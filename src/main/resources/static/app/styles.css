@@ -1,125 +1,50 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+:root{
+    --accent:#2b6cb0;
+    --muted:#6b7280;
+    --bg:#f7fafc;
+    --card:#ffffff;
+    --btn:#2f4858;
 }
 
-body {
-    padding: 20px;
-    background-color: #f5f5f5;
+*{box-sizing:border-box}
+body{
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    margin:0;
+    background:var(--bg);
+    color:#111827;
+    padding:24px;
 }
 
-/* 登录页样式 */
-.login-box {
-    max-width: 400px;
-    margin: 100px auto;
-    padding: 30px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-.login-box h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-}
-.form-item {
-    margin-bottom: 15px;
-}
-.form-item label {
-    display: block;
-    margin-bottom: 5px;
-    color: #666;
-}
-.form-item input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-button {
-    padding: 10px 20px;
-    background-color: #2c3e50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-button:hover {
-    background-color: #34495e;
-}
-.error-tip {
-    color: red;
-    margin-top: 10px;
-    font-size: 14px;
-}
-.tip-text {
-    margin-top: 20px;
-    font-size: 14px;
-    color: #666;
+.container{
+    max-width:980px;
+    margin:0 auto;
 }
 
-/* 主页面样式 */
-.header-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 20px;
+.card{
+    background:var(--card);
+    border-radius:10px;
+    padding:20px;
+    box-shadow:0 6px 20px rgba(10,10,20,0.06);
+    margin-bottom:18px;
 }
-.user-info {
-    font-size: 14px;
+
+h1{font-size:28px;margin:0 0 12px;color:var(--accent)}
+h2{font-size:18px;margin:0 0 10px;color:#111827}
+
+.form-row{display:flex;gap:12px;align-items:center;margin:8px 0}
+.form-row label{min-width:70px;color:var(--muted)}
+input[type="text"],input[type="password"],select{
+    padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;flex:1;
+    background:white;
 }
-.tab-bar {
-    margin-bottom: 20px;
+button{
+    background:var(--btn);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;
 }
-.tab-item {
-    display: inline-block;
-    padding: 8px 16px;
-    margin-right: 10px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.tab-item.active {
-    background-color: #2c3e50;
-    color: white;
-    border-color: #2c3e50;
-}
-.panel {
-    display: none;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-.panel.active {
-    display: block;
-}
-.form-section {
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
-}
-.form-section input {
-    margin-right: 10px;
-    margin-bottom: 10px;
-    padding: 6px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-.list-section table {
-    width: 100%;
-    border-collapse: collapse;
-}
-.list-section th, .list-section td {
-    padding: 8px;
-    border: 1px solid #ddd;
-    text-align: left;
-}
-.list-section th {
-    background-color: #f8f8f8;
-}
+button.secondary{background:#64748b}
+.status{margin-top:8px;color:green}
+.hidden{display:none}
+.small{font-size:13px;color:var(--muted)}
+
+.footer-note{margin-top:12px;color:var(--muted);font-size:13px}
+.btn-link{background:transparent;color:var(--accent);border:0;cursor:pointer;padding:0;font-size:14px}
+.panel{margin-top:10px}

@@ -1,31 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>HRMS - 登录</title>
-    <link rel="stylesheet" href="app/styles.css">
+    <meta charset="utf-8">
+    <title>HRMS - 登录与注册</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="/app/styles.css">
 </head>
 <body>
-<div class="login-box">
-    <h2>HRMS 人力资源系统</h2>
-    <div class="form-item">
-        <label>用户名</label>
-        <input type="text" id="login-username" placeholder="输入账号（如spec）">
-    </div>
-    <div class="form-item">
-        <label>密码</label>
-        <input type="password" id="login-password" placeholder="输入密码（如specpass）">
-    </div>
-    <button onclick="authLogin()">登录</button>
-    <div class="error-tip" id="login-error"></div>
-    <div class="tip-text">
-        示例账户：<br>
-        人事专员：spec/specpass<br>
-        人事经理：mgr/mgrpass<br>
-        管理员：admin/adminpass
+<div class="container">
+    <div class="card">
+        <h1>HRMS - 登录与注册</h1>
+        <h2>登录（用于 API Basic Auth）</h2>
+
+        <div class="form-row">
+            <label for="username">用户名</label>
+            <input id="username" value="admin" />
+        </div>
+        <div class="form-row">
+            <label for="password">密码</label>
+            <input id="password" type="password" value="adminpass" />
+            <button id="btnSaveCreds">保存并登录</button>
+        </div>
+        <div id="loginStatus" class="status"></div>
+
+        <div class="panel">
+            <button id="goRegister" class="btn-link">没有账号？去注册（仅普通员工自助注册）</button>
+        </div>
+
+        <div class="footer-note">
+            说明：默认账号：admin/adminpass（管理员）；spec/specpass（人事专员）；mgr/mgrpass（人事经理）。<br>
+            管理员可在登录后通过管理界面创建其他 HR 账号；普通员工请在注册页自助注册。
+        </div>
     </div>
 </div>
 
-<script src="app/js/auth.js"></script>
+<script src="/app/js/login.js"></script>
 </body>
 </html>

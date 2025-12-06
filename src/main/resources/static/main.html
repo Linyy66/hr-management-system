@@ -1,128 +1,56 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>HRMS - 系统主页面</title>
-    <link rel="stylesheet" href="app/styles.css">
+    <meta charset="utf-8">
+    <title>HRMS - 主界面</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="/app/styles.css">
 </head>
 <body>
-<div class="header-bar">
-    <h1>HRMS 人力资源管理系统</h1>
-    <div class="user-info">
-        当前角色：<span id="current-role"></span>
-        <button onclick="authLogout()">退出登录</button>
+<div class="container">
+    <div class="card">
+        <h1 id="title">HRMS</h1>
+        <div class="small" id="userInfo">正在获取用户信息...</div>
+
+        <div id="adminPanel" class="hidden panel">
+            <h2>管理员面板</h2>
+            <p>管理员可以创建 HR 专员 / HR 经理 / 管理员 账号（通过 API）。</p>
+            <div class="form-row">
+                <label>用户名</label><input id="adm_user" />
+                <label>密码</label><input id="adm_pass" type="password" />
+                <label>角色</label>
+                <select id="adm_role">
+                    <option>EMPLOYEE</option>
+                    <option>HR_SPEC</option>
+                    <option>HR_MANAGER</option>
+                    <option>ADMIN</option>
+                </select>
+                <button id="adm_create">创建</button>
+            </div>
+            <div id="adm_status" class="status"></div>
+        </div>
+
+        <div id="hrPanel" class="hidden panel">
+            <h2>人事面板（HR 专员 / 人事经理）</h2>
+            <p>可管理档案、查看考勤等（示例页仅展示查询接口按钮）。</p>
+            <button id="btnListOrgs">列出一级机构 (/api/org1)</button>
+            <pre id="orgResult"></pre>
+            <button id="btnListStaff">列出员工档案 (/api/staff)</button>
+            <pre id="staffResult"></pre>
+        </div>
+
+        <div id="employeePanel" class="hidden panel">
+            <h2>员工视图</h2>
+            <p>普通员工仅能查看自己的信息（示例仅显示欢迎语与说明）。</p>
+            <div id="empWelcome"></div>
+        </div>
+
+        <div style="margin-top:12px">
+            <button id="btnLogout" class="secondary">登出并返回登录</button>
+        </div>
     </div>
 </div>
 
-<!-- 功能标签栏 -->
-<div class="tab-bar">
-    <div class="tab-item active" data-panel="staff-panel">员工档案</div>
-    <div class="tab-item" data-panel="org-panel">机构管理</div>
-    <div class="tab-item" data-panel="attendance-panel" id="tab-attendance">考勤管理</div>
-    <div class="tab-item" data-panel="admin-panel" id="tab-admin">系统管理</div>
-</div>
-
-<!-- 员工档案面板 -->
-<div class="panel active" id="staff-panel">
-    <h2>员工档案管理</h2>
-    <div class="form-section">
-        <h3>新增员工档案</h3>
-        <input type="text" id="staff-archiveId" placeholder="档案ID（如202501010101）">
-        <input type="text" id="staff-org1Id" placeholder="一级机构ID（如01）">
-        <input type="text" id="staff-org2Id" placeholder="二级机构ID（如01）">
-        <input type="text" id="staff-org3Id" placeholder="三级机构ID（如01）">
-        <input type="text" id="staff-positionId" placeholder="职位ID（如FE001）">
-        <input type="text" id="staff-name" placeholder="员工姓名">
-        <input type="text" id="staff-mobile" placeholder="手机号">
-        <button onclick="staffCreate()">创建档案</button>
-    </div>
-    <div class="list-section">
-        <h3>员工列表</h3>
-        <button onclick="staffRefresh()">刷新列表</button>
-        <table id="staff-table">
-            <thead>
-            <tr>
-                <th>档案ID</th>
-                <th>姓名</th>
-                <th>机构</th>
-                <th>手机号</th>
-                <th>状态</th>
-            </tr>
-            </thead>
-            <tbody id="staff-table-body"></tbody>
-        </table>
-    </div>
-</div>
-
-<!-- 机构管理面板 -->
-<div class="panel" id="org-panel">
-    <h2>机构管理</h2>
-    <div class="form-section">
-        <h3>新增一级机构</h3>
-        <input type="text" id="org1-id" placeholder="机构ID（如01）">
-        <input type="text" id="org1-name" placeholder="机构名称（如技术中心）">
-        <button onclick="org1Add()">添加一级机构</button>
-    </div>
-    <div class="list-section">
-        <h3>一级机构列表</h3>
-        <div id="org1-list"></div>
-    </div>
-</div>
-
-<!-- 考勤管理面板 -->
-<div class="panel" id="attendance-panel">
-    <h2>考勤管理</h2>
-    <p>考勤规则配置、打卡记录管理等功能（仅经理/管理员可见）</p>
-</div>
-
-<!-- 系统管理面板 -->
-<div class="panel" id="admin-panel">
-    <h2>系统管理</h2>
-    <p>角色配置、权限管理等功能（仅管理员可见）</p>
-</div>
-
-<script src="app/js/auth.js"></script>
-<script src="app/js/staff.js"></script>
-<script src="app/js/org.js"></script>
-<script>
-    // 页面初始化：验证登录+角色控制
-    window.onload = function() {
-        const user = localStorage.getItem('hrms_user');
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
-        }
-
-        // 角色映射
-        const roleMap = {
-            'spec': '人事专员',
-            'mgr': '人事经理',
-            'admin': '管理员'
-        };
-        document.getElementById('current-role').textContent = roleMap[user];
-
-        // 隐藏无权标签/面板
-        if (user === 'spec') {
-            document.getElementById('tab-admin').style.display = 'none';
-            document.getElementById('admin-panel').style.display = 'none';
-        }
-        if (user !== 'admin') {
-            document.getElementById('admin-panel').style.display = 'none';
-        }
-
-        // 标签切换逻辑
-        document.querySelectorAll('.tab-item').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // 切换标签激活态
-                document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
-                this.classList.add('active');
-                // 切换面板显示
-                const panelId = this.getAttribute('data-panel');
-                document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
-                document.getElementById(panelId).classList.add('active');
-            });
-        });
-    }
-</script>
+<script src="/app/js/main.js"></script>
 </body>
 </html>

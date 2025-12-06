@@ -1,121 +1,102 @@
-// 登录验证
-function authLogin() {
-    const username = document.getElementById('login-username').value.trim(); // 去除首尾空格
-    const password = document.getElementById('login-password').value;
-    const errorEl = document.getElementById('login-error');
+// 简单 auth helper for Basic Auth + admin register
+(function () {
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginStatus = document.getElementById('loginStatus');
 
-    // 清空之前的错误信息
-    errorEl.textContent = '';
+    const regSection = document.getElementById('registerSection');
+    const regUsername = document.getElementById('reg_username');
+    const regPassword = document.getElementById('reg_password');
+    const regRole = document.getElementById('reg_role');
+    const registerStatus = document.getElementById('registerStatus');
 
-    // 输入校验
-    if (!username) {
-        errorEl.textContent = '请输入用户名';
-        return;
+    const apiResult = document.getElementById('apiResult');
+
+    let savedCreds = null;
+
+    function setStatus(el, msg, ok = true) {
+        el.textContent = msg;
+        el.style.color = ok ? 'green' : 'darkred';
     }
-    if (!password) {
-        errorEl.textContent = '请输入密码';
-        return;
-    }
 
-    try {
-        // 核心修复：简化Basic Auth凭证生成（避免过度编码导致后端解析失败）
-        // 直接拼接用户名密码，btoa原生支持ASCII字符（测试账号无特殊字符）
-        const rawAuthStr = `${username}:${password}`;
-        const authStr = btoa(rawAuthStr);
-        localStorage.setItem('hrms_auth', authStr);
-        localStorage.setItem('hrms_user', username);
-
-        // 验证凭证有效性（调用员工接口）
-        fetch('/api/staff', {
-            method: 'GET', // 明确指定请求方法
-            headers: {
-                'Authorization': `Basic ${authStr}`,
-                'Accept': 'application/json', // 声明期望的响应格式
-                'Content-Type': 'application/json;charset=UTF-8', // 强制UTF-8编码
-                'X-Requested-With': 'XMLHttpRequest' // 标识AJAX请求，避免后端误判
-            },
-            credentials: 'same-origin', // 确保同域凭证传递
-            cache: 'no-cache' // 禁用缓存，避免旧凭证干扰
-        }).then(async (res) => {
-            // 处理HTTP错误状态码
-            if (!res.ok) {
-                // 获取后端返回的具体错误信息（适配后端自定义的403提示）
-                let errorMsg = '用户名或密码错误';
-                try {
-                    const errorData = await res.json();
-                    errorMsg = errorData.message || errorMsg; // 优先使用后端返回的错误信息
-                } catch (e) {
-                    // 按状态码细分错误提示（适配后端权限规则）
-                    if (res.status === 403) {
-                        errorMsg = '权限不足！请使用人事专员/经理/管理员账号登录';
-                    } else if (res.status === 401) {
-                        errorMsg = '认证失败！请检查账号密码是否正确';
-                    } else if (res.status === 404) {
-                        errorMsg = '接口未找到！请确认后端/api/staff接口已实现';
-                    } else {
-                        errorMsg = `登录失败（状态码：${res.status}）`;
-                    }
-                }
-                errorEl.textContent = errorMsg;
-                localStorage.clear(); // 清除无效凭证
-                return;
-            }
-
-            // 登录成功，跳转主页面（强制刷新避免缓存）
-            window.location.replace('main.html');
-        }).catch((err) => {
-            console.error('登录请求失败详情:', err); // 控制台打印错误详情，方便调试
-            // 细分网络错误提示
-            if (err.message.includes('Failed to fetch')) {
-                errorEl.textContent = '系统连接失败！请检查后端服务是否启动（端口8080）';
-            } else {
-                errorEl.textContent = '请求异常！请刷新页面重试';
-            }
-            localStorage.clear();
-        });
-    } catch (err) {
-        console.error('凭证生成失败详情:', err);
-        // 捕获btoa编码异常（如用户名含非ASCII字符）
-        if (err.message.includes('btoa')) {
-            errorEl.textContent = '用户名/密码包含特殊字符，暂不支持';
-        } else {
-            errorEl.textContent = '登录过程异常，请重试';
+    function authHeader() {
+        const headers = { 'Content-Type': 'application/json' };
+        if (savedCreds && savedCreds.u) {
+            const token = btoa(savedCreds.u + ':' + savedCreds.p);
+            headers['Authorization'] = 'Basic ' + token;
         }
+        return headers;
     }
-}
 
-// 退出登录
-function authLogout() {
-    // 清除本地存储的认证信息
-    localStorage.removeItem('hrms_auth');
-    localStorage.removeItem('hrms_user');
-    // 强制跳转登录页（避免缓存页面）
-    window.location.replace('login.html');
-}
+    document.getElementById('btnSaveCreds').addEventListener('click', async () => {
+        const u = usernameInput.value.trim();
+        const p = passwordInput.value;
+        if (!u || !p) return setStatus(loginStatus, '请输入用户名与密码', false);
+        savedCreds = { u, p };
+        // test with /api/org1 (requires auth)
+        try {
+            const res = await fetch('/api/org1', { method: 'GET', headers: authHeader() });
+            if (res.status === 200) {
+                setStatus(loginStatus, '已保存凭证并成功连接后端');
+                // show register section only for admin
+                if (savedCreds.u === 'admin') {
+                    regSection.classList.remove('hidden');
+                } else {
+                    regSection.classList.add('hidden');
+                }
+            } else if (res.status === 401) {
+                setStatus(loginStatus, '认证失败：用户名或密码错误', false);
+                regSection.classList.add('hidden');
+            } else {
+                setStatus(loginStatus, '已保存凭证，但连接返回状态：' + res.status, false);
+                regSection.classList.add('hidden');
+            }
+        } catch (e) {
+            setStatus(loginStatus, '连接失败: ' + e.message, false);
+            regSection.classList.add('hidden');
+        }
+    });
 
-// 获取认证请求头（供其他模块调用）
-function getAuthHeader() {
-    const authStr = localStorage.getItem('hrms_auth');
-    // 未登录时返回空对象（避免请求头格式错误）
-    if (!authStr) return {};
-    return {
-        'Authorization': `Basic ${authStr}`,
-        'Content-Type': 'application/json;charset=UTF-8', // 统一UTF-8编码
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest' // 标识AJAX请求
-    };
-}
+    document.getElementById('btnRegister').addEventListener('click', async () => {
+        if (!savedCreds) return setStatus(registerStatus, '请先保存管理员凭证', false);
+        const payload = {
+            username: regUsername.value.trim(),
+            password: regPassword.value,
+            role: regRole.value
+        };
+        if (!payload.username || !payload.password) return setStatus(registerStatus, '用户名/密码必填', false);
 
-// 新增：页面加载时自动清除无效凭证（可选，解决缓存导致的登录异常）
-window.onload = function() {
-    const authStr = localStorage.getItem('hrms_auth');
-    if (authStr) {
-        // 验证本地凭证是否有效，无效则清除
-        fetch('/api/staff', {
-            method: 'GET',
-            headers: getAuthHeader()
-        }).catch(() => {
-            localStorage.clear();
-        });
-    }
-}
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: authHeader(),
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setStatus(registerStatus, '注册成功: ' + JSON.stringify(data));
+            } else {
+                const text = await res.text();
+                setStatus(registerStatus, '注册失败: ' + res.status + ' ' + text, false);
+            }
+        } catch (e) {
+            setStatus(registerStatus, '注册请求失败: ' + e.message, false);
+        }
+    });
+
+    document.getElementById('btnListUsers').addEventListener('click', async () => {
+        if (!savedCreds) return apiResult.textContent = '请先保存管理员或其它用户凭证';
+        try {
+            const res = await fetch('/api/staff', { method: 'GET', headers: authHeader() });
+            if (res.ok) {
+                const json = await res.json();
+                apiResult.textContent = JSON.stringify(json, null, 2);
+            } else {
+                apiResult.textContent = 'HTTP ' + res.status + ' ' + (await res.text());
+            }
+        } catch (e) {
+            apiResult.textContent = '请求失败: ' + e.message;
+        }
+    });
+
+})();
