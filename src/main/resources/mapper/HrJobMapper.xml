@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.hr.mapper.HrJobMapper">
+
+    <!-- 通用查询列 -->
+    <sql id="Base_Column_List">
+        id, name, dept_id, sort, remark, create_time, update_time
+    </sql>
+
+    <!-- 分页查询职位 -->
+    <select id="queryJobPage" parameterType="com.example.hr.dto.HrJobQueryDTO" resultType="com.example.hr.entity.HrJob">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM hr_job
+        <where>
+            <if test="deptId != null">
+                AND dept_id = #{deptId}
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        ORDER BY sort ASC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 根据部门ID查询 -->
+    <select id="selectByDeptId" parameterType="java.lang.Long" resultType="com.example.hr.entity.HrJob">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM hr_job
+        WHERE dept_id = #{deptId}
+        ORDER BY sort ASC
+    </select>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" parameterType="java.lang.Long" resultType="com.example.hr.entity.HrJob">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM hr_job
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增职位 -->
+    <insert id="insert" parameterType="com.example.hr.entity.HrJob" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO hr_job (
+            name, dept_id, sort, remark, create_time, update_time
+        ) VALUES (
+                     #{name}, #{deptId}, #{sort}, #{remark}, NOW(), NOW()
+                 )
+    </insert>
+
+    <!-- 更新职位 -->
+    <update id="update" parameterType="com.example.hr.entity.HrJob">
+        UPDATE hr_job
+        SET
+            name = #{name},
+            dept_id = #{deptId},
+            sort = #{sort},
+            remark = #{remark},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除职位 -->
+    <delete id="delete" parameterType="java.lang.Long">
+        DELETE FROM hr_job WHERE id = #{id}
+    </delete>
+
+    <!-- 统计关联员工数量 -->
+    <select id="countEmployees" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT COUNT(id) FROM employee
+        WHERE job_id = #{jobId} AND is_deleted = 0
+    </select>
+</mapper>

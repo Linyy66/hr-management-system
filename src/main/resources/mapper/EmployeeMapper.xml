@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.hr.mapper.EmployeeMapper">
+
+    <!-- 通用查询列 -->
+    <sql id="Base_Column_List">
+        id, emp_no, name, gender, age, dept_id, job_id, position_id,
+        entry_date, phone, email, avatar, status, create_time, update_time, is_deleted
+    </sql>
+
+    <!-- 分页查询员工 -->
+    <select id="queryEmployeePage" parameterType="com.example.hr.dto.EmployeeQueryDTO" resultType="com.example.hr.entity.Employee">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM employee
+        WHERE is_deleted = 0
+        <if test="name != null and name != ''">
+            AND name LIKE CONCAT('%', #{name}, '%')
+        </if>
+        <if test="empNo != null and empNo != ''">
+            AND emp_no = #{empNo}
+        </if>
+        <if test="deptId != null">
+            AND dept_id = #{deptId}
+        </if>
+        <if test="jobId != null">
+            AND job_id = #{jobId}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" parameterType="java.lang.Long" resultType="com.example.hr.entity.Employee">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM employee
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 根据员工编号查询 -->
+    <select id="selectByEmpNo" parameterType="java.lang.String" resultType="com.example.hr.entity.Employee">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM employee
+        WHERE emp_no = #{empNo} AND is_deleted = 0
+    </select>
+
+    <!-- 新增员工 -->
+    <insert id="insert" parameterType="com.example.hr.entity.Employee" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO employee (
+            emp_no, name, gender, age, dept_id, job_id, position_id,
+            entry_date, phone, email, avatar, status, create_time, update_time
+        ) VALUES (
+                     #{empNo}, #{name}, #{gender}, #{age}, #{deptId}, #{jobId}, #{positionId},
+                     #{entryDate}, #{phone}, #{email}, #{avatar}, #{status}, NOW(), NOW()
+                 )
+    </insert>
+
+    <!-- 更新员工 -->
+    <update id="update" parameterType="com.example.hr.entity.Employee">
+        UPDATE employee
+        SET
+            name = #{name},
+            gender = #{gender},
+            age = #{age},
+            dept_id = #{deptId},
+            job_id = #{jobId},
+            position_id = #{positionId},
+            entry_date = #{entryDate},
+            phone = #{phone},
+            email = #{email},
+            status = #{status},
+            update_time = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 批量逻辑删除 -->
+    <update id="batchDelete" parameterType="java.lang.Long">
+        UPDATE employee
+        SET is_deleted = 1, update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- 更新头像 -->
+    <update id="updateAvatar">
+        UPDATE employee
+        SET avatar = #{avatarUrl}, update_time = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 统计部门下的员工数量 -->
+    <select id="countByDeptId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT COUNT(id) FROM employee
+        WHERE dept_id = #{deptId} AND is_deleted = 0
+    </select>
+</mapper>
