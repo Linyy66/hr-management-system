@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>HRMS - 登录</title>
+    <link rel="stylesheet" href="app/styles.css">
+</head>
+<body>
+<div class="login-box">
+    <h2>HRMS 人力资源系统</h2>
+    <div class="form-item">
+        <label>用户名</label>
+        <input type="text" id="login-username" placeholder="输入账号（如spec）">
+    </div>
+    <div class="form-item">
+        <label>密码</label>
+        <input type="password" id="login-password" placeholder="输入密码（如specpass）">
+    </div>
+    <button onclick="authLogin()">登录</button>
+    <div class="error-tip" id="login-error"></div>
+    <div class="tip-text">
+        示例账户：<br>
+        人事专员：spec/specpass<br>
+        人事经理：mgr/mgrpass<br>
+        管理员：admin/adminpass
+    </div>
+</div>
+
+<script src="app/js/auth.js"></script>
+</body>
+</html>

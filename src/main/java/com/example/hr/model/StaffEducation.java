@@ -13,8 +13,10 @@ public class StaffEducation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 12, nullable = false)
-    private String archiveId;
+    // 使用 ManyToOne 关联 StaffArchive，外键列名 archive_id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "archive_id", nullable = false)
+    private StaffArchive staffArchive;
 
     private String school;
     private String degree;

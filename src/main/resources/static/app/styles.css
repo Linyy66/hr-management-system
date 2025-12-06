@@ -1,0 +1,125 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+/* 登录页样式 */
+.login-box {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.login-box h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+.form-item {
+    margin-bottom: 15px;
+}
+.form-item label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+}
+.form-item input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+button {
+    padding: 10px 20px;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #34495e;
+}
+.error-tip {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
+}
+.tip-text {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* 主页面样式 */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+.user-info {
+    font-size: 14px;
+}
+.tab-bar {
+    margin-bottom: 20px;
+}
+.tab-item {
+    display: inline-block;
+    padding: 8px 16px;
+    margin-right: 10px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.tab-item.active {
+    background-color: #2c3e50;
+    color: white;
+    border-color: #2c3e50;
+}
+.panel {
+    display: none;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.panel.active {
+    display: block;
+}
+.form-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+.form-section input {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.list-section table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.list-section th, .list-section td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+.list-section th {
+    background-color: #f8f8f8;
+}

@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -53,7 +54,7 @@ public class StaffArchive {
     private LocalDateTime updateTime;
     private Integer version = 1;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "archive_id", referencedColumnName = "archiveId")
-    private List<StaffEducation> educations;
+    // 反向关联，mappedBy 对应子实体的 staffArchive 字段名
+    @OneToMany(mappedBy = "staffArchive", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StaffEducation> educations = new ArrayList<>();
 }
