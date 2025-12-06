@@ -9,6 +9,7 @@
     <file url="file://$PROJECT_DIR$/src/main/resources/application.yml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources/db/data.sql" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources/db/schema.sql" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/schema.sql" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources/static/app/js/auth.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources/static/app/js/org.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources/static/app/js/staff.js" charset="UTF-8" />

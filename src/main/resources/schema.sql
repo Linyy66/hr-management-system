@@ -124,3 +124,9 @@ CREATE TABLE IF NOT EXISTS t_attendance_exception (
                                                       create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
                                                       FOREIGN KEY (attendance_id) REFERENCES t_attendance_record(id)
 );
+CREATE TABLE IF NOT EXISTS t_user (
+                                      username VARCHAR(50) PRIMARY KEY,
+                                      password VARCHAR(255) NOT NULL,
+                                      role VARCHAR(30) NOT NULL,
+                                      enabled TINYINT(1) NOT NULL DEFAULT 1
+);
