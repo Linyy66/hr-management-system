@@ -14,20 +14,57 @@
 
         <div id="adminPanel" class="hidden panel">
             <h2>管理员面板</h2>
-            <p>管理员可以创建 HR 专员 / HR 经理 / 管理员 账号（通过 API）。</p>
-            <div class="form-row">
-                <label>用户名</label><input id="adm_user" />
-                <label>密码</label><input id="adm_pass" type="password" />
-                <label>角色</label>
-                <select id="adm_role">
-                    <option>EMPLOYEE</option>
-                    <option>HR_SPEC</option>
-                    <option>HR_MANAGER</option>
-                    <option>ADMIN</option>
-                </select>
-                <button id="adm_create">创建</button>
-            </div>
-            <div id="adm_status" class="status"></div>
+
+            <section class="card" style="padding:12px">
+                <h3>角色管理</h3>
+                <div class="form-row">
+                    <label for="newRoleName">新角色名</label>
+                    <input id="newRoleName" placeholder="例如 HR_AUDITOR" />
+                    <button id="btnAddRole">添加角色</button>
+                </div>
+                <div class="small">提示：角色名会自动转成大写并唯一。</div>
+                <table id="roleTable" style="width:100%; margin-top:10px; border-collapse:collapse;">
+                    <thead>
+                    <tr style="text-align:left; border-bottom:1px solid #e5e7eb">
+                        <th style="padding:8px">ID</th>
+                        <th style="padding:8px">角色名</th>
+                        <th style="padding:8px">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div id="roleStatus" class="status"></div>
+            </section>
+
+            <section class="card" style="padding:12px; margin-top:12px">
+                <h3>创建账号（管理员）</h3>
+                <div class="form-row">
+                    <label>用户名</label><input id="adm_user" />
+                    <label>密码</label><input id="adm_pass" type="password" />
+                    <label>角色</label>
+                    <select id="adm_role"></select>
+                    <button id="adm_create">创建</button>
+                </div>
+                <div id="adm_status" class="status"></div>
+            </section>
+
+            <section class="card" style="padding:12px; margin-top:12px">
+                <h3>账号管理</h3>
+                <div class="small">可以编辑用户角色、启用/禁用账户或删除（不能删除 admin）。</div>
+                <table id="userTable" style="width:100%; margin-top:10px; border-collapse:collapse;">
+                    <thead>
+                    <tr style="text-align:left; border-bottom:1px solid #e5e7eb">
+                        <th style="padding:8px">用户名</th>
+                        <th style="padding:8px">角色</th>
+                        <th style="padding:8px">启用</th>
+                        <th style="padding:8px">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div id="userStatus" class="status"></div>
+            </section>
+
         </div>
 
         <div id="hrPanel" class="hidden panel">
@@ -41,8 +78,7 @@
 
         <div id="employeePanel" class="hidden panel">
             <h2>员工视图</h2>
-            <p>普通员工仅能查看自己的信息（示例仅显示欢迎语与说明）。</p>
-            <div id="empWelcome"></div>
+            <p id="empWelcome"></p>
         </div>
 
         <div style="margin-top:12px">

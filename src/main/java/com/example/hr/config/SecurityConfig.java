@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
@@ -37,15 +39,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable() // demo 环境禁用 CSRF，生产请根据需要启用
+                .csrf().disable()
                 .authorizeRequests()
-                // 静态资源和页面允许匿名访问
                 .antMatchers("/", "/index.html", "/login.html", "/register.html", "/main.html", "/app/**", "/static/**").permitAll()
-                // 允许通过 POST 自助注册员工账号（后端逻辑再判断）
                 .antMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
-                // 获取当前用户信息需要认证
                 .antMatchers("/api/auth/me").authenticated()
-                // 管理其他 API 权限控制（与之前一致）
+                .antMatchers("/api/roles/**").hasRole("ADMIN")
+                .antMatchers("/api/users/**").hasRole("ADMIN")   // <--- only admin can manage users
                 .antMatchers("/api/org1/**").hasAnyRole("HR_SPEC","HR_MANAGER","ADMIN")
                 .antMatchers("/api/staff/**").hasAnyRole("HR_SPEC","HR_MANAGER","ADMIN")
                 .anyRequest().authenticated()
