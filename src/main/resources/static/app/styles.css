@@ -1,50 +1,107 @@
-:root{
-    --accent:#2b6cb0;
-    --muted:#6b7280;
-    --bg:#f7fafc;
-    --card:#ffffff;
-    --btn:#2f4858;
-}
-
+:root { --accent:#2b6cb0; --muted:#6b7280; --bg:#f7fafc; --card:#fff; --btn:#2f4858; }
 *{box-sizing:border-box}
-body{
-    font-family: "Helvetica Neue", Arial, sans-serif;
-    margin:0;
-    background:var(--bg);
-    color:#111827;
-    padding:24px;
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:#111;margin:0;padding:0}
+
+/* General layout for app (keeps existing main layout safe) */
+.app{display:flex;min-height:100vh}
+.sidebar{width:260px;background:#fff;border-right:1px solid #e6eef5;padding:18px;box-shadow:2px 0 8px rgba(0,0,0,0.03);display:flex;flex-direction:column}
+.sidebar-header{margin-bottom:12px}
+.sidebar h2{margin:0;color:var(--accent);font-size:18px}
+.menu{flex:1;overflow:auto}
+.menu-group{margin-bottom:12px}
+.menu-group-title{font-size:13px;color:var(--muted);margin-bottom:6px}
+.menu-items{list-style:none;padding:0;margin:0}
+.menu-item{padding:8px 10px;border-radius:6px;color:#0f1724;cursor:pointer;margin-bottom:6px}
+.menu-item:hover{background:#f1f7fb}
+.menu-item.active{background:var(--accent);color:#fff}
+.sidebar-footer{margin-top:12px}
+.main{flex:1;padding:20px}
+.main-card{background:var(--card);border-radius:8px;padding:18px;margin:18px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+.main-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+
+/* Form / controls */
+.form-row{display:flex;gap:10px;align-items:center;margin:8px 0}
+.form-row label{min-width:90px;color:var(--muted);font-size:14px}
+input[type="text"],input[type="password"],input[type="date"],select,textarea{padding:8px;border:1px solid #e5e7eb;border-radius:6px;flex:1}
+textarea{resize:vertical}
+button{background:var(--btn);color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer}
+button.secondary{background:#64748b}
+.btn-link{background:transparent;color:var(--accent);border:0;cursor:pointer;padding:0}
+.table{width:100%;border-collapse:collapse;margin-top:8px}
+.table th,.table td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+.status{margin-top:8px;color:green}
+.small{font-size:13px;color:var(--muted)}
+.hidden{display:none}
+
+/* =========================
+   AUTH (login / register) centered box
+   ========================= */
+.auth-page{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    background: linear-gradient(180deg, #f7fbfd 0%, var(--bg) 100%);
+    padding:20px;
 }
 
-.container{
-    max-width:980px;
-    margin:0 auto;
-}
-
-.card{
+.auth-box{
+    width:100%;
+    max-width:480px;
     background:var(--card);
     border-radius:10px;
-    padding:20px;
-    box-shadow:0 6px 20px rgba(10,10,20,0.06);
-    margin-bottom:18px;
+    padding:24px;
+    box-shadow: 0 12px 40px rgba(20,40,60,0.08);
+    border: 1px solid rgba(20,40,60,0.03);
 }
 
-h1{font-size:28px;margin:0 0 12px;color:var(--accent)}
-h2{font-size:18px;margin:0 0 10px;color:#111827}
-
-.form-row{display:flex;gap:12px;align-items:center;margin:8px 0}
-.form-row label{min-width:70px;color:var(--muted)}
-input[type="text"],input[type="password"],select{
-    padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;flex:1;
-    background:white;
+.auth-title{
+    margin:0 0 12px;
+    color:var(--accent);
+    font-size:20px;
 }
-button{
-    background:var(--btn);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;
-}
-button.secondary{background:#64748b}
-.status{margin-top:8px;color:green}
-.hidden{display:none}
-.small{font-size:13px;color:var(--muted)}
 
+.auth-subtitle{
+    margin:0 0 10px;
+    font-size:14px;
+    color:#0f1724;
+}
+
+.auth-section{margin-top:6px}
+
+.auth-actions{margin-top:10px;display:flex;justify-content:flex-end}
 .footer-note{margin-top:12px;color:var(--muted);font-size:13px}
-.btn-link{background:transparent;color:var(--accent);border:0;cursor:pointer;padding:0;font-size:14px}
-.panel{margin-top:10px}
+
+/* Responsive tweaks */
+@media (max-width:520px){
+    .auth-box{padding:18px; max-width: 92%;}
+    .form-row{flex-direction:column; align-items:stretch}
+    .form-row label{min-width:unset}
+}
+.pane {
+    padding: 20px;
+}
+.section {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+.form-row {
+    margin: 10px 0;
+}
+.form-row input, .form-row select {
+    margin-right: 10px;
+    padding: 5px;
+}
+.org-list {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #eee;
+}
+.org-item {
+    padding: 5px;
+    border-bottom: 1px solid #f5f5f5;
+}
+.hidden {
+    display: none;
+}

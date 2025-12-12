@@ -41,13 +41,23 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .authorizeRequests()
+                // 静态资源和页面允许匿名访问
                 .antMatchers("/", "/index.html", "/login.html", "/register.html", "/main.html", "/app/**", "/static/**").permitAll()
+                // 允许通过 POST 自助注册员工账号（后端再判断）
                 .antMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+                // 获取当前用户信息需要认证
                 .antMatchers("/api/auth/me").authenticated()
+                // roles 管理接口仍受 ADMIN 控制
                 .antMatchers("/api/roles/**").hasRole("ADMIN")
-                .antMatchers("/api/users/**").hasRole("ADMIN")   // <--- only admin can manage users
+                // org / staff 访问控制
                 .antMatchers("/api/org1/**").hasAnyRole("HR_SPEC","HR_MANAGER","ADMIN")
                 .antMatchers("/api/staff/**").hasAnyRole("HR_SPEC","HR_MANAGER","ADMIN")
+                // 机构管理权限控制
+                .antMatchers("/api/org/level1/**").hasRole("ADMIN")
+                .antMatchers("/api/org/level2/**").hasRole("ADMIN")
+                .antMatchers("/api/org/level3/**").hasAnyRole("ADMIN", "HR_MANAGER")
+                .antMatchers("/api/positions/**").hasRole("ADMIN")
+                // 其余接口默认认证
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();

@@ -1,37 +1,38 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>HRMS - 注册</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="/app/styles.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="/app/styles.css" />
 </head>
-<body>
-<div class="container">
-    <div class="card">
-        <h1>HRMS - 免费注册（普通员工）</h1>
-        <p class="small">仅供普通员工自助注册。HR / 管理员账号请由管理员在系统中创建。</p>
+<body class="auth-page">
+<div class="auth-box" role="main" aria-labelledby="regTitle">
+    <h1 id="regTitle" class="auth-title">HRMS - 注册（普通员工）</h1>
+
+    <div class="auth-section">
+        <p class="small">仅供普通员工自助注册。HR/管理员账号请由管理员创建。</p>
 
         <div class="form-row">
             <label for="reg_username">用户名</label>
-            <input id="reg_username" placeholder="请输入登录用户名" />
+            <input id="reg_username" placeholder="用户名" autocomplete="username" />
         </div>
+
         <div class="form-row">
             <label for="reg_password">密码</label>
-            <input id="reg_password" type="password" placeholder="请输入密码" />
+            <input id="reg_password" type="password" placeholder="密码" autocomplete="new-password" />
         </div>
-        <div class="form-row">
-            <label for="reg_role">注册角色</label>
-            <!-- 公开注册仅允许 EMPLOYEE -->
-            <select id="reg_role">
+
+        <div class="form-row" style="justify-content:flex-end">
+            <select id="reg_role" aria-label="注册角色" style="display:none">
                 <option value="EMPLOYEE">EMPLOYEE</option>
             </select>
             <button id="btnRegister" class="secondary">注册并返回登录</button>
         </div>
 
-        <div id="registerStatus" class="status"></div>
+        <div id="registerStatus" class="status" aria-live="polite"></div>
 
-        <div class="panel">
+        <div class="auth-actions">
             <button id="backToLogin" class="btn-link">返回登录</button>
         </div>
     </div>

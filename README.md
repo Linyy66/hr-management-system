@@ -1,7 +1,7 @@
 # HRMS Minimal Project 
 
 这是一个按你要求的最简实现骨架，包含基础配置、数据库建表脚本、实体、Repository、最小的 Controller 以及基于内存的 Spring Security。
-启动时输入http://localhost:8080/login.html
+启动时输入http://localhost:8081/login.html
 环境（根据你的要求）：
 - JDK: 21
 - Spring Boot: 2.6.14

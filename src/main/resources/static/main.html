@@ -7,86 +7,358 @@
     <link rel="stylesheet" href="/app/styles.css">
 </head>
 <body>
-<div class="container">
-    <div class="card">
-        <h1 id="title">HRMS</h1>
-        <div class="small" id="userInfo">正在获取用户信息...</div>
+<div class="app">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2 id="appTitle">HRMS</h2>
+            <div id="userInfo" class="small">正在                <script>document.write('当前用户: ' + localStorage.getItem('username') || '未登录')</script>
+            </div>
+        </div>
+        <nav id="sideMenu" class="menu">
+            <!-- 菜单将通过JS根据用户角色动态生成 -->
+        </nav>
+        <div class="sidebar-footer">
+            <button id="btnLogout" class="btn small" onclick="logout()">登出并返回登录</button>
+        </div>
+    </aside>
 
-        <div id="adminPanel" class="hidden panel">
-            <h2>管理员面板</h2>
+    <main class="main">
+        <div class="main-card">
+            <header class="main-header">
+                <h1 id="pageTitle">欢迎使用人力资源管理系统</h1>
+                <div id="pageSubtitle" class="small">请选择左侧菜单进行操作</div>
+            </header>
 
-            <section class="card" style="padding:12px">
-                <h3>角色管理</h3>
-                <div class="form-row">
-                    <label for="newRoleName">新角色名</label>
-                    <input id="newRoleName" placeholder="例如 HR_AUDITOR" />
-                    <button id="btnAddRole">添加角色</button>
+            <section id="contentArea">
+                <!-- 管理员功能页面 -->
+                <div id="admin.organization" class="pane hidden">
+                    <h3>机构管理</h3>
+                    <div class="form-row">
+                        <input id="org1-id" placeholder="一级机构ID">
+                        <input id="org1-name" placeholder="一级机构名称">
+                        <button onclick="addOrgLevel1()">添加一级机构</button>
+                    </div>
+                    <div id="org1-list" class="org-list"></div>
+
+                    <div class="form-row" style="margin-top:10px">
+                        <select id="parent-org1" onchange="loadOrgLevel2()"></select>
+                        <input id="org2-id" placeholder="二级机构ID">
+                        <input id="org2-name" placeholder="二级机构名称">
+                        <button onclick="addOrgLevel2()">添加二级机构</button>
+                    </div>
+                    <div id="org2-list" class="org-list"></div>
+
+                    <div class="form-row" style="margin-top:10px">
+                        <select id="parent-org2" onchange="loadOrgLevel3()"></select>
+                        <input id="org3-id" placeholder="三级机构ID">
+                        <input id="org3-name" placeholder="三级机构名称">
+                        <button onclick="addOrgLevel3()">添加三级机构</button>
+                    </div>
+                    <div id="org3-list" class="org-list"></div>
                 </div>
-                <div class="small">提示：角色名会自动转成大写并唯一。</div>
-                <table id="roleTable" style="width:100%; margin-top:10px; border-collapse:collapse;">
-                    <thead>
-                    <tr style="text-align:left; border-bottom:1px solid #e5e7eb">
-                        <th style="padding:8px">ID</th>
-                        <th style="padding:8px">角色名</th>
-                        <th style="padding:8px">操作</th>
-                    </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                <div id="roleStatus" class="status"></div>
-            </section>
 
-            <section class="card" style="padding:12px; margin-top:12px">
-                <h3>创建账号（管理员）</h3>
-                <div class="form-row">
-                    <label>用户名</label><input id="adm_user" />
-                    <label>密码</label><input id="adm_pass" type="password" />
-                    <label>角色</label>
-                    <select id="adm_role"></select>
-                    <button id="adm_create">创建</button>
+                <div id="admin.position" class="pane hidden">
+                    <h3>职位设置</h3>
+                    <div class="form-row">
+                        <select id="position-org3" onchange="loadPositionsByOrg3()">
+                            <option value="">选择三级机构</option>
+                        </select>
+                        <input id="position-id" placeholder="职位ID（如FE001）">
+                        <input id="position-name" placeholder="职位名称">
+                        <button onclick="positionAdd()">添加职位</button>
+                    </div>
+                    <table id="position-table" class="table">
+                        <tr>
+                            <th>职位ID</th>
+                            <th>职位名称</th>
+                            <th>所属机构</th>
+                        </tr>
+                    </table>
                 </div>
-                <div id="adm_status" class="status"></div>
+
+                <div id="admin.roles" class="pane hidden">
+                    <h3>角色管理</h3>
+                    <div class="form-row">
+                        <input id="newRoleName" placeholder="输入新角色名（如 HR_AUDITOR）" />
+                        <button id="btnAddRole">添加角色</button>
+                    </div>
+                    <table id="roleTable" class="table"><thead><tr><th>ID</th><th>角色名</th><th>操作</th></tr></thead><tbody></tbody></table>
+                    <div id="roleStatus" class="status"></div>
+                </div>
+
+                <div id="admin.users" class="pane hidden">
+                    <h3>账号管理</h3>
+                    <div class="form-row">
+                        <input id="adm_user" placeholder="用户名" />
+                        <input id="adm_pass" placeholder="密码" type="password" />
+                        <select id="adm_role"></select>
+                        <button id="adm_create">创建</button>
+                    </div>
+                    <div id="adm_status" class="status"></div>
+                    <table id="userTable" class="table"><thead><tr><th>用户名</th><th>角色</th><th>启用</th><th>操作</th></tr></thead><tbody></tbody></table>
+                    <div id="userStatus" class="status"></div>
+                </div>
+
+                <!-- 人事经理功能页面 -->
+                <div id="hrManager.org3Edit" class="pane hidden">
+                    <h3>三级机构修改</h3>
+                    <div class="form-row">
+                        <select id="edit-org3-select" onchange="loadOrg3Detail()">
+                            <option value="">选择三级机构</option>
+                        </select>
+                        <input id="edit-org3-name" placeholder="新机构名称">
+                        <button onclick="updateOrg3()">更新名称</button>
+                    </div>
+                    <div id="org3-edit-status" class="status"></div>
+                </div>
+
+                <div id="hrManager.reports" class="pane hidden">
+                    <h3>企业人力数据报表</h3>
+                    <div class="form-row">
+                        <button id="btnLoadReport">刷新报表</button>
+                        <button id="btnExportReport" class="secondary">导出 CSV</button>
+                    </div>
+                    <pre id="reportResult" class="small"></pre>
+                </div>
+
+                <div id="hrManager.approvals" class="pane hidden">
+                    <h3>审批：晋升/调岗/招聘方案</h3>
+                    <div class="form-row">
+                        <select id="mgrApprovalFilter"><option value="ALL">全部</option><option value="PENDING">待审批</option><option value="APPROVED">已通过</option><option value="REJECTED">已驳回</option></select>
+                        <button id="btnLoadApprovals">刷新审批列表</button>
+                    </div>
+                    <table id="mgrApprovalsTable" class="table"><thead><tr><th>ID</th><th>类型</th><th>提交者</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody></tbody></table>
+                    <div id="mgrApprovalStatus" class="status"></div>
+                </div>
+
+                <div id="hrManager.staff" class="pane hidden">
+                    <h3>员工列表（用于审批/决策）</h3>
+                    <div class="form-row">
+                        <input id="mgrSearch" placeholder="按档案ID/姓名/手机号搜索" />
+                        <button id="btnRefreshStaffMgr">刷新</button>
+                        <button id="btnExportStaffMgr" class="secondary">导出 CSV</button>
+                    </div>
+                    <table id="mgrStaffTable" class="table"><thead><tr><th>档案ID</th><th>姓名</th><th>手机号</th><th>职位</th><th>状态</th><th>操作</th></tr></thead><tbody></tbody></table>
+                    <div id="mgrStaffStatus" class="status"></div>
+                </div>
+
+                <!-- 人事专员功能页面 -->
+                <div id="hrSpec.staffApprove" class="pane hidden">
+                    <h3>员工审批</h3>
+                    <div class="form-row">
+                        <select id="staff-org1" onchange="loadStaffOrg2()"></select>
+                        <select id="staff-org2" onchange="loadStaffOrg3()"></select>
+                        <select id="staff-org3" onchange="loadStaffPositions()"></select>
+                        <select id="staff-position"></select>
+                    </div>
+                    <div class="form-row">
+                        <input id="staff-name" placeholder="员工姓名">
+                        <button onclick="approveStaff()">审批通过</button>
+                    </div>
+                    <table id="staff-approval-table" class="table">
+                        <thead><tr><th>姓名</th><th>机构</th><th>职位</th><th>提交时间</th><th>状态</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div id="hrSpec.createStaff" class="pane hidden">
+                    <h3>创建员工档案</h3>
+                    <div class="form-row">
+                        <select id="staffOrg1Id" onchange="loadOrg2ByOrg1()"></select> <!-- 一级机构 -->
+                        <select id="staffOrg2Id" onchange="loadOrg3ByOrg2()"></select> <!-- 二级机构 -->
+                        <select id="staffOrg3Id" onchange="loadPositionsByOrg3()"></select> <!-- 三级机构 -->
+                        <select id="staffPositionId"></select> <!-- 职位（基于三级机构） -->
+                        <!-- 其他字段... -->
+                        <button id="btnCreateStaff">创建档案</button>
+                    </div>
+                </div>
+
+                <div id="hrSpec.employees" class="pane hidden">
+                    <h3>已注册员工（HR 可见）</h3>
+                    <div class="form-row">
+                        <input id="empSearch" placeholder="按用户名搜索" />
+                        <button id="btnRefreshEmployees">刷新列表</button>
+                    </div>
+                    <table id="employeesTable" class="table"><thead><tr><th>用户名</th><th>角色</th><th>启用</th><th>操作</th></tr></thead><tbody></tbody></table>
+                    <div id="employeesStatus" class="status"></div>
+                </div>
+
+                <div id="hrSpec.resumes" class="pane hidden">
+                    <h3>简历审批</h3>
+                    <div class="form-row">
+                        <select id="resumeFilter">
+                            <option value="ALL">全部</option>
+                            <option value="PENDING">待审批</option>
+                            <option value="APPROVED">已通过</option>
+                            <option value="REJECTED">已驳回</option>
+                        </select>
+                        <button id="btnRefreshResumes">刷新简历列表</button>
+                    </div>
+                    <table id="resumesTable" class="table"><thead><tr><th>ID</th><th>姓名</th><th>应聘职位</th><th>提交时间</th><th>状态</th><th>操作</th></tr></thead><tbody></tbody></table>
+                </div>
+
+                <div id="hrSpec.leaves" class="pane hidden">
+                    <h3>请假审批（HR）</h3>
+                    <div class="form-row">
+                        <select id="leaveFilter"><option value="ALL">全部</option><option value="PENDING">待审批</option><option value="APPROVED">已通过</option><option value="REJECTED">已驳回</option></select>
+                        <button id="btnRefreshLeaves">刷新请假</button>
+                    </div>
+                    <table id="leaveRequestsTable" class="table"><thead><tr><th>ID</th><th>用户名</th><th>开始</th><th>结束</th><th>类型</th><th>状态</th><th>操作</th></tr></thead><tbody></tbody></table>
+                </div>
+
+                <!-- 普通员工功能页面 -->
+                <div id="employee.jobs" class="pane hidden">
+                    <h3>职位列表（可投递）</h3>
+                    <div class="form-row">
+                        <input id="empPosSearch" placeholder="职位名或ID" />
+                        <button id="btnRefreshPosForEmp">刷新职位</button>
+                    </div>
+                    <table id="empPositionsTable" class="table"><thead><tr><th>ID</th><th>名称</th><th>薪资</th><th>概况</th><th>操作</th></tr></thead><tbody></tbody></table>
+                </div>
+
+                <div id="employee.resumes" class="pane hidden">
+                    <h3>我的简历与入职状态</h3>
+                    <div class="form-row">
+                        <button id="btnRefreshMyResumes">刷新我的简历</button>
+                    </div>
+                    <table id="myResumesTable" class="table"><thead><tr><th>ID</th><th>投递职位</th><th>提交时间</th><th>状态</th></tr></thead><tbody></tbody></table>
+                    <div id="hireStatus" class="small"></div>
+                </div>
+
+                <div id="employee.profile" class="pane hidden">
+                    <h3>我的简历 / 个人资料</h3>
+                    <!-- 个人基础信息字段 -->
+                    <div class="form-row">
+                        <input id="empName" placeholder="姓名">
+                        <input id="empPhone" placeholder="手机号">
+                        <input id="empEmail" placeholder="邮箱">
+                    </div>
+                    <div class="form-row">
+                        <textarea id="empExperience" placeholder="工作经历"></textarea>
+                    </div>
+                    <button id="btnSaveProfile">保存资料</button>
+                </div>
+
+                <div id="employee.leave" class="pane hidden">
+                    <h3>请假申请</h3>
+                    <div class="form-row">
+                        <input type="date" id="leaveStart">
+                        <input type="date" id="leaveEnd">
+                        <select id="leaveType">
+                            <option value="ANNUAL">年假</option>
+                            <option value="SICK">病假</option>
+                            <option value="PERSONAL">事假</option>
+                        </select>
+                        <button id="btnSubmitLeave">提交请假</button>
+                    </div>
+                    <div id="leaveStatus" class="status"></div>
+
+                    <h4 style="margin-top:12px">我的请假记录</h4>
+                    <button id="btnRefreshMyLeaves">刷新我的请假</button>
+                    <table id="myLeavesTable" class="table"><thead><tr><th>ID</th><th>开始</th><th>结束</th><th>类型</th><th>状态</th></tr></thead><tbody></tbody></table>
+                </div>
             </section>
-
-            <section class="card" style="padding:12px; margin-top:12px">
-                <h3>账号管理</h3>
-                <div class="small">可以编辑用户角色、启用/禁用账户或删除（不能删除 admin）。</div>
-                <table id="userTable" style="width:100%; margin-top:10px; border-collapse:collapse;">
-                    <thead>
-                    <tr style="text-align:left; border-bottom:1px solid #e5e7eb">
-                        <th style="padding:8px">用户名</th>
-                        <th style="padding:8px">角色</th>
-                        <th style="padding:8px">启用</th>
-                        <th style="padding:8px">操作</th>
-                    </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                <div id="userStatus" class="status"></div>
-            </section>
-
         </div>
-
-        <div id="hrPanel" class="hidden panel">
-            <h2>人事面板（HR 专员 / 人事经理）</h2>
-            <p>可管理档案、查看考勤等（示例页仅展示查询接口按钮）。</p>
-            <button id="btnListOrgs">列出一级机构 (/api/org1)</button>
-            <pre id="orgResult"></pre>
-            <button id="btnListStaff">列出员工档案 (/api/staff)</button>
-            <pre id="staffResult"></pre>
-        </div>
-
-        <div id="employeePanel" class="hidden panel">
-            <h2>员工视图</h2>
-            <p id="empWelcome"></p>
-        </div>
-
-        <div style="margin-top:12px">
-            <button id="btnLogout" class="secondary">登出并返回登录</button>
-        </div>
-    </div>
+    </main>
 </div>
 
-<script src="/app/js/main.js"></script>
+<script>
+    // 显示指定面板，隐藏其他面板
+    function showPane(paneId) {
+        // 隐藏所有面板
+        document.querySelectorAll('.pane').forEach(pane => {
+            pane.classList.add('hidden');
+        });
+        // 显示选中的面板
+        const activePane = document.getElementById(paneId);
+        if (activePane) {
+            activePane.classList.remove('hidden');
+            // 更新页面标题
+            document.getElementById('pageTitle').textContent = activePane.querySelector('h3')?.textContent || '操作页面';
+        }
+    }
+
+    // 登出功能
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('role');
+        window.location.href = '/login.html';
+    }
+
+    // 根据用户角色生成菜单
+    function initMenu() {
+        const role = localStorage.getItem('role');
+        const menuContainer = document.getElementById('sideMenu');
+        menuContainer.innerHTML = '';
+
+        // 根据角色添加对应菜单
+        if (role === 'ADMIN') {
+            addMenuItem('机构管理', 'admin.organization');
+            addMenuItem('职位设置', 'admin.position');
+            addMenuItem('角色管理', 'admin.roles');
+            addMenuItem('账号管理', 'admin.users');
+        } else if (role === 'HR_MANAGER') {
+            addMenuItem('三级机构修改', 'hrManager.org3Edit');
+            addMenuItem('人力数据报表', 'hrManager.reports');
+            addMenuItem('审批管理', 'hrManager.approvals');
+            addMenuItem('员工列表', 'hrManager.staff');
+        } else if (role === 'HR_SPEC') {
+            addMenuItem('员工审批', 'hrSpec.staffApprove');
+            addMenuItem('创建员工档案', 'hrSpec.createStaff');
+            addMenuItem('员工列表', 'hrSpec.employees');
+            addMenuItem('简历审批', 'hrSpec.resumes');
+            addMenuItem('请假审批', 'hrSpec.leaves');
+        } else if (role === 'EMPLOYEE') {
+            addMenuItem('职位浏览', 'employee.jobs');
+            addMenuItem('我的简历', 'employee.resumes');
+            addMenuItem('个人资料', 'employee.profile');
+            addMenuItem('请假申请', 'employee.leave');
+        }
+
+        // 默认显示第一个菜单
+        const firstMenuItem = menuContainer.querySelector('.menu-item');
+        if (firstMenuItem) {
+            firstMenuItem.click();
+        }
+    }
+
+    // 添加菜单项
+    function addMenuItem(text, paneId) {
+        const menuItem = document.createElement('div');
+        menuItem.className = 'menu-item';
+        menuItem.textContent = text;
+        menuItem.onclick = () => showPane(paneId);
+        document.getElementById('sideMenu').appendChild(menuItem);
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        // 检查登录状态
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        // 初始化菜单
+        initMenu();
+
+        // 初始化机构和职位相关数据
+        if (localStorage.getItem('role') === 'ADMIN') {
+            initOrgPage();
+        }
+        if (localStorage.getItem('role') === 'HR_SPEC') {
+            initStaffForm();
+            initStaffApprove();
+        }
+        loadAllOrg3();
+    });
+</script>
+<!-- 引入外部JS文件 -->
+<script src="/app/js/api.js"></script>
+<script src="/app/js/organization.js"></script>
+<script src="/app/js/staff.js"></script>
+<script src="/app/js/position.js"></script>
+<script src="/app/js/user.js"></script>
 </body>
 </html>

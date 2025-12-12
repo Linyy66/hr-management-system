@@ -1,0 +1,11 @@
+<!-- 管理员职位设置页面 -->
+<div class="pane" id="admin.position">
+    <h3>职位设置</h3>
+    <div class="form-row">
+        <select id="position-org3" onchange="loadPositions()"></select>
+        <input id="position-id" placeholder="职位ID（如FE001）" />
+        <input id="position-name" placeholder="职位名称（如前端开发工程师）" />
+        <button onclick="addPosition()">添加职位</button>
+    </div>
+    <div id="position-list" class="org-list"></div>
+</div>

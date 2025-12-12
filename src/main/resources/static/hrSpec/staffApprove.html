@@ -1,0 +1,11 @@
+<div class="pane" id="hrSpec.staffApprove">
+    <h3>员工审批</h3>
+    <div class="form-row">
+        <select id="staff-org1" onchange="loadStaffOrg2()"></select>
+        <select id="staff-org2" onchange="loadStaffOrg3()"></select>
+        <select id="staff-org3" onchange="loadStaffPositions()"></select>
+        <select id="staff-position"></select>
+        <input id="staff-name" placeholder="员工姓名" />
+        <button onclick="approveStaff()">审批通过</button>
+    </div>
+</div>

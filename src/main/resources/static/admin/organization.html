@@ -1,0 +1,39 @@
+<!-- 管理员机构管理页面 -->
+<div class="pane" id="admin.organization">
+    <h3>机构关系设置</h3>
+
+    <!-- 一级机构管理 -->
+    <div class="section">
+        <h4>一级机构</h4>
+        <div class="form-row">
+            <input id="org1-id" placeholder="机构ID（如01）" />
+            <input id="org1-name" placeholder="机构名称（如技术中心）" />
+            <button onclick="addOrgLevel1()">添加</button>
+        </div>
+        <div id="org1-list" class="org-list"></div>
+    </div>
+
+    <!-- 二级机构管理（依赖一级机构） -->
+    <div class="section">
+        <h4>二级机构</h4>
+        <div class="form-row">
+            <select id="parent-org1" onchange="loadOrgLevel2()"></select>
+            <input id="org2-id" placeholder="机构ID（如0101）" />
+            <input id="org2-name" placeholder="机构名称（如产品研发部）" />
+            <button onclick="addOrgLevel2()">添加</button>
+        </div>
+        <div id="org2-list" class="org-list"></div>
+    </div>
+
+    <!-- 三级机构管理（依赖二级机构） -->
+    <div class="section">
+        <h4>三级机构</h4>
+        <div class="form-row">
+            <select id="parent-org2" onchange="loadOrgLevel3()"></select>
+            <input id="org3-id" placeholder="机构ID（如010101）" />
+            <input id="org3-name" placeholder="机构名称（如前端组）" />
+            <button onclick="addOrgLevel3()">添加</button>
+        </div>
+        <div id="org3-list" class="org-list"></div>
+    </div>
+</div>

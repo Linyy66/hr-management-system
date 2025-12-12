@@ -1,4 +1,4 @@
-// login page logic: save credentials (localStorage) and go to main.html
+// login.js - save basic auth credentials and redirect to main
 (function(){
     const username = document.getElementById('username');
     const password = document.getElementById('password');
@@ -19,14 +19,12 @@
         const u = username.value.trim();
         const p = password.value;
         if(!u||!p) return setStatus('请输入用户名和密码', false);
-        // test by calling /api/auth/me
         try{
             const res = await fetch('/api/auth/me', { headers: authHeader(u,p) });
             if(res.ok){
-                // save to localStorage then redirect to main
                 localStorage.setItem('hrms_auth', JSON.stringify({u,p}));
                 setStatus('登录成功，正在跳转...');
-                setTimeout(()=> location.href = '/main.html', 600);
+                setTimeout(()=> location.href = '/main.html', 400);
             } else {
                 const text = await res.text();
                 setStatus('登录失败: '+res.status + ' ' + text, false);
@@ -36,7 +34,5 @@
         }
     });
 
-    goRegister.addEventListener('click', ()=>{
-        location.href = '/register.html';
-    });
+    goRegister.addEventListener('click', ()=> location.href = '/register.html');
 })();
