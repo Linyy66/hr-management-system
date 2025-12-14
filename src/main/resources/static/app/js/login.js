@@ -5,8 +5,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     // 检查是否有错误参数
     const urlParams = new URLSearchParams(window.location.search);
+    const statusDiv = document.getElementById('loginStatus');
+    
     if (urlParams.has('error')) {
-        const statusDiv = document.getElementById('loginStatus');
         showStatus(statusDiv, '用户名或密码错误', 'error');
     }
     

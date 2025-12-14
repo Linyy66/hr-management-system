@@ -29,8 +29,10 @@
                     <button class="btn-primary" style="width: 100%;">登录</button>
                 </div>
             </form>
-            <p class="small">注意：这是演示页面，实际系统中填写用户名和密码后点击登录按钮可进入系统</p>
-            <div id="loginStatus" class="status"></div>
+            <p class="small">填写用户名和密码后点击登录按钮可进入系统</p>
+            <div id="loginStatus" class="status">
+                <!-- 错误信息将通过JavaScript显示 -->
+            </div>
 
             <div class="card" style="margin-top: 2rem; background: #f1f5f9;">
                 <p style="margin: 0;">还没有账号？ <a href="/register.html" class="btn-link">立即注册</a></p>
@@ -43,7 +45,18 @@
             </div>
         </div>
     </div>
-
-    <script src="/app/js/login.js"></script>
+    
+    <script>
+        // 检查URL参数中是否有错误信息
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const statusDiv = document.getElementById('loginStatus');
+            
+            if (urlParams.has('error')) {
+                statusDiv.textContent = '用户名或密码错误';
+                statusDiv.className = 'status error';
+            }
+        });
+    </script>
 </body>
 </html>

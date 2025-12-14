@@ -3,7 +3,6 @@
  */
 
 // 工具类函数库
-// 由于项目要求使用纯后端HTML/CSS方式，此文件仅保留最基础的实用函数
 
 // 格式化日期
 function formatDate(date) {

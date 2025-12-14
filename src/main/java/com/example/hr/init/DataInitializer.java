@@ -33,19 +33,20 @@ public class DataInitializer implements ApplicationRunner {
     }
 
     private void createUserIfNotExists(String username, String rawPassword, String role) {
-        if (!userRepository.existsById(username)) {
-            AppUser u = new AppUser();
-            u.setUsername(username);
-            u.setPassword(passwordEncoder.encode(rawPassword)); // 确保密码是加密的
-            u.setRole(role);
-            u.setEnabled(true);
-            userRepository.save(u);
-            System.out.println("Created default user: " + username + " / role=" + role);
-        }
+        // 不管用户是否存在，都更新密码以确保使用正确的密码
+        AppUser u = userRepository.findById(username).orElse(new AppUser());
+        u.setUsername(username);
+        u.setPassword(passwordEncoder.encode(rawPassword)); // 确保密码是加密的
+        u.setRole(role);
+        u.setEnabled(true);
+        userRepository.save(u);
+        System.out.println("Created/Updated default user: " + username + " / role=" + role);
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        System.out.println("Initializing default data...");
+        
         // ensure roles exist
         createRoleIfNotExists("ADMIN");
         createRoleIfNotExists("HR_SPEC");
@@ -56,5 +57,7 @@ public class DataInitializer implements ApplicationRunner {
         createUserIfNotExists("admin", "adminpass", "ADMIN");
         createUserIfNotExists("spec", "specpass", "HR_SPEC");
         createUserIfNotExists("mgr", "mgrpass", "HR_MANAGER");
+        
+        System.out.println("Data initialization completed.");
     }
 }
