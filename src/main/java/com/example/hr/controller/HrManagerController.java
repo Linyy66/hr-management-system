@@ -1,7 +1,9 @@
 package com.example.hr.controller;
 
+import com.example.hr.dto.ApiResponse;
 import com.example.hr.model.*;
 import com.example.hr.repository.*;
+import com.example.hr.service.OrgStructureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/hr-manager")
@@ -33,6 +36,9 @@ public class HrManagerController {
     @Autowired
     private OrgLevel3Repository orgLevel3Repository;
     
+    @Autowired
+    private OrgStructureService orgStructureService;
+    
     // Helper method to get current user ID
     private String getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -52,7 +58,7 @@ public class HrManagerController {
     public ResponseEntity<StaffArchive> getStaffArchive(@PathVariable String id) {
         return staffArchiveRepository.findById(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     /**
@@ -64,7 +70,7 @@ public class HrManagerController {
             archive.setStatus("NORMAL");
             archive.setUpdateTime(LocalDateTime.now());
             return ResponseEntity.ok(staffArchiveRepository.save(archive));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     /**
@@ -78,7 +84,7 @@ public class HrManagerController {
             archive.setUpdateTime(LocalDateTime.now());
             // 在实际应用中，可以将拒绝原因保存到另一个表或字段中
             return ResponseEntity.ok(staffArchiveRepository.save(archive));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     /**
@@ -90,7 +96,7 @@ public class HrManagerController {
             archive.setStatus("DELETED");
             archive.setUpdateTime(LocalDateTime.now());
             return ResponseEntity.ok(staffArchiveRepository.save(archive));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     /**
@@ -102,7 +108,7 @@ public class HrManagerController {
             archive.setStatus("NORMAL");
             archive.setUpdateTime(LocalDateTime.now());
             return ResponseEntity.ok(staffArchiveRepository.save(archive));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     // 请假审批
@@ -124,7 +130,7 @@ public class HrManagerController {
             // 在实际应用中，应该从安全上下文中获取当前用户作为审批人
             application.setApproverId(currentUserId); 
             return ResponseEntity.ok(leaveApplicationRepository.save(application));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     @PutMapping("/leave-applications/{id}/reject")
@@ -142,7 +148,7 @@ public class HrManagerController {
             application.setApproverId(currentUserId);
             // 在实际应用中，可以将拒绝原因保存到另一个表或字段中
             return ResponseEntity.ok(leaveApplicationRepository.save(application));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     // 加班审批
@@ -164,7 +170,7 @@ public class HrManagerController {
             // 在实际应用中，应该从安全上下文中获取当前用户作为审批人
             application.setApproverId(currentUserId);
             return ResponseEntity.ok(overtimeApplicationRepository.save(application));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     @PutMapping("/overtime-applications/{id}/reject")
@@ -182,35 +188,112 @@ public class HrManagerController {
             application.setApproverId(currentUserId);
             // 在实际应用中，可以将拒绝原因保存到另一个表或字段中
             return ResponseEntity.ok(overtimeApplicationRepository.save(application));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
-    // 组织架构查看（人事经理只能查看不能修改，除了三级机构名称）
+    // 组织架构管理
     @GetMapping("/org/level1")
     public List<OrgLevel1> getAllOrgLevel1() {
-        return orgLevel1Repository.findAll();
+        return orgStructureService.getAllOrgLevel1();
     }
     
     @GetMapping("/org/level2")
     public List<OrgLevel2> getAllOrgLevel2() {
-        return orgLevel2Repository.findAll();
+        return orgStructureService.getAllOrgLevel2();
     }
     
     @GetMapping("/org/level3")
     public List<OrgLevel3> getAllOrgLevel3() {
-        return orgLevel3Repository.findAll();
+        return orgStructureService.getAllOrgLevel3();
+    }
+    
+    // 创建二级机构
+    @PostMapping("/org/level2")
+    public ResponseEntity<ApiResponse<OrgLevel2>> createOrgLevel2(@RequestBody OrgLevel2 org) {
+        // 检查一级机构是否存在
+        if (!orgStructureService.existsOrgLevel1(org.getOrg1Id())) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("指定的一级机构不存在"));
+        }
+        
+        org.setCreateTime(LocalDateTime.now());
+        org.setUpdateTime(LocalDateTime.now());
+        OrgLevel2 savedOrg = orgLevel2Repository.save(org);
+        return ResponseEntity.ok(ApiResponse.success("二级机构创建成功", savedOrg));
+    }
+    
+    // 创建三级机构
+    @PostMapping("/org/level3")
+    public ResponseEntity<ApiResponse<OrgLevel3>> createOrgLevel3(@RequestBody OrgLevel3 org) {
+        // 检查二级机构是否存在
+        if (!orgStructureService.existsOrgLevel2(org.getOrg2Id())) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("指定的二级机构不存在"));
+        }
+        
+        org.setCreateTime(LocalDateTime.now());
+        org.setUpdateTime(LocalDateTime.now());
+        OrgLevel3 savedOrg = orgLevel3Repository.save(org);
+        return ResponseEntity.ok(ApiResponse.success("三级机构创建成功", savedOrg));
     }
     
     /**
      * 人事经理可以修改三级机构名称
      */
     @PutMapping("/org/level3/{id}")
-    public ResponseEntity<OrgLevel3> updateOrgLevel3Name(@PathVariable String id, 
+    public ResponseEntity<ApiResponse<OrgLevel3>> updateOrgLevel3Name(@PathVariable String id, 
                                                         @RequestBody OrgLevel3 org) {
         return orgLevel3Repository.findById(id).map(existing -> {
             existing.setOrg3Name(org.getOrg3Name());
             existing.setUpdateTime(LocalDateTime.now());
-            return ResponseEntity.ok(orgLevel3Repository.save(existing));
-        }).orElse(ResponseEntity.notFound().build());
+            OrgLevel3 saved = orgLevel3Repository.save(existing);
+            return ResponseEntity.ok(ApiResponse.success("三级机构更新成功", saved));
+        }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    // 修改二级机构
+    @PutMapping("/org/level2/{id}")
+    public ResponseEntity<ApiResponse<OrgLevel2>> updateOrgLevel2(@PathVariable String id, @RequestBody OrgLevel2 org) {
+        Optional<OrgLevel2> existingOpt = orgLevel2Repository.findById(id);
+        if (!existingOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        OrgLevel2 existing = existingOpt.get();
+        // 检查一级机构是否存在
+        if (!org.getOrg1Id().equals(existing.getOrg1Id()) && 
+            !orgStructureService.existsOrgLevel1(org.getOrg1Id())) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("指定的一级机构不存在"));
+        }
+        
+        existing.setOrg1Id(org.getOrg1Id());
+        existing.setOrg2Name(org.getOrg2Name());
+        existing.setUpdateTime(LocalDateTime.now());
+        OrgLevel2 saved = orgLevel2Repository.save(existing);
+        return ResponseEntity.ok(ApiResponse.success("二级机构更新成功", saved));
+    }
+    
+    // 删除二级机构
+    @DeleteMapping("/org/level2/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteOrgLevel2(@PathVariable String id) {
+        if (!orgLevel2Repository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        // 检查是否有下属三级机构
+        List<OrgLevel3> childOrgs = orgStructureService.getOrgLevel3ByOrg2Id(id);
+        if (!childOrgs.isEmpty()) {
+            // 有下属机构，不能删除
+            return ResponseEntity.status(409).body(ApiResponse.error("该二级机构下有三级机构，不能删除"));
+        }
+        orgLevel2Repository.deleteById(id);
+        return ResponseEntity.ok(ApiResponse.success("二级机构删除成功"));
+    }
+    
+    // 删除三级机构
+    @DeleteMapping("/org/level3/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteOrgLevel3(@PathVariable String id) {
+        if (!orgLevel3Repository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        orgLevel3Repository.deleteById(id);
+        return ResponseEntity.ok(ApiResponse.success("三级机构删除成功"));
     }
 }

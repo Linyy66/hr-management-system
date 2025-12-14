@@ -35,21 +35,27 @@
                     <ul id="org-level1-tree">
                         <!-- 动态加载一级机构树 -->
                     </ul>
-                    <button id="add-org1-btn" class="btn-primary">新增一级机构</button>
+                    <button id="add-org1-btn" class="btn-primary">
+                        <span class="plus-icon">+</span> 新增机构
+                    </button>
                 </div>
                 <div class="org-level">
                     <h3>二级机构</h3>
                     <ul id="org-level2-tree">
                         <!-- 动态加载二级机构树 -->
                     </ul>
-                    <button id="add-org2-btn" class="btn-primary">新增二级机构</button>
+                    <button id="add-org2-btn" class="btn-primary">
+                        <span class="plus-icon">+</span> 新增机构
+                    </button>
                 </div>
                 <div class="org-level">
                     <h3>三级机构</h3>
                     <ul id="org-level3-tree">
                         <!-- 动态加载三级机构树 -->
                     </ul>
-                    <button id="add-org3-btn" class="btn-primary">新增三级机构</button>
+                    <button id="add-org3-btn" class="btn-primary">
+                        <span class="plus-icon">+</span> 新增机构
+                    </button>
                 </div>
             </div>
         </div>
@@ -73,6 +79,77 @@
         </div>
     </div>
 
-    <!-- 移除所有JavaScript代码，使用纯后端HTML/CSS方式 -->
+    <!-- 新增机构模态对话框 -->
+    <div id="add-org-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>新增机构</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="add-org-form">
+                    <div class="form-group">
+                        <label>机构层级：</label>
+                        <div>
+                            <input type="radio" id="level1" name="orgLevel" value="1" checked>
+                            <label for="level1">一级机构</label>
+                            <input type="radio" id="level2" name="orgLevel" value="2">
+                            <label for="level2">二级机构</label>
+                            <input type="radio" id="level3" name="orgLevel" value="3">
+                            <label for="level3">三级机构</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="parent-level1-group" style="display: none;">
+                        <label for="parent-level1">选择一级机构：</label>
+                        <select id="parent-level1" class="form-control">
+                            <option value="">请选择一级机构</option>
+                            <!-- 动态加载选项 -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="parent-level2-group" style="display: none;">
+                        <label for="parent-level2">选择二级机构：</label>
+                        <select id="parent-level2" class="form-control">
+                            <option value="">请选择二级机构</option>
+                            <!-- 动态加载选项 -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="org-name">机构名称：</label>
+                        <input type="text" id="org-name" class="form-control" maxlength="50" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="org-code">机构代码：</label>
+                        <input type="text" id="org-code" class="form-control" maxlength="6" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="org-head">机构负责人（可选）：</label>
+                        <input type="text" id="org-head" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="org-desc">机构描述（可选）：</label>
+                        <textarea id="org-desc" class="form-control" rows="3" maxlength="200"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="effective-date">生效日期：</label>
+                        <input type="date" id="effective-date" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-add-org" class="btn-secondary">取消</button>
+                <button id="submit-add-org" class="btn-primary">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/app/js/utils.js"></script>
+    <script src="/app/js/admin.js"></script>
 </body>
 </html>

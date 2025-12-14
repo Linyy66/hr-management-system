@@ -13,13 +13,6 @@
                 <h1>HRMS</h1>
                 <span>人事专员平台</span>
             </div>
-            <div class="nav-menu">
-                <ul>
-                    <li><a href="#" class="nav-link active" data-pane="dashboard">仪表板</a></li>
-                    <li><a href="#" class="nav-link" data-pane="staff-archive">员工档案</a></li>
-                    <li><a href="#" class="nav-link" data-pane="attendance">考勤异常</a></li>
-                </ul>
-            </div>
             <div class="user-info">
                 <span id="current-user">人事专员</span>
                 <span class="role-badge hr_spec">人事专员</span>
@@ -28,107 +21,168 @@
         </div>
     </nav>
 
-    <div class="container main-content">
-        <!-- Dashboard Pane -->
-        <div id="dashboard" class="panel active">
-            <div class="card">
-                <h2>人事专员仪表板</h2>
-                <p>欢迎使用人事专员平台，在这里您可以管理员工档案、处理考勤异常等日常人事工作。</p>
-            </div>
-            
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <h3>待处理档案</h3>
-                    <div class="stat-value" id="pending-archives">8</div>
-                    <p>份</p>
-                </div>
-                <div class="stat-card">
-                    <h3>考勤异常</h3>
-                    <div class="stat-value" id="attendance-exceptions">5</div>
-                    <p>条</p>
-                </div>
-                <div class="stat-card">
-                    <h3>今日入职</h3>
-                    <div class="stat-value" id="new-hires">2</div>
-                    <p>人</p>
-                </div>
-                <div class="stat-card">
-                    <h3>本周离职</h3>
-                    <div class="stat-value" id="resignations">1</div>
-                    <p>人</p>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>近期工作任务</h3>
-                <ul>
-                    <li>处理新员工张三的档案录入</li>
-                    <li>审核员工李四的考勤异常申请</li>
-                    <li>更新员工王五的职位信息</li>
-                    <li>准备下周的员工转正材料</li>
+    <div class="container-fluid">
+        <div class="main-layout">
+            <!-- 左侧导航栏 -->
+            <nav class="sidebar">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-pane="dashboard">
+                            <span class="nav-icon">📊</span>
+                            仪表板
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-pane="staff-archive">
+                            <span class="nav-icon">👥</span>
+                            员工档案
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-pane="attendance">
+                            <span class="nav-icon">⏰</span>
+                            考勤异常
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/hr_spec/org.html">
+                            <span class="nav-icon">🏢</span>
+                            组织架构
+                        </a>
+                    </li>
                 </ul>
-            </div>
-        </div>
-        
-        <!-- Staff Archive Pane -->
-        <div id="staff-archive" class="panel">
-            <div class="card">
-                <h2>员工档案管理</h2>
-                <button id="add-staff-btn" class="btn-primary">新增员工档案</button>
-            </div>
-            
-            <div class="card">
-                <h3>档案搜索</h3>
-                <div class="search-bar">
-                    <input type="text" id="archive-search" placeholder="按姓名、员工编号或部门搜索">
-                    <button class="btn-primary">搜索</button>
+            </nav>
+
+            <!-- 右侧工作区 -->
+            <main class="content">
+                <!-- 面包屑导航 -->
+                <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">人事专员</li>
+                        <li class="breadcrumb-item active" id="current-page-title">仪表板</li>
+                    </ol>
+                </nav>
+
+                <!-- 页面内容 -->
+                <div class="content-wrapper">
+                    <!-- Dashboard Pane -->
+                    <div id="dashboard" class="panel active">
+                        <div class="card">
+                            <h2>人事专员仪表板</h2>
+                            <p>欢迎使用人事专员平台，在这里您可以管理员工档案、处理考勤异常等日常人事工作。</p>
+                        </div>
+                        
+                        <div class="dashboard-stats">
+                            <div class="stat-card">
+                                <h3>待处理档案</h3>
+                                <div class="stat-value" id="pending-archives">8</div>
+                                <p>份</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>考勤异常</h3>
+                                <div class="stat-value" id="attendance-exceptions">5</div>
+                                <p>条</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>今日入职</h3>
+                                <div class="stat-value" id="new-hires">2</div>
+                                <p>人</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>本周离职</h3>
+                                <div class="stat-value" id="resignations">1</div>
+                                <p>人</p>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>近期工作任务</h3>
+                            <ul>
+                                <li>处理员工赵六的考勤异常申请</li>
+                                <li>录入新员工钱七的基本档案</li>
+                                <li>更新员工孙八的联系方式</li>
+                                <li>整理本月员工花名册</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Staff Archive Pane -->
+                    <div id="staff-archive" class="panel">
+                        <div class="card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>员工档案管理</h2>
+                                <button id="add-staff-btn" class="btn-primary">新增员工档案</button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>档案搜索</h3>
+                            <div class="search-bar">
+                                <input type="text" id="archive-search" placeholder="按姓名、员工编号或部门搜索">
+                                <button class="btn-primary">搜索</button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>员工档案列表</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>员工编号</th>
+                                        <th>姓名</th>
+                                        <th>性别</th>
+                                        <th>部门</th>
+                                        <th>职位</th>
+                                        <th>联系电话</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="staff-archive-body">
+                                    <!-- 动态加载员工档案列表 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Attendance Exceptions Pane -->
+                    <div id="attendance" class="panel">
+                        <div class="card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>考勤异常处理</h2>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>异常搜索</h3>
+                            <div class="search-bar">
+                                <input type="text" id="exception-search" placeholder="按姓名或员工编号搜索">
+                                <button class="btn-primary">搜索</button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>考勤异常列表</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>员工编号</th>
+                                        <th>姓名</th>
+                                        <th>异常日期</th>
+                                        <th>异常类型</th>
+                                        <th>申请理由</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendance-body">
+                                    <!-- 动态加载考勤异常列表 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="card">
-                <h3>员工档案列表</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>员工编号</th>
-                            <th>姓名</th>
-                            <th>部门</th>
-                            <th>职位</th>
-                            <th>状态</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="archive-body">
-                        <!-- 动态加载档案列表 -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Attendance Pane -->
-        <div id="attendance" class="panel">
-            <div class="card">
-                <h2>考勤异常处理</h2>
-            </div>
-            
-            <div class="card">
-                <h3>异常列表</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>员工姓名</th>
-                            <th>日期</th>
-                            <th>异常类型</th>
-                            <th>申请时间</th>
-                            <th>状态</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="exception-body">
-                        <!-- 动态加载异常列表 -->
-                    </tbody>
-                </table>
-            </div>
+            </main>
         </div>
     </div>
 

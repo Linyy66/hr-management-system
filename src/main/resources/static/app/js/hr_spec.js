@@ -4,14 +4,19 @@
 
 // 当前活动面板
 let currentPane = 'dashboard';
+let orgData = {
+    level1: [],
+    level2: [],
+    level3: []
+};
 
 // DOM加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
-    initializeHrSpecPage();
+    initializeHRSpecPage();
 });
 
 // 初始化人事专员页面
-function initializeHrSpecPage() {
+function initializeHRSpecPage() {
     // 绑定导航链接事件
     bindNavLinks();
     
@@ -23,6 +28,9 @@ function initializeHrSpecPage() {
     
     // 显示当前用户信息
     showCurrentUser();
+    
+    // 加载组织数据
+    loadOrgData();
 }
 
 // 绑定导航链接事件
@@ -32,7 +40,9 @@ function bindNavLinks() {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const pane = this.getAttribute('data-pane');
-            showPane(pane);
+            if (pane) {
+                showPane(pane);
+            }
         });
     });
 }
@@ -44,58 +54,6 @@ function bindButtonEvents() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
     }
-    
-    // 新增员工档案按钮
-    const addStaffBtn = document.getElementById('add-staff-btn');
-    if (addStaffBtn) {
-        addStaffBtn.addEventListener('click', function() {
-            alert('新增员工档案功能占位符');
-        });
-    }
-    
-    // 搜索按钮
-    const searchBtn = document.querySelector('#staff-archive .search-bar .btn-primary');
-    if (searchBtn) {
-        searchBtn.addEventListener('click', function() {
-            alert('搜索功能占位符');
-        });
-    }
-}
-
-// 显示指定面板
-function showPane(pane) {
-    // 隐藏所有面板
-    const panels = document.querySelectorAll('.panel');
-    panels.forEach(panel => {
-        panel.classList.remove('active');
-    });
-    
-    // 显示目标面板
-    const targetPane = document.getElementById(pane);
-    if (targetPane) {
-        targetPane.classList.add('active');
-        currentPane = pane;
-        
-        // 根据面板加载相应数据
-        switch (pane) {
-            case 'staff-archive':
-                loadStaffArchiveData();
-                break;
-            case 'attendance':
-                loadAttendanceExceptionData();
-                break;
-        }
-    }
-    
-    // 更新导航链接激活状态
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        if (link.getAttribute('data-pane') === pane) {
-            link.classList.add('active');
-        } else {
-            link.classList.remove('active');
-        }
-    });
 }
 
 // 显示当前用户信息
@@ -134,70 +92,67 @@ async function loadDashboardData() {
     }
 }
 
-// 加载员工档案数据
-async function loadStaffArchiveData() {
+// 加载组织架构数据
+async function loadOrgData() {
     try {
-        // 在实际应用中，这里应该从后端获取员工档案数据
-        const tbody = document.getElementById('archive-body');
-        if (tbody) {
-            tbody.innerHTML = `
-                <tr>
-                    <td>E001</td>
-                    <td>张三</td>
-                    <td>技术部</td>
-                    <td>高级软件工程师</td>
-                    <td>待审批</td>
-                    <td>
-                        <button class="btn-secondary btn-small">查看</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>E002</td>
-                    <td>李四</td>
-                    <td>市场部</td>
-                    <td>产品经理</td>
-                    <td>正常</td>
-                    <td>
-                        <button class="btn-secondary btn-small">查看</button>
-                    </td>
-                </tr>
-            `;
-        }
+        // 加载一级机构
+        const org1Response = await fetch('/api/admin/org/level1');
+        const org1Data = await org1Response.json();
+        orgData.level1 = org1Data.data || [];
+        
+        // 加载二级机构
+        const org2Response = await fetch('/api/admin/org/level2');
+        const org2Data = await org2Response.json();
+        orgData.level2 = org2Data.data || [];
+        
+        // 加载三级机构
+        const org3Response = await fetch('/api/admin/org/level3');
+        const org3Data = await org3Response.json();
+        orgData.level3 = org3Data.data || [];
     } catch (error) {
-        console.error('Load staff archive data error:', error);
+        console.error('Load organization data error:', error);
     }
 }
 
-// 加载考勤异常数据
-async function loadAttendanceExceptionData() {
-    try {
-        // 在实际应用中，这里应该从后端获取考勤异常数据
-        const tbody = document.getElementById('exception-body');
-        if (tbody) {
-            tbody.innerHTML = `
-                <tr>
-                    <td>王五</td>
-                    <td>2023-06-01</td>
-                    <td>迟到</td>
-                    <td>2023-06-01 09:15</td>
-                    <td>待处理</td>
-                    <td>
-                        <button class="btn-primary btn-small">处理</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>赵六</td>
-                    <td>2023-06-02</td>
-                    <td>早退</td>
-                    <td>2023-06-02 17:30</td>
-                    <td>待处理</td>
-                    <td>
-                        <button class="btn-primary btn-small">处理</button>
-                    </td>
-                </tr>
-            `;
+// 显示指定面板
+function showPane(paneId) {
+    // 隐藏所有面板
+    const panels = document.querySelectorAll('.panel');
+    panels.forEach(panel => {
+        panel.classList.remove('active');
+    });
+    
+    // 显示目标面板
+    const targetPanel = document.getElementById(paneId);
+    if (targetPanel) {
+        targetPanel.classList.add('active');
+        currentPane = paneId;
+        
+        // 更新导航链接的活动状态
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('data-pane') === paneId) {
+                link.classList.add('active');
+            }
+        });
+        
+        // 更新面包屑导航
+        const currentPageTitle = document.getElementById('current-page-title');
+        if (currentPageTitle) {
+            switch (paneId) {
+                case 'dashboard':
+                    currentPageTitle.textContent = '仪表板';
+                    break;
+                case 'staff-archive':
+                    currentPageTitle.textContent = '员工档案管理';
+                    break;
+                case 'attendance':
+                    currentPageTitle.textContent = '考勤异常处理';
+                    break;
+                default:
+                    currentPageTitle.textContent = '人事专员';
+            }
         }
-    } catch (error) {
-        console.error('Load attendance exception data error:', error);
     }
 }

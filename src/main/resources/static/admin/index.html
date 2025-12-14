@@ -13,16 +13,6 @@
                 <h1>HRMS</h1>
                 <span>系统管理平台</span>
             </div>
-            <div class="nav-menu">
-                <ul>
-                    <li><a href="#" class="nav-link active" data-pane="dashboard">仪表板</a></li>
-                    <li><a href="#" class="nav-link" data-pane="org">组织架构</a></li>
-                    <li><a href="#" class="nav-link" data-pane="positions">职位管理</a></li>
-                    <li><a href="#" class="nav-link" data-pane="users">用户管理</a></li>
-                    <li><a href="#" class="nav-link" data-pane="roles">角色管理</a></li>
-                    <li><a href="#" class="nav-link" data-pane="attendance-rules">考勤规则</a></li>
-                </ul>
-            </div>
             <div class="user-info">
                 <span id="current-user">管理员</span>
                 <span class="role-badge admin">系统管理员</span>
@@ -31,179 +21,503 @@
         </div>
     </nav>
 
-    <div class="container main-content">
-        <!-- Dashboard Pane -->
-        <div id="dashboard" class="panel active">
-            <div class="card">
-                <h2>系统管理仪表板</h2>
-                <p>欢迎使用系统管理平台，在这里您可以管理系统的所有基础设置。</p>
-            </div>
-            
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <h3>一级机构</h3>
-                    <div class="stat-value" id="org1-count">3</div>
-                    <p>个</p>
-                </div>
-                <div class="stat-card">
-                    <h3>职位</h3>
-                    <div class="stat-value" id="position-count">15</div>
-                    <p>个</p>
-                </div>
-                <div class="stat-card">
-                    <h3>用户</h3>
-                    <div class="stat-value" id="user-count">28</div>
-                    <p>人</p>
-                </div>
-                <div class="stat-card">
-                    <h3>角色</h3>
-                    <div class="stat-value" id="role-count">4</div>
-                    <p>种</p>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>最近操作</h3>
-                <ul>
-                    <li>2023-06-01: 创建了新的职位 - 高级软件工程师</li>
-                    <li>2023-05-28: 添加了一级机构 - 市场部</li>
-                    <li>2023-05-25: 更新了用户权限设置</li>
+    <div class="container-fluid">
+        <div class="main-layout">
+            <!-- 左侧导航栏 -->
+            <nav class="sidebar">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-pane="dashboard">
+                            <span class="nav-icon">📊</span>
+                            仪表板
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-pane="org">
+                            <span class="nav-icon">🏢</span>
+                            组织架构
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-pane="positions">
+                            <span class="nav-icon">💼</span>
+                            职位管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-pane="users">
+                            <span class="nav-icon">👥</span>
+                            用户管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-pane="attendance-rules">
+                            <span class="nav-icon">⏰</span>
+                            考勤规则
+                        </a>
+                    </li>
                 </ul>
-            </div>
-        </div>
-        
-        <!-- Organization Pane -->
-        <div id="org" class="panel">
-            <div class="card">
-                <h2>组织架构管理</h2>
-                <button id="add-org-btn" class="btn-primary">新增机构</button>
-            </div>
-            
-            <div class="card">
-                <h3>一级机构</h3>
-                <div id="org-level1-list">
-                    <!-- 动态加载一级机构列表 -->
+            </nav>
+
+            <!-- 右侧工作区 -->
+            <main class="content">
+                <!-- 面包屑导航 -->
+                <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">系统管理</li>
+                        <li class="breadcrumb-item active" id="current-page-title">组织架构管理</li>
+                    </ol>
+                </nav>
+
+                <!-- 页面内容 -->
+                <div class="content-wrapper">
+                    <!-- Dashboard Pane -->
+                    <div id="dashboard" class="panel">
+                        <div class="card">
+                            <h2>系统管理仪表板</h2>
+                            <p>欢迎使用系统管理平台，在这里您可以管理系统的所有基础设置。</p>
+                        </div>
+                        
+                        <div class="dashboard-stats">
+                            <div class="stat-card">
+                                <h3>一级机构</h3>
+                                <div class="stat-value" id="org1-count">3</div>
+                                <p>个</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>职位</h3>
+                                <div class="stat-value" id="position-count">15</div>
+                                <p>个</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>用户</h3>
+                                <div class="stat-value" id="user-count">28</div>
+                                <p>人</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>角色</h3>
+                                <div class="stat-value" id="role-count">4</div>
+                                <p>种</p>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>最近操作</h3>
+                            <ul>
+                                <li>2023-06-01: 创建了新的职位 - 高级软件工程师</li>
+                                <li>2023-05-28: 添加了一级机构 - 市场部</li>
+                                <li>2023-05-25: 更新了用户权限设置</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Organization Pane -->
+                    <div id="org" class="panel active">
+                        <div class="card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>组织架构管理</h2>
+                                <button id="toggle-view-btn" class="btn-primary">查看机构</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 新增/编辑机构表单 -->
+                        <div id="org-form-section" class="card">
+                            <h3>新增/编辑机构</h3>
+                            <form id="org-form">
+                                <div class="form-group">
+                                    <label>机构层级：</label>
+                                    <div>
+                                        <input type="radio" id="level1" name="orgLevel" value="1" checked>
+                                        <label for="level1">一级机构</label>
+                                        <input type="radio" id="level2" name="orgLevel" value="2">
+                                        <label for="level2">二级机构</label>
+                                        <input type="radio" id="level3" name="orgLevel" value="3">
+                                        <label for="level3">三级机构</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group" id="parent-level1-group" style="display: none;">
+                                    <label for="parent-level1">选择一级机构：</label>
+                                    <select id="parent-level1" class="form-control">
+                                        <option value="">请选择一级机构</option>
+                                        <!-- 动态加载选项 -->
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group" id="parent-level2-group" style="display: none;">
+                                    <label for="parent-level2">选择二级机构：</label>
+                                    <select id="parent-level2" class="form-control">
+                                        <option value="">请选择二级机构</option>
+                                        <!-- 动态加载选项 -->
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="org-name">机构名称：</label>
+                                    <input type="text" id="org-name" class="form-control" maxlength="50" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="org-code">机构代码：</label>
+                                    <input type="text" id="org-code" class="form-control" maxlength="6" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="org-head">机构负责人（可选）：</label>
+                                    <input type="text" id="org-head" class="form-control">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="org-desc">机构描述（可选）：</label>
+                                    <textarea id="org-desc" class="form-control" rows="3" maxlength="200"></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="effective-date">生效日期：</label>
+                                    <input type="date" id="effective-date" class="form-control">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <button id="save-org-btn" type="button" class="btn-primary">保存</button>
+                                    <button id="reset-form-btn" type="button" class="btn-secondary">重置</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- 机构列表视图 -->
+                        <div id="org-list-section" style="display: none;">
+                            <div class="card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h3>一级机构列表</h3>
+                                    <button class="btn-small btn-danger" onclick="deleteSelectedOrgs(1)">删除选中</button>
+                                </div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="select-all-level1"></th>
+                                            <th>机构代码</th>
+                                            <th>机构名称</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="org-level1-tbody">
+                                        <!-- 动态加载一级机构列表 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h3>二级机构列表</h3>
+                                    <button class="btn-small btn-danger" onclick="deleteSelectedOrgs(2)">删除选中</button>
+                                </div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="select-all-level2"></th>
+                                            <th>机构代码</th>
+                                            <th>机构名称</th>
+                                            <th>上级机构</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="org-level2-tbody">
+                                        <!-- 动态加载二级机构列表 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h3>三级机构列表</h3>
+                                    <button class="btn-small btn-danger" onclick="deleteSelectedOrgs(3)">删除选中</button>
+                                </div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="select-all-level3"></th>
+                                            <th>机构代码</th>
+                                            <th>机构名称</th>
+                                            <th>上级机构</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="org-level3-tbody">
+                                        <!-- 动态加载三级机构列表 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Positions Pane -->
+                    <div id="positions" class="panel">
+                        <div class="card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>关联职位</h2>
+                                <button id="add-position-btn" class="btn-primary">新增职位</button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>职位列表</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>职位编码</th>
+                                        <th>职位名称</th>
+                                        <th>所属机构</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="positions-body">
+                                    <!-- 动态加载职位列表 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Users Pane -->
+                    <div id="users" class="panel">
+                        <div class="card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>用户管理</h2>
+                                <button id="add-user-btn" class="btn-primary">新增用户</button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>用户列表</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>用户名</th>
+                                        <th>角色</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-body">
+                                    <!-- 动态加载用户列表 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Attendance Rules Pane -->
+                    <div id="attendance-rules" class="panel">
+                        <div class="card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>考勤规则管理</h2>
+                                <button class="btn-primary">新增规则</button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>规则搜索</h3>
+                            <div class="search-bar">
+                                <input type="text" placeholder="按规则名称或适用机构搜索">
+                                <button class="btn-primary">搜索</button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>规则列表</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>规则名称</th>
+                                        <th>适用机构</th>
+                                        <th>规则详情</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rules-body">
+                                    <!-- 动态加载规则列表 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 新增机构模态对话框 -->
+    <div id="add-org-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>新增机构</h3>
+                <span class="close">&times;</span>
             </div>
-            
-            <div class="card">
-                <h3>二级机构</h3>
-                <div id="org-level2-list">
-                    <!-- 动态加载二级机构列表 -->
-                </div>
+            <div class="modal-body">
+                <form id="add-org-form">
+                    <div class="form-group">
+                        <label>机构层级：</label>
+                        <div>
+                            <input type="radio" id="modal-level1" name="orgLevel" value="1" checked>
+                            <label for="modal-level1">一级机构</label>
+                            <input type="radio" id="modal-level2" name="orgLevel" value="2">
+                            <label for="modal-level2">二级机构</label>
+                            <input type="radio" id="modal-level3" name="orgLevel" value="3">
+                            <label for="modal-level3">三级机构</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="modal-parent-level1-group" style="display: none;">
+                        <label for="modal-parent-level1">选择一级机构：</label>
+                        <select id="modal-parent-level1" class="form-control">
+                            <option value="">请选择一级机构</option>
+                            <!-- 动态加载选项 -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="modal-parent-level2-group" style="display: none;">
+                        <label for="modal-parent-level2">选择二级机构：</label>
+                        <select id="modal-parent-level2" class="form-control">
+                            <option value="">请选择二级机构</option>
+                            <!-- 动态加载选项 -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal-org-name">机构名称：</label>
+                        <input type="text" id="modal-org-name" class="form-control" maxlength="50" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal-org-code">机构代码：</label>
+                        <input type="text" id="modal-org-code" class="form-control" maxlength="6" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal-org-head">机构负责人（可选）：</label>
+                        <input type="text" id="modal-org-head" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal-org-desc">机构描述（可选）：</label>
+                        <textarea id="modal-org-desc" class="form-control" rows="3" maxlength="200"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal-effective-date">生效日期：</label>
+                        <input type="date" id="modal-effective-date" class="form-control">
+                    </div>
+                </form>
             </div>
-            
-            <div class="card">
-                <h3>三级机构</h3>
-                <div id="org-level3-list">
-                    <!-- 动态加载三级机构列表 -->
-                </div>
+            <div class="modal-footer">
+                <button id="cancel-add-org" class="btn-secondary">取消</button>
+                <button id="submit-add-org" class="btn-primary">确定</button>
             </div>
         </div>
-        
-        <!-- Positions Pane -->
-        <div id="positions" class="panel">
-            <div class="card">
-                <h2>职位管理</h2>
-                <button id="add-position-btn" class="btn-primary">新增职位</button>
+    </div>
+
+    <!-- 新增职位模态对话框 -->
+    <div id="add-position-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>新增职位</h3>
+                <span class="close">&times;</span>
             </div>
-            
-            <div class="card">
-                <h3>职位列表</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>职位编码</th>
-                            <th>职位名称</th>
-                            <th>所属机构</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="positions-body">
-                        <!-- 动态加载职位列表 -->
-                    </tbody>
-                </table>
+            <div class="modal-body">
+                <form id="add-position-form">
+                    <div class="form-group">
+                        <label for="position-name">职位名称：</label>
+                        <input type="text" id="position-name" class="form-control" maxlength="50" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="position-org3">所属三级机构：</label>
+                        <select id="position-org3" class="form-control" required>
+                            <option value="">请选择三级机构</option>
+                            <!-- 动态加载选项 -->
+                        </select>
+                    </div>
+                </form>
             </div>
-        </div>
-        
-        <!-- Users Pane -->
-        <div id="users" class="panel">
-            <div class="card">
-                <h2>用户管理</h2>
-                <button id="add-user-btn" class="btn-primary">新增用户</button>
-            </div>
-            
-            <div class="card">
-                <h3>用户列表</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>用户名</th>
-                            <th>角色</th>
-                            <th>状态</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-body">
-                        <!-- 动态加载用户列表 -->
-                    </tbody>
-                </table>
+            <div class="modal-footer">
+                <button id="cancel-add-position" class="btn-secondary">取消</button>
+                <button id="submit-add-position" class="btn-primary">确定</button>
             </div>
         </div>
-        
-        <!-- Roles Pane -->
-        <div id="roles" class="panel">
-            <div class="card">
-                <h2>角色管理</h2>
-                <button id="add-role-btn" class="btn-primary">新增角色</button>
+    </div>
+
+    <!-- 新增用户模态对话框 -->
+    <div id="add-user-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>新增用户</h3>
+                <span class="close">&times;</span>
             </div>
-            
-            <div class="card">
-                <h3>角色列表</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>角色名称</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="roles-body">
-                        <!-- 动态加载角色列表 -->
-                    </tbody>
-                </table>
+            <div class="modal-body">
+                <form id="add-user-form">
+                    <div class="form-group">
+                        <label for="new-username">用户名：</label>
+                        <input type="text" id="new-username" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-password">密码：</label>
+                        <input type="password" id="new-password" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-role">角色：</label>
+                        <select id="new-role" class="form-control" required>
+                            <option value="">请选择角色</option>
+                            <option value="EMPLOYEE">普通员工</option>
+                            <option value="HR_SPEC">人事专员</option>
+                            <option value="HR_MANAGER">人事经理</option>
+                            <option value="ADMIN">系统管理员</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-add-user" class="btn-secondary">取消</button>
+                <button id="submit-add-user" class="btn-primary">确定</button>
             </div>
         </div>
-        
-        <!-- Attendance Rules Pane -->
-        <div id="attendance-rules" class="panel">
-            <div class="card">
-                <h2>考勤规则管理</h2>
-                <button class="btn-primary">新增规则</button>
+    </div>
+
+    <!-- 编辑用户模态对话框 -->
+    <div id="edit-user-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑用户</h3>
+                <span class="close">&times;</span>
             </div>
-            
-            <div class="card">
-                <h3>规则搜索</h3>
-                <div class="search-bar">
-                    <input type="text" placeholder="按规则名称或适用机构搜索">
-                    <button class="btn-primary">搜索</button>
-                </div>
+            <div class="modal-body">
+                <form id="edit-user-form">
+                    <input type="hidden" id="edit-username">
+                    <div class="form-group">
+                        <label>用户名：</label>
+                        <span id="edit-username-display"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-role">角色：</label>
+                        <select id="edit-role" class="form-control" required>
+                            <option value="EMPLOYEE">普通员工</option>
+                            <option value="HR_SPEC">人事专员</option>
+                            <option value="HR_MANAGER">人事经理</option>
+                            <option value="ADMIN">系统管理员</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-status">状态：</label>
+                        <select id="edit-status" class="form-control" required>
+                            <option value="true">启用</option>
+                            <option value="false">禁用</option>
+                        </select>
+                    </div>
+                </form>
             </div>
-            
-            <div class="card">
-                <h3>规则列表</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>规则名称</th>
-                            <th>适用机构</th>
-                            <th>规则详情</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rules-body">
-                        <!-- 动态加载规则列表 -->
-                    </tbody>
-                </table>
+            <div class="modal-footer">
+                <button id="cancel-edit-user" class="btn-secondary">取消</button>
+                <button id="submit-edit-user" class="btn-primary">确定</button>
             </div>
         </div>
     </div>

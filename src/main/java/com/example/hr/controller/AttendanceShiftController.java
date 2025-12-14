@@ -34,7 +34,7 @@ public class AttendanceShiftController {
     public ResponseEntity<ApiResponse<AttendanceShift>> get(@PathVariable Long id) {
         return attendanceShiftRepository.findById(id)
             .map(shift -> ResponseEntity.ok(ApiResponse.success(shift)))
-            .orElse(ResponseEntity.notFound().build());
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
@@ -45,7 +45,7 @@ public class AttendanceShiftController {
             existing.setStatus(shift.getStatus());
             AttendanceShift saved = attendanceShiftRepository.save(existing);
             return ResponseEntity.ok(ApiResponse.success("班次更新成功", saved));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

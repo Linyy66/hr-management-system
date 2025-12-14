@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组织架构管理 - HRMS</title>
+    <link rel="stylesheet" href="/app/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>HRMS</h1>
+                <span>人事经理平台</span>
+            </div>
+            <div class="user-info">
+                <span id="current-user">人事经理</span>
+                <span class="role-badge hr_manager">人事经理</span>
+                <button id="logout-btn" class="btn-secondary btn-small">退出</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="main-layout">
+            <!-- 左侧导航栏 -->
+            <nav class="sidebar">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/hr_manager/index.html" data-pane="dashboard">
+                            <span class="nav-icon">📊</span>
+                            仪表板
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/hr_manager/index.html" data-pane="staff">
+                            <span class="nav-icon">👥</span>
+                            员工档案
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/hr_manager/index.html" data-pane="approvals">
+                            <span class="nav-icon">✅</span>
+                            审批管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            <span class="nav-icon">🏢</span>
+                            组织架构
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/hr_manager/index.html" data-pane="reports">
+                            <span class="nav-icon">📈</span>
+                            人事报表
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- 右侧工作区 -->
+            <main class="content">
+                <!-- 面包屑导航 -->
+                <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">人事经理</li>
+                        <li class="breadcrumb-item active">组织架构管理</li>
+                    </ol>
+                </nav>
+
+                <!-- 页面内容 -->
+                <div class="content-wrapper">
+                    <div class="card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2>组织架构管理</h2>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>一级机构</h3>
+                        <div id="org-level1-list">
+                            <!-- 动态加载一级机构列表 -->
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>二级机构</h3>
+                        <div id="org-level2-list">
+                            <!-- 动态加载二级机构列表 -->
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>三级机构</h3>
+                        <div id="org-level3-list">
+                            <!-- 动态加载三级机构列表 -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/app/js/utils.js"></script>
+    <script src="/app/js/hr_manager.js"></script>
+</body>
+</html>

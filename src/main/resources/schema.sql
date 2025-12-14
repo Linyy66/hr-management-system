@@ -1,9 +1,12 @@
 -- Minimal schema for HRMS minimal implementation
-create DATABASE hr_campus;
+DROP DATABASE IF EXISTS hr_campus;
+CREATE DATABASE hr_campus;
+USE hr_campus;
+
 CREATE TABLE IF NOT EXISTS t_org_level1 (
                                             org1_id VARCHAR(2) PRIMARY KEY,
                                             org1_name VARCHAR(50) NOT NULL,
-                                            create_by VARCHAR(20) NOT NULL,
+                                            create_by VARCHAR(20),
                                             create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
                                             update_by VARCHAR(20),
                                             update_time DATETIME,
@@ -11,10 +14,10 @@ CREATE TABLE IF NOT EXISTS t_org_level1 (
 );
 
 CREATE TABLE IF NOT EXISTS t_org_level2 (
-                                            org2_id VARCHAR(2) PRIMARY KEY,
+                                            org2_id VARCHAR(4) PRIMARY KEY,
                                             org1_id VARCHAR(2) NOT NULL,
                                             org2_name VARCHAR(50) NOT NULL,
-                                            create_by VARCHAR(20) NOT NULL,
+                                            create_by VARCHAR(20),
                                             create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
                                             update_by VARCHAR(20),
                                             update_time DATETIME,
@@ -23,10 +26,10 @@ CREATE TABLE IF NOT EXISTS t_org_level2 (
 );
 
 CREATE TABLE IF NOT EXISTS t_org_level3 (
-                                            org3_id VARCHAR(2) PRIMARY KEY,
-                                            org2_id VARCHAR(2) NOT NULL,
+                                            org3_id VARCHAR(6) PRIMARY KEY,
+                                            org2_id VARCHAR(4) NOT NULL,
                                             org3_name VARCHAR(50) NOT NULL,
-                                            create_by VARCHAR(20) NOT NULL,
+                                            create_by VARCHAR(20),
                                             create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
                                             update_by VARCHAR(20),
                                             update_time DATETIME,
@@ -36,9 +39,9 @@ CREATE TABLE IF NOT EXISTS t_org_level3 (
 
 CREATE TABLE IF NOT EXISTS t_position (
                                           position_id VARCHAR(10) PRIMARY KEY,
-                                          org3_id VARCHAR(2) NOT NULL,
+                                          org3_id VARCHAR(6) NOT NULL,
                                           position_name VARCHAR(50) NOT NULL,
-                                          create_by VARCHAR(20) NOT NULL,
+                                          create_by VARCHAR(20),
                                           create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
                                           update_by VARCHAR(20),
                                           update_time DATETIME,
@@ -49,8 +52,8 @@ CREATE TABLE IF NOT EXISTS t_position (
 CREATE TABLE IF NOT EXISTS t_staff_archive (
                                                archive_id VARCHAR(12) PRIMARY KEY,
                                                org1_id VARCHAR(2) NOT NULL,
-                                               org2_id VARCHAR(2) NOT NULL,
-                                               org3_id VARCHAR(2) NOT NULL,
+                                               org2_id VARCHAR(4) NOT NULL,
+                                               org3_id VARCHAR(6) NOT NULL,
                                                position_id VARCHAR(10) NOT NULL,
                                                title CHAR(1) NOT NULL,
                                                staff_name VARCHAR(20) NOT NULL,
@@ -124,6 +127,7 @@ CREATE TABLE IF NOT EXISTS t_attendance_exception (
                                                       create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
                                                       FOREIGN KEY (attendance_id) REFERENCES t_attendance_record(id)
 );
+
 CREATE TABLE IF NOT EXISTS t_user (
                                       username VARCHAR(50) PRIMARY KEY,
                                       password VARCHAR(255) NOT NULL,

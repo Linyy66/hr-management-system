@@ -2,6 +2,7 @@ package com.example.hr.controller;
 
 import com.example.hr.model.*;
 import com.example.hr.repository.*;
+import com.example.hr.service.OrgStructureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -36,6 +37,9 @@ public class HrSpecController {
     @Autowired
     private PositionRepository positionRepository;
     
+    @Autowired
+    private OrgStructureService orgStructureService;
+    
     // Helper method to get current user ID
     private String getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -63,7 +67,7 @@ public class HrSpecController {
     public ResponseEntity<StaffArchive> getStaffArchive(@PathVariable String id) {
         return staffArchiveRepository.findById(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     @PutMapping("/staff/{id}")
@@ -79,7 +83,7 @@ public class HrSpecController {
             // 更新后状态重新设为待审批
             existing.setStatus("PENDING");
             return ResponseEntity.ok(staffArchiveRepository.save(existing));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     // 请假初审
@@ -102,7 +106,7 @@ public class HrSpecController {
             // 在实际应用中，应该从安全上下文中获取当前用户作为初审人
             application.setApproverId(currentUserId);
             return ResponseEntity.ok(leaveApplicationRepository.save(application));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     // 加班初审
@@ -125,23 +129,33 @@ public class HrSpecController {
             // 在实际应用中，应该从安全上下文中获取当前用户作为初审人
             application.setApproverId(currentUserId);
             return ResponseEntity.ok(overtimeApplicationRepository.save(application));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     // 组织架构查看（用于员工建档时选择）
     @GetMapping("/org/level1")
     public List<OrgLevel1> getAllOrgLevel1() {
-        return orgLevel1Repository.findAll();
+        return orgStructureService.getAllOrgLevel1();
     }
     
     @GetMapping("/org/level2")
     public List<OrgLevel2> getAllOrgLevel2() {
-        return orgLevel2Repository.findAll();
+        return orgStructureService.getAllOrgLevel2();
+    }
+    
+    @GetMapping("/org/level2/by-org1/{org1Id}")
+    public List<OrgLevel2> getOrgLevel2ByOrg1Id(@PathVariable String org1Id) {
+        return orgStructureService.getOrgLevel2ByOrg1Id(org1Id);
     }
     
     @GetMapping("/org/level3")
     public List<OrgLevel3> getAllOrgLevel3() {
-        return orgLevel3Repository.findAll();
+        return orgStructureService.getAllOrgLevel3();
+    }
+    
+    @GetMapping("/org/level3/by-org2/{org2Id}")
+    public List<OrgLevel3> getOrgLevel3ByOrg2Id(@PathVariable String org2Id) {
+        return orgStructureService.getOrgLevel3ByOrg2Id(org2Id);
     }
     
     // 职位查看（用于员工建档时选择）
