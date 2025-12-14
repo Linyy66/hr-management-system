@@ -1562,6 +1562,8 @@ function showPane(paneId) {
                     break;
                 case 'attendance-rules':
                     currentPageTitle.textContent = '考勤规则管理';
+                    // 加载考勤规则数据
+                    loadAttendanceRulesData();
                     break;
                 default:
                     currentPageTitle.textContent = '系统管理';
@@ -1582,5 +1584,69 @@ function showPane(paneId) {
         if (paneId === 'users') {
             loadUsersData();
         }
+        
+        // 如果是考勤规则面板，加载规则数据
+        if (paneId === 'attendance-rules') {
+            loadAttendanceRulesData();
+        }
+    }
+}
+
+// 加载考勤规则数据
+async function loadAttendanceRulesData() {
+    try {
+        // 模拟从后端获取考勤规则数据
+        const rules = [
+            {
+                id: 1,
+                name: '标准工作制',
+                org: '技术部',
+                details: '上午9:00-下午6:00，午休1小时',
+                status: '启用'
+            },
+            {
+                id: 2,
+                name: '弹性工作制',
+                org: '人事部',
+                details: '上午8:00-下午5:00，午休1小时',
+                status: '启用'
+            }
+        ];
+        
+        const tbody = document.getElementById('rules-body');
+        if (tbody) {
+            tbody.innerHTML = '';
+            rules.forEach(rule => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${rule.name}</td>
+                    <td>${rule.org}</td>
+                    <td>${rule.details}</td>
+                    <td>
+                        <button class="btn-small btn-danger" onclick="deleteAttendanceRule(${rule.id})">删除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    } catch (error) {
+        console.error('Load attendance rules data error:', error);
+    }
+}
+
+// 删除考勤规则
+async function deleteAttendanceRule(ruleId) {
+    if (!confirm('确定要删除这条考勤规则吗？')) {
+        return;
+    }
+    
+    try {
+        // 模拟删除操作
+        alert(`考勤规则 ${ruleId} 已删除`);
+        // 重新加载数据
+        loadAttendanceRulesData();
+    } catch (error) {
+        console.error('Delete attendance rule error:', error);
+        alert('删除考勤规则时发生错误，请稍后重试');
     }
 }

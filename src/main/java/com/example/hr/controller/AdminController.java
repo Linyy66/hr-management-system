@@ -76,6 +76,9 @@ public class AdminController {
     public ResponseEntity<ApiResponse<OrgLevel1>> updateOrgLevel1(@PathVariable String id, @RequestBody OrgLevel1 org) {
         return orgLevel1Repository.findById(id).map(existing -> {
             existing.setOrg1Name(org.getOrg1Name());
+            existing.setOrgHead(org.getOrgHead());
+            existing.setOrgDesc(org.getOrgDesc());
+            existing.setEffectiveDate(org.getEffectiveDate());
             existing.setUpdateTime(LocalDateTime.now());
             existing.setUpdateBy("admin"); // 在实际应用中应该从安全上下文中获取当前用户
             OrgLevel1 saved = orgLevel1Repository.save(existing);
@@ -137,6 +140,7 @@ public class AdminController {
         org.setCreateTime(LocalDateTime.now());
         org.setUpdateTime(LocalDateTime.now());
         org.setCreateBy("admin"); // 在实际应用中应该从安全上下文中获取当前用户
+        org.setUpdateBy("admin");
         OrgLevel2 savedOrg = orgLevel2Repository.save(org);
         return ResponseEntity.ok(ApiResponse.success("二级机构创建成功", savedOrg));
     }
@@ -152,6 +156,10 @@ public class AdminController {
             
             existing.setOrg1Id(org.getOrg1Id());
             existing.setOrg2Name(org.getOrg2Name());
+            // 更新新增的字段
+            existing.setOrgHead(org.getOrgHead());
+            existing.setOrgDesc(org.getOrgDesc());
+            existing.setEffectiveDate(org.getEffectiveDate());
             existing.setUpdateTime(LocalDateTime.now());
             existing.setUpdateBy("admin"); // 在实际应用中应该从安全上下文中获取当前用户
             OrgLevel2 saved = orgLevel2Repository.save(existing);
@@ -213,6 +221,7 @@ public class AdminController {
         org.setCreateTime(LocalDateTime.now());
         org.setUpdateTime(LocalDateTime.now());
         org.setCreateBy("admin"); // 在实际应用中应该从安全上下文中获取当前用户
+        org.setUpdateBy("admin");
         OrgLevel3 savedOrg = orgLevel3Repository.save(org);
         return ResponseEntity.ok(ApiResponse.success("三级机构创建成功", savedOrg));
     }
@@ -228,6 +237,10 @@ public class AdminController {
             
             existing.setOrg2Id(org.getOrg2Id());
             existing.setOrg3Name(org.getOrg3Name());
+            // 更新新增的字段
+            existing.setOrgHead(org.getOrgHead());
+            existing.setOrgDesc(org.getOrgDesc());
+            existing.setEffectiveDate(org.getEffectiveDate());
             existing.setUpdateTime(LocalDateTime.now());
             existing.setUpdateBy("admin"); // 在实际应用中应该从安全上下文中获取当前用户
             OrgLevel3 saved = orgLevel3Repository.save(existing);

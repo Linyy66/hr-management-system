@@ -45,6 +45,13 @@ public class StaffArchive {
     private String mobile;
 
     private String email;
+    
+    // 添加年龄字段
+    private Integer age;
+    
+    // 添加自我介绍字段
+    @Column(columnDefinition = "TEXT")
+    private String bio;
 
     private String status; // PENDING / NORMAL / DELETED / REJECTED
 

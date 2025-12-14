@@ -33,4 +33,14 @@ public class OrgLevel3 {
     
     @Column(name = "version")
     private Integer version = 1;
+    
+    // 添加缺失的必需字段
+    @Column(name = "org_head", length = 20)
+    private String orgHead;
+    
+    @Column(name = "org_desc", columnDefinition = "TEXT")
+    private String orgDesc;
+    
+    @Column(name = "effective_date")
+    private LocalDateTime effectiveDate;
 }

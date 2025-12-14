@@ -104,6 +104,23 @@
                                 <li>办公区域网络升级已完成</li>
                             </ul>
                         </div>
+                        
+                        <div class="card dashboard-logs">
+                            <h3>操作日志</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>时间</th>
+                                        <th>操作类型</th>
+                                        <th>详情</th>
+                                        <th>状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="operation-logs-body">
+                                    <!-- 动态填充操作日志 -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     
                     <!-- Profile Pane -->
@@ -113,7 +130,6 @@
                                 <h2>个人档案</h2>
                             </div>
                             <div class="profile-header">
-                                <div class="avatar-placeholder">头像</div>
                                 <div class="profile-basic-info">
                                     <h3 id="staff-name">-</h3>
                                     <p>员工编号: <span id="archive-id">-</span></p>
@@ -125,15 +141,19 @@
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label>姓名</label>
-                                    <input type="text" id="profile-staff-name" readonly>
+                                    <input type="text" id="profile-staff-name">
                                 </div>
                                 <div class="form-group">
                                     <label>性别</label>
-                                    <input type="text" id="profile-gender" readonly>
+                                    <select id="profile-gender">
+                                        <option value="">请选择</option>
+                                        <option value="M">男</option>
+                                        <option value="F">女</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>身份证号</label>
-                                    <input type="text" id="profile-id-card" readonly>
+                                    <label>年龄</label>
+                                    <input type="number" id="profile-age" min="18" max="100">
                                 </div>
                                 <div class="form-group">
                                     <label>手机号</label>
@@ -147,9 +167,76 @@
                                     <label>邮箱</label>
                                     <input type="text" id="profile-email">
                                 </div>
+                                <div class="form-group full-width">
+                                    <label>自我介绍</label>
+                                    <textarea id="profile-bio" rows="3"></textarea>
+                                </div>
                             </div>
                             
                             <button id="update-profile-btn" class="btn-primary">更新信息</button>
+                            <button id="transfer-department-btn" class="btn-secondary">申请变更部门/职位</button>
+                        </div>
+                        
+                        <!-- Transfer Department/Position Modal -->
+                        <div id="transfer-modal" class="modal" style="display:none;">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h2>申请变更部门/职位</h2>
+                                    <span class="close" onclick="closeTransferModal()">&times;</span>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="transfer-form">
+                                        <div class="form-group">
+                                            <label for="transfer-org1">一级机构</label>
+                                            <select id="transfer-org1" required>
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="transfer-org2">二级机构</label>
+                                            <select id="transfer-org2" required>
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="transfer-org3">三级机构</label>
+                                            <select id="transfer-org3" required>
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="transfer-position">职位</label>
+                                            <select id="transfer-position" required>
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group full-width">
+                                            <label for="transfer-reason">变更原因</label>
+                                            <textarea id="transfer-reason" rows="3" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn-primary">提交申请</button>
+                                        <button type="button" class="btn-secondary" onclick="closeTransferModal()">取消</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>我的调岗申请记录</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>申请日期</th>
+                                        <th>目标部门</th>
+                                        <th>目标职位</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transfer-applications-body">
+                                    <!-- 动态填充调岗申请记录 -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                     

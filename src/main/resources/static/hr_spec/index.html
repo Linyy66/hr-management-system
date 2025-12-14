@@ -41,11 +41,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-pane="attendance">
                             <span class="nav-icon">⏰</span>
-                            考勤异常
+                            考勤管理
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/hr_spec/org.html">
+                        <a class="nav-link" href="#" data-pane="org">
                             <span class="nav-icon">🏢</span>
                             组织架构
                         </a>
@@ -116,9 +116,78 @@
                         </div>
                         
                         <div class="card">
+                            <h3>新增员工档案</h3>
+                            <form id="add-staff-form">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="staff-account">员工账号</label>
+                                        <input type="text" id="staff-account" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="staff-name">员工姓名</label>
+                                        <input type="text" id="staff-name" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="staff-gender">性别</label>
+                                        <select id="staff-gender" class="form-control" required>
+                                            <option value="">请选择</option>
+                                            <option value="M">男</option>
+                                            <option value="F">女</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="staff-age">年龄</label>
+                                        <input type="number" id="staff-age" class="form-control" min="18" max="100" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="staff-org1">一级机构</label>
+                                        <select id="staff-org1" class="form-control" required>
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="staff-org2">二级机构</label>
+                                        <select id="staff-org2" class="form-control" required>
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="staff-org3">三级机构</label>
+                                        <select id="staff-org3" class="form-control" required>
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="staff-position">职位</label>
+                                        <select id="staff-position" class="form-control" required>
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="staff-mobile">手机号</label>
+                                        <input type="text" id="staff-mobile" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="staff-phone">电话</label>
+                                        <input type="text" id="staff-phone" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="staff-email">邮箱</label>
+                                        <input type="email" id="staff-email" class="form-control">
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label for="staff-bio">自我介绍</label>
+                                        <textarea id="staff-bio" class="form-control" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-primary">保存员工档案</button>
+                            </form>
+                        </div>
+                        
+                        <div class="card">
                             <h3>档案搜索</h3>
                             <div class="search-bar">
-                                <input type="text" id="archive-search" placeholder="按姓名、员工编号或部门搜索">
+                                <input type="text" id="archive-search" placeholder="按员工编号、员工账号或姓名搜索">
                                 <button class="btn-primary">搜索</button>
                             </div>
                         </div>
@@ -129,6 +198,7 @@
                                 <thead>
                                     <tr>
                                         <th>员工编号</th>
+                                        <th>员工账号</th>
                                         <th>姓名</th>
                                         <th>性别</th>
                                         <th>部门</th>
@@ -145,40 +215,114 @@
                         </div>
                     </div>
                     
-                    <!-- Attendance Exceptions Pane -->
+                    <!-- Attendance Management Pane -->
                     <div id="attendance" class="panel">
                         <div class="card">
                             <div class="d-flex justify-content-between align-items-center">
-                                <h2>考勤异常处理</h2>
+                                <h2>考勤管理</h2>
                             </div>
                         </div>
                         
                         <div class="card">
-                            <h3>异常搜索</h3>
+                            <h3>考勤记录搜索</h3>
                             <div class="search-bar">
-                                <input type="text" id="exception-search" placeholder="按姓名或员工编号搜索">
+                                <input type="text" id="attendance-search" placeholder="按工作编号、员工姓名或员工账号搜索">
                                 <button class="btn-primary">搜索</button>
                             </div>
                         </div>
                         
                         <div class="card">
-                            <h3>考勤异常列表</h3>
+                            <h3>正常考勤记录</h3>
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>员工编号</th>
-                                        <th>姓名</th>
-                                        <th>异常日期</th>
-                                        <th>异常类型</th>
-                                        <th>申请理由</th>
+                                        <th>工作编号</th>
+                                        <th>员工姓名</th>
+                                        <th>员工账号</th>
+                                        <th>日期</th>
+                                        <th>上班时间</th>
+                                        <th>下班时间</th>
                                         <th>状态</th>
                                         <th>操作</th>
                                     </tr>
                                 </thead>
-                                <tbody id="attendance-body">
-                                    <!-- 动态加载考勤异常列表 -->
+                                <tbody id="normal-attendance-body">
+                                    <!-- 动态加载正常考勤记录 -->
                                 </tbody>
                             </table>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>异常考勤记录</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>工作编号</th>
+                                        <th>员工姓名</th>
+                                        <th>员工账号</th>
+                                        <th>日期</th>
+                                        <th>上班时间</th>
+                                        <th>下班时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="abnormal-attendance-body">
+                                    <!-- 动态加载异常考勤记录 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Organization Structure Pane -->
+                    <div id="org" class="panel">
+                        <div class="card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>组织架构管理</h2>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3>组织架构搜索</h3>
+                            <div class="search-bar">
+                                <input type="text" id="org-search" placeholder="按部门、职位或员工搜索">
+                                <button class="btn-primary" id="search-btn">搜索</button>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3>一级机构</h3>
+                            <div id="org-level1-list">
+                                <!-- 动态加载一级机构列表 -->
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3>二级机构</h3>
+                            <div id="org-level2-list">
+                                <!-- 动态加载二级机构列表 -->
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3>三级机构</h3>
+                            <div id="org-level3-list">
+                                <!-- 动态加载三级机构列表 -->
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3>职位列表</h3>
+                            <div id="position-list">
+                                <!-- 动态加载职位列表 -->
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3>员工列表</h3>
+                            <div id="staff-list">
+                                <!-- 动态加载员工列表 -->
+                            </div>
                         </div>
                     </div>
                 </div>

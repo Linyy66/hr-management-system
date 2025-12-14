@@ -28,6 +28,12 @@ public class HrManagerController {
     private OvertimeApplicationRepository overtimeApplicationRepository;
     
     @Autowired
+    private DepartmentChangeRequestRepository departmentChangeRequestRepository;
+    
+    @Autowired
+    private AttendanceRecordRepository attendanceRecordRepository;
+    
+    @Autowired
     private OrgLevel1Repository orgLevel1Repository;
     
     @Autowired
@@ -191,6 +197,74 @@ public class HrManagerController {
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
+    // 调岗审批
+    @GetMapping("/department-change-requests")
+    public List<DepartmentChangeRequest> getAllPendingDepartmentChangeRequests() {
+        return departmentChangeRequestRepository.findByStatus("PENDING");
+    }
+    
+    @PutMapping("/department-change-requests/{id}/approve")
+    public ResponseEntity<DepartmentChangeRequest> approveDepartmentChangeRequest(@PathVariable Long id) {
+        String currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        return departmentChangeRequestRepository.findById(id).map(request -> {
+            request.setStatus("APPROVED");
+            request.setUpdateBy(currentUserId);
+            request.setUpdateTime(LocalDateTime.now());
+            DepartmentChangeRequest savedRequest = departmentChangeRequestRepository.save(request);
+            
+            // 更新员工档案信息
+            Optional<StaffArchive> staffArchiveOpt = staffArchiveRepository.findById(request.getArchiveId());
+            if (staffArchiveOpt.isPresent()) {
+                StaffArchive staffArchive = staffArchiveOpt.get();
+                staffArchive.setOrg1Id(request.getNewOrg1Id());
+                staffArchive.setOrg2Id(request.getNewOrg2Id());
+                staffArchive.setOrg3Id(request.getNewOrg3Id());
+                staffArchive.setPositionId(request.getNewPositionId());
+                staffArchive.setUpdateTime(LocalDateTime.now());
+                staffArchiveRepository.save(staffArchive);
+            }
+            
+            return ResponseEntity.ok(savedRequest);
+        }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    @PutMapping("/department-change-requests/{id}/reject")
+    public ResponseEntity<DepartmentChangeRequest> rejectDepartmentChangeRequest(@PathVariable Long id,
+                                                                              @RequestParam String reason) {
+        String currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        return departmentChangeRequestRepository.findById(id).map(request -> {
+            request.setStatus("REJECTED");
+            request.setUpdateBy(currentUserId);
+            request.setUpdateTime(LocalDateTime.now());
+            // 在实际应用中，可以将拒绝原因保存到另一个表或字段中
+            return ResponseEntity.ok(departmentChangeRequestRepository.save(request));
+        }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    // 报表相关接口
+    @GetMapping("/reports/attendance-summary")
+    public ResponseEntity<ApiResponse<List<AttendanceSummaryReport>>> getAttendanceSummaryReport(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        
+        // 在实际应用中，这里应该根据日期范围查询考勤数据并生成汇总报表
+        // 这里我们返回模拟数据
+        List<AttendanceSummaryReport> reportData = List.of(
+            new AttendanceSummaryReport("张三", 22, 20, 2, 5, 0),
+            new AttendanceSummaryReport("李四", 22, 21, 1, 2, 1)
+        );
+        
+        return ResponseEntity.ok(ApiResponse.success(reportData));
+    }
+    
     // 组织架构管理
     @GetMapping("/org/level1")
     public List<OrgLevel1> getAllOrgLevel1() {
@@ -295,5 +369,44 @@ public class HrManagerController {
         }
         orgLevel3Repository.deleteById(id);
         return ResponseEntity.ok(ApiResponse.success("三级机构删除成功"));
+    }
+    
+    // 考勤汇总报表数据类
+    public static class AttendanceSummaryReport {
+        private String employeeName;
+        private int totalDays;
+        private int attendedDays;
+        private int absentDays;
+        private int lateCount;
+        private int earlyLeaveCount;
+        
+        public AttendanceSummaryReport(String employeeName, int totalDays, int attendedDays, 
+                                     int absentDays, int lateCount, int earlyLeaveCount) {
+            this.employeeName = employeeName;
+            this.totalDays = totalDays;
+            this.attendedDays = attendedDays;
+            this.absentDays = absentDays;
+            this.lateCount = lateCount;
+            this.earlyLeaveCount = earlyLeaveCount;
+        }
+        
+        // Getters and setters
+        public String getEmployeeName() { return employeeName; }
+        public void setEmployeeName(String employeeName) { this.employeeName = employeeName; }
+        
+        public int getTotalDays() { return totalDays; }
+        public void setTotalDays(int totalDays) { this.totalDays = totalDays; }
+        
+        public int getAttendedDays() { return attendedDays; }
+        public void setAttendedDays(int attendedDays) { this.attendedDays = attendedDays; }
+        
+        public int getAbsentDays() { return absentDays; }
+        public void setAbsentDays(int absentDays) { this.absentDays = absentDays; }
+        
+        public int getLateCount() { return lateCount; }
+        public void setLateCount(int lateCount) { this.lateCount = lateCount; }
+        
+        public int getEarlyLeaveCount() { return earlyLeaveCount; }
+        public void setEarlyLeaveCount(int earlyLeaveCount) { this.earlyLeaveCount = earlyLeaveCount; }
     }
 }

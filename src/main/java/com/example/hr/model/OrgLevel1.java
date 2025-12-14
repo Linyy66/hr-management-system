@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 public class OrgLevel1 {
     @Id
-    @Column(name = "org1_id", length = 2)
+    @Column(length = 2)
     private String org1Id;
 
     @Column(name = "org1_name", nullable = false, length = 50)
@@ -30,4 +30,14 @@ public class OrgLevel1 {
     
     @Column(name = "version")
     private Integer version = 1;
+    
+    // 添加缺失的必需字段
+    @Column(name = "org_head", length = 20)
+    private String orgHead;
+    
+    @Column(name = "org_desc", columnDefinition = "TEXT")
+    private String orgDesc;
+    
+    @Column(name = "effective_date")
+    private LocalDateTime effectiveDate;
 }
