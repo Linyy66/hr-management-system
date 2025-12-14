@@ -1,5 +1,10 @@
--- 人力资源管理系统数据库设计
+-- 查看表结构
+-- 查看当前表结构确认
+DESCRIBE t_org_level1;
 
+DESCRIBE t_org_level1;
+-- 人力资源管理系统数据库设计
+SHOW ERRORS;
 -- 删除并创建数据库
 DROP DATABASE IF EXISTS hr_system;
 CREATE DATABASE hr_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

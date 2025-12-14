@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 public class OrgLevel1 {
     @Id
-    @Column(length = 2)
+    @Column(name = "org1_id",length = 2,nullable = false)
     private String org1Id;
 
     @Column(name = "org1_name", nullable = false, length = 50)

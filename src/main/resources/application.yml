@@ -10,7 +10,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/hr_campus?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://localhost:3306/hr_system?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
     username: root
     password: 549345
 
@@ -36,3 +36,22 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
+
+  # 日志配置
+  logging:
+    level:
+      org.hibernate.SQL: DEBUG
+      org.hibernate.type.descriptor.sql: TRACE
+      org.hibernate.engine.jdbc.spi.SqlExceptionHelper: ERROR
+      org.springframework.orm.jpa: DEBUG
+
+  # Hibernate 配置
+  spring:
+    jpa:
+      properties:
+        hibernate:
+          format_sql: true
+          show_sql: true
+          use_sql_comments: true
+      show-sql: true
+
