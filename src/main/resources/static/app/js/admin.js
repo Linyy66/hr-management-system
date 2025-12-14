@@ -643,26 +643,31 @@ async function loadUsersData() {
         const response = await fetch('/api/users');
         const users = await response.json();
         
-        const tbody = document.getElementById('users-body');
-        if (tbody) {
-            tbody.innerHTML = '';
-            users.forEach(user => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${user.username}</td>
-                    <td>${getUserRoleDisplayName(user.role)}</td>
-                    <td>${user.enabled ? '启用' : '禁用'}</td>
-                    <td>
-                        <button class="btn-small btn-primary" onclick="openEditUserModal('${user.username}', '${user.role}', ${user.enabled})">编辑</button>
-                        <button class="btn-small btn-danger" onclick="deleteUser('${user.username}')">删除</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+        renderUserTable(users);
     } catch (error) {
         console.error('Load users data error:', error);
     }
+}
+
+// 渲染用户列表
+function renderUserTable(users) {
+    const tbody = document.getElementById('users-body');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    users.forEach(user => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${user.username}</td>
+            <td>${getUserRoleDescription(user.role)}</td>
+            <td>${user.enabled ? '启用' : '禁用'}</td>
+            <td>
+                <button class="btn-small btn-primary" onclick='editUser(${JSON.stringify(user).replace(/'/g, "\\'")})'>编辑</button>
+                <button class="btn-small btn-danger" onclick="deleteUser('${user.username}')">删除</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 // 获取角色显示名称
@@ -674,6 +679,22 @@ function getUserRoleDisplayName(role) {
         'ADMIN': '系统管理员'
     };
     return roleMap[role] || role;
+}
+
+// 获取用户角色描述
+function getUserRoleDescription(role) {
+    switch (role) {
+        case 'ADMIN':
+            return '系统管理员';
+        case 'HR_MANAGER':
+            return '人事经理';
+        case 'HR_SPECIALIST':
+            return '人事专员';
+        case 'EMPLOYEE':
+            return '普通员工';
+        default:
+            return role;
+    }
 }
 
 // 删除用户

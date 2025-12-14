@@ -56,11 +56,43 @@ public class HrSpecController {
     }
     
     @PostMapping("/staff")
-    public StaffArchive createStaffArchive(@RequestBody StaffArchive archive) {
-        archive.setStatus("PENDING");
+    public ResponseEntity<?> createStaffArchive(@RequestBody StaffArchive archive) {
+        // 验证必要的组织结构字段是否存在
+        if (archive.getOrg3Id() == null || archive.getOrg3Id().isEmpty()) {
+            return ResponseEntity.badRequest().body("三级机构ID不能为空");
+        }
+        
+        // 从org3Id推断org2Id和org1Id
+        String org3Id = archive.getOrg3Id();
+        if (org3Id.length() >= 6) {
+            if (archive.getOrg2Id() == null || archive.getOrg2Id().isEmpty()) {
+                archive.setOrg2Id(org3Id.substring(0, 4));
+            }
+            if (archive.getOrg1Id() == null || archive.getOrg1Id().isEmpty()) {
+                archive.setOrg1Id(org3Id.substring(0, 2));
+            }
+        } else {
+            return ResponseEntity.badRequest().body("三级机构ID格式不正确");
+        }
+        
+        // 验证所有组织字段是否都已设置
+        if (archive.getOrg1Id() == null || archive.getOrg1Id().isEmpty() ||
+            archive.getOrg2Id() == null || archive.getOrg2Id().isEmpty() ||
+            archive.getOrg3Id() == null || archive.getOrg3Id().isEmpty()) {
+            return ResponseEntity.badRequest().body("组织结构信息不完整");
+        }
+        
+        // 设置其他必要字段
+        archive.setStatus("PENDING"); // 默认状态为待审批
         archive.setCreateTime(LocalDateTime.now());
         archive.setUpdateTime(LocalDateTime.now());
-        return staffArchiveRepository.save(archive);
+        
+        try {
+            StaffArchive savedArchive = staffArchiveRepository.save(archive);
+            return ResponseEntity.ok(savedArchive);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("保存员工档案时发生错误: " + e.getMessage());
+        }
     }
     
     @GetMapping("/staff/{id}")
@@ -89,7 +121,7 @@ public class HrSpecController {
     // 请假初审
     @GetMapping("/leave-applications")
     public List<LeaveApplication> getPendingLeaveApplications() {
-        return leaveApplicationRepository.findByStatus("PENDING");
+        return leaveApplicationRepository.findByApprovalStatus("PENDING");
     }
     
     @PutMapping("/leave-applications/{id}/pre-approve")
@@ -101,10 +133,10 @@ public class HrSpecController {
         
         return leaveApplicationRepository.findById(id).map(application -> {
             // 人事专员只能进行初审，将状态改为待终审
-            application.setStatus("PENDING_FINAL_APPROVAL");
+            application.setApprovalStatus("PENDING_FINAL_APPROVAL");
             application.setUpdateTime(LocalDateTime.now());
             // 在实际应用中，应该从安全上下文中获取当前用户作为初审人
-            application.setApproverId(currentUserId);
+            application.setApprover(currentUserId);
             return ResponseEntity.ok(leaveApplicationRepository.save(application));
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -112,7 +144,7 @@ public class HrSpecController {
     // 加班初审
     @GetMapping("/overtime-applications")
     public List<OvertimeApplication> getPendingOvertimeApplications() {
-        return overtimeApplicationRepository.findByStatus("PENDING");
+        return overtimeApplicationRepository.findByApprovalStatus("PENDING");
     }
     
     @PutMapping("/overtime-applications/{id}/pre-approve")
@@ -124,10 +156,10 @@ public class HrSpecController {
         
         return overtimeApplicationRepository.findById(id).map(application -> {
             // 人事专员只能进行初审，将状态改为待终审
-            application.setStatus("PENDING_FINAL_APPROVAL");
+            application.setApprovalStatus("PENDING_FINAL_APPROVAL");
             application.setUpdateTime(LocalDateTime.now());
             // 在实际应用中，应该从安全上下文中获取当前用户作为初审人
-            application.setApproverId(currentUserId);
+            application.setApprover(currentUserId);
             return ResponseEntity.ok(overtimeApplicationRepository.save(application));
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }

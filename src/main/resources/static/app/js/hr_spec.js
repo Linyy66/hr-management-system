@@ -266,8 +266,7 @@ async function handleAddStaffSubmit(e) {
     
     try {
         const formData = {
-            staffId: account, // 使用账号作为员工ID
-            accountId: account,
+            archiveId: account, // 使用账号作为员工档案ID
             staffName: name,
             gender: gender,
             age: parseInt(age),
@@ -298,7 +297,9 @@ async function handleAddStaffSubmit(e) {
             // 重新加载员工档案列表
             loadStaffArchiveData();
         } else {
-            alert('创建员工档案失败，请稍后重试');
+            const errorData = await response.text();
+            console.error('Create staff archive error response:', errorData);
+            alert('创建员工档案失败: ' + errorData);
         }
     } catch (error) {
         console.error('Create staff archive error:', error);
@@ -482,6 +483,7 @@ async function loadStaffByPosition(positionId) {
                 <tr>
                     <th>员工编号</th>
                     <th>姓名</th>
+                    <th>状态</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -493,8 +495,9 @@ async function loadStaffByPosition(positionId) {
         filteredStaff.forEach(staff => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${staff.staffId}</td>
+                <td>${staff.archiveId}</td>
                 <td>${staff.staffName}</td>
+                <td>${getStaffArchiveStatusDescription(staff.status)}</td>
                 <td>
                     <button class="btn-small btn-primary" onclick="viewStaffDetails('${staff.staffId}')">查看详情</button>
                 </td>
@@ -588,8 +591,8 @@ async function searchStaff(keyword) {
         // 过滤包含关键词的员工
         return staffList.filter(staff => 
             staff.staffName.includes(keyword) || 
-            staff.staffId.includes(keyword) ||
-            staff.accountId.includes(keyword)
+            staff.archiveId.includes(keyword) ||
+            (staff.accountId && staff.accountId.includes(keyword))
         );
     } catch (error) {
         console.error('Search staff error:', error);
@@ -675,11 +678,11 @@ function displaySearchResults(orgResults, positionResults, staffResults) {
             staffResults.forEach(staff => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${staff.staffId}</td>
+                    <td>${staff.archiveId}</td>
                     <td>${staff.staffName}</td>
-                    <td>${staff.accountId}</td>
+                    <td>${staff.accountId || '无'}</td>
                     <td>
-                        <button class="btn-small btn-primary" onclick="viewStaffDetails('${staff.staffId}')">查看详情</button>
+                        <button class="btn-small btn-primary" onclick="viewStaffDetails('${staff.archiveId}')">查看详情</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -756,18 +759,18 @@ async function loadStaffArchiveData() {
             staffArchives.forEach(archive => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${archive.staffId}</td>
-                    <td>${archive.accountId}</td>
+                    <td>${archive.archiveId}</td>
+                    <td>${archive.accountId || '无'}</td>
                     <td>${archive.staffName}</td>
-                    <td>${archive.gender}</td>
+                    <td>${archive.gender === 'M' ? '男' : (archive.gender === 'F' ? '女' : archive.gender)}</td>
                     <td>${getOrgFullName(archive.org1Id, archive.org2Id, archive.org3Id)}</td>
                     <td>${archive.positionId}</td>
                     <td>${archive.mobile}</td>
-                    <td>${archive.status === 'ACTIVE' ? '已完善' : '未完善'}</td>
+                    <td>${getStaffArchiveStatusDescription(archive.status)}</td>
                     <td>
-                        <button class="btn-small btn-primary" onclick="viewStaffArchive('${archive.staffId}')">查看</button>
-                        <button class="btn-small btn-secondary" onclick="editStaffArchive('${archive.staffId}')">编辑</button>
-                        <button class="btn-small btn-danger" onclick="deleteStaffArchive('${archive.staffId}')">删除</button>
+                        <button class="btn-small btn-primary" onclick="viewStaffArchive('${archive.archiveId}')">查看</button>
+                        <button class="btn-small btn-secondary" onclick="editStaffArchive('${archive.archiveId}')">编辑</button>
+                        <button class="btn-small btn-danger" onclick="deleteStaffArchive('${archive.archiveId}')">删除</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -785,6 +788,22 @@ function getOrgFullName(org1Id, org2Id, org3Id) {
     const org3 = orgData.level3.find(org => org.org3Id === org3Id);
     
     return `${org1 ? org1.org1Name : ''} > ${org2 ? org2.org2Name : ''} > ${org3 ? org3.org3Name : ''}`;
+}
+
+// 获取员工档案状态描述
+function getStaffArchiveStatusDescription(status) {
+    switch (status) {
+        case 'PENDING':
+            return '待审批';
+        case 'NORMAL':
+            return '正常';
+        case 'DELETED':
+            return '已删除';
+        case 'REJECTED':
+            return '已拒绝';
+        default:
+            return status;
+    }
 }
 
 // 查看员工档案

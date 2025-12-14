@@ -8,5 +8,5 @@ import java.util.List;
 @Repository
 public interface DepartmentChangeRequestRepository extends JpaRepository<DepartmentChangeRequest, Long> {
     List<DepartmentChangeRequest> findByArchiveId(String archiveId);
-    List<DepartmentChangeRequest> findByStatus(String status);
+    List<DepartmentChangeRequest> findByApprovalStatus(String approvalStatus);
 }

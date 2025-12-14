@@ -300,12 +300,10 @@ function renderLeaveApplications() {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${app.applyDate}</td>
-            <td>${getLeaveTypeName(app.leaveType)}</td>
+            <td>${getLeaveTypeDescription(app.leaveType)}</td>
             <td>${app.leaveDays}</td>
-            <td>${app.status}</td>
-            <td>
-                <button class="btn-small btn-secondary" onclick="viewLeaveApplication(${app.id})">查看</button>
-            </td>
+            <td>${app.startDate} 至 ${app.endDate}</td>
+            <td>${getApprovalStatusDescription(app.status)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -388,12 +386,10 @@ function renderOvertimeApplications() {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${app.applyDate}</td>
-            <td>${app.overtimeDate}</td>
-            <td>${app.overtimeHours}</td>
-            <td>${app.status}</td>
-            <td>
-                <button class="btn-small btn-secondary" onclick="viewOvertimeApplication(${app.id})">查看</button>
-            </td>
+            <td>${app.workDate}</td>
+            <td>${app.hours}</td>
+            <td>${app.reason}</td>
+            <td>${getApprovalStatusDescription(app.status)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -592,12 +588,10 @@ function renderTransferApplications() {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${app.applyDate}</td>
-            <td>${app.targetOrg1}-${app.targetOrg2}-${app.targetOrg3}</td>
-            <td>${getPositionName(app.targetPosition)}</td>
-            <td>${app.status}</td>
-            <td>
-                <button class="btn-small btn-secondary" onclick="viewTransferApplication(${app.id})">查看</button>
-            </td>
+            <td>${app.currentDepartment}</td>
+            <td>${app.targetDepartment}</td>
+            <td>${app.reason}</td>
+            <td>${getApprovalStatusDescription(app.status)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -935,5 +929,39 @@ async function loadProfileData() {
         document.getElementById('profile-bio').value = '';
     } catch (error) {
         console.error('Load profile data error:', error);
+    }
+}
+
+// 获取审批状态描述
+function getApprovalStatusDescription(status) {
+    switch (status) {
+        case 'PENDING':
+            return '待审批';
+        case 'APPROVED':
+            return '已批准';
+        case 'REJECTED':
+            return '已拒绝';
+        default:
+            return status;
+    }
+}
+
+// 获取请假类型描述
+function getLeaveTypeDescription(type) {
+    switch (type) {
+        case 'ANNUAL':
+            return '年假';
+        case 'SICK':
+            return '病假';
+        case 'PERSONAL':
+            return '事假';
+        case 'MATERNITY':
+            return '产假';
+        case 'PATERNITY':
+            return '陪产假';
+        case 'MARRIAGE':
+            return '婚假';
+        default:
+            return type;
     }
 }

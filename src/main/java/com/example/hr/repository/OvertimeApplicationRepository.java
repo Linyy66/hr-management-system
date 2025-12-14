@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface OvertimeApplicationRepository extends JpaRepository<OvertimeApplication, Long> {
-    List<OvertimeApplication> findByUserId(String userId);
-    List<OvertimeApplication> findByStatus(String status);
+    List<OvertimeApplication> findByArchiveId(String archiveId);
+    List<OvertimeApplication> findByApprovalStatus(String approvalStatus);
 }

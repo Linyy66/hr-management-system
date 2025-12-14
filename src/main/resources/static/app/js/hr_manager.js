@@ -396,22 +396,16 @@ function renderLeaveApprovalTable(applications) {
     if (!tbody) return;
     
     tbody.innerHTML = '';
-    
-    if (!applications || applications.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="6" class="text-center">暂无请假申请</td>';
-        tbody.appendChild(tr);
-        return;
-    }
-    
     applications.forEach(app => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${getStaffNameByArchiveId(app.archiveId)}</td>
-            <td>${getLeaveTypeText(app.leaveType)}</td>
-            <td>${app.leaveDays}</td>
-            <td>${formatDate(app.createTime)}</td>
-            <td>${getStatusText(app.status)}</td>
+            <td>${app.applicantName || '未知'}</td>
+            <td>${app.leaveType ? getLeaveTypeDescription(app.leaveType) : ''}</td>
+            <td>${app.startDate ? new Date(app.startDate).toLocaleDateString() : ''}</td>
+            <td>${app.endDate ? new Date(app.endDate).toLocaleDateString() : ''}</td>
+            <td>${app.leaveDays || ''}</td>
+            <td>${app.applyTime ? new Date(app.applyTime).toLocaleString() : ''}</td>
+            <td>${app.approvalStatus ? getApprovalStatusDescription(app.approvalStatus) : ''}</td>
             <td>
                 <button class="btn-small btn-primary" onclick="approveLeaveApplication(${app.id})">通过</button>
                 <button class="btn-small btn-danger" onclick="rejectLeaveApplication(${app.id})">驳回</button>
@@ -427,22 +421,14 @@ function renderOvertimeApprovalTable(applications) {
     if (!tbody) return;
     
     tbody.innerHTML = '';
-    
-    if (!applications || applications.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="6" class="text-center">暂无加班申请</td>';
-        tbody.appendChild(tr);
-        return;
-    }
-    
     applications.forEach(app => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${getStaffNameByArchiveId(app.archiveId)}</td>
-            <td>${formatDate(app.overtimeDate)}</td>
-            <td>${app.hours}</td>
-            <td>${formatDate(app.createTime)}</td>
-            <td>${getStatusText(app.status)}</td>
+            <td>${app.applicantName || '未知'}</td>
+            <td>${app.workDate ? new Date(app.workDate).toLocaleDateString() : ''}</td>
+            <td>${app.overtimeHours || ''}</td>
+            <td>${app.applyTime ? new Date(app.applyTime).toLocaleString() : ''}</td>
+            <td>${app.approvalStatus ? getApprovalStatusDescription(app.approvalStatus) : ''}</td>
             <td>
                 <button class="btn-small btn-primary" onclick="approveOvertimeApplication(${app.id})">通过</button>
                 <button class="btn-small btn-danger" onclick="rejectOvertimeApplication(${app.id})">驳回</button>
@@ -458,25 +444,17 @@ function renderDepartmentChangeApprovalTable(requests) {
     if (!tbody) return;
     
     tbody.innerHTML = '';
-    
-    if (!requests || requests.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="6" class="text-center">暂无调岗申请</td>';
-        tbody.appendChild(tr);
-        return;
-    }
-    
-    requests.forEach(request => {
+    requests.forEach(req => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${getStaffNameByArchiveId(request.archiveId)}</td>
-            <td>${getOrgFullName(request.currentOrg1Id, request.currentOrg2Id, request.currentOrg3Id)} > ${request.currentPositionId}</td>
-            <td>${getOrgFullName(request.newOrg1Id, request.newOrg2Id, request.newOrg3Id)} > ${request.newPositionId}</td>
-            <td>${formatDate(request.createTime)}</td>
-            <td>${getStatusText(request.status)}</td>
+            <td>${req.applicantName || '未知'}</td>
+            <td>${req.oldDepartment || ''}</td>
+            <td>${req.newDepartment || ''}</td>
+            <td>${req.applyTime ? new Date(req.applyTime).toLocaleString() : ''}</td>
+            <td>${req.approvalStatus ? getApprovalStatusDescription(req.approvalStatus) : ''}</td>
             <td>
-                <button class="btn-small btn-primary" onclick="approveDepartmentChangeRequest(${request.id})">通过</button>
-                <button class="btn-small btn-danger" onclick="rejectDepartmentChangeRequest(${request.id})">驳回</button>
+                <button class="btn-small btn-primary" onclick="approveTransferRequest(${req.id})">通过</button>
+                <button class="btn-small btn-danger" onclick="rejectTransferRequest(${req.id})">驳回</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -888,4 +866,38 @@ function getReportTypeName(reportType) {
         'turnover': '人员流动'
     };
     return types[reportType] || reportType;
+}
+
+// 获取审批状态描述
+function getApprovalStatusDescription(status) {
+    switch (status) {
+        case 'PENDING':
+            return '待审批';
+        case 'APPROVED':
+            return '已批准';
+        case 'REJECTED':
+            return '已拒绝';
+        default:
+            return status;
+    }
+}
+
+// 获取请假类型描述
+function getLeaveTypeDescription(type) {
+    switch (type) {
+        case 'ANNUAL':
+            return '年假';
+        case 'SICK':
+            return '病假';
+        case 'PERSONAL':
+            return '事假';
+        case 'MATERNITY':
+            return '产假';
+        case 'PATERNITY':
+            return '陪产假';
+        case 'MARRIAGE':
+            return '婚假';
+        default:
+            return type;
+    }
 }

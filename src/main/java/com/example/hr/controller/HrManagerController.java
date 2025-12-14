@@ -120,7 +120,7 @@ public class HrManagerController {
     // 请假审批
     @GetMapping("/leave-applications")
     public List<LeaveApplication> getAllPendingLeaveApplications() {
-        return leaveApplicationRepository.findByStatus("PENDING");
+        return leaveApplicationRepository.findByApprovalStatus("PENDING");
     }
     
     @PutMapping("/leave-applications/{id}/approve")
@@ -131,10 +131,10 @@ public class HrManagerController {
         }
         
         return leaveApplicationRepository.findById(id).map(application -> {
-            application.setStatus("APPROVED");
+            application.setApprovalStatus("APPROVED");
             application.setApproveTime(LocalDateTime.now());
             // 在实际应用中，应该从安全上下文中获取当前用户作为审批人
-            application.setApproverId(currentUserId); 
+            application.setApprover(currentUserId); 
             return ResponseEntity.ok(leaveApplicationRepository.save(application));
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -148,10 +148,10 @@ public class HrManagerController {
         }
         
         return leaveApplicationRepository.findById(id).map(application -> {
-            application.setStatus("REJECTED");
+            application.setApprovalStatus("REJECTED");
             application.setApproveTime(LocalDateTime.now());
             // 在实际应用中，应该从安全上下文中获取当前用户作为审批人
-            application.setApproverId(currentUserId);
+            application.setApprover(currentUserId);
             // 在实际应用中，可以将拒绝原因保存到另一个表或字段中
             return ResponseEntity.ok(leaveApplicationRepository.save(application));
         }).orElseGet(() -> ResponseEntity.notFound().build());
@@ -160,7 +160,7 @@ public class HrManagerController {
     // 加班审批
     @GetMapping("/overtime-applications")
     public List<OvertimeApplication> getAllPendingOvertimeApplications() {
-        return overtimeApplicationRepository.findByStatus("PENDING");
+        return overtimeApplicationRepository.findByApprovalStatus("PENDING");
     }
     
     @PutMapping("/overtime-applications/{id}/approve")
@@ -171,10 +171,10 @@ public class HrManagerController {
         }
         
         return overtimeApplicationRepository.findById(id).map(application -> {
-            application.setStatus("APPROVED");
+            application.setApprovalStatus("APPROVED");
             application.setApproveTime(LocalDateTime.now());
             // 在实际应用中，应该从安全上下文中获取当前用户作为审批人
-            application.setApproverId(currentUserId);
+            application.setApprover(currentUserId);
             return ResponseEntity.ok(overtimeApplicationRepository.save(application));
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -188,10 +188,10 @@ public class HrManagerController {
         }
         
         return overtimeApplicationRepository.findById(id).map(application -> {
-            application.setStatus("REJECTED");
+            application.setApprovalStatus("REJECTED");
             application.setApproveTime(LocalDateTime.now());
             // 在实际应用中，应该从安全上下文中获取当前用户作为审批人
-            application.setApproverId(currentUserId);
+            application.setApprover(currentUserId);
             // 在实际应用中，可以将拒绝原因保存到另一个表或字段中
             return ResponseEntity.ok(overtimeApplicationRepository.save(application));
         }).orElseGet(() -> ResponseEntity.notFound().build());
@@ -200,7 +200,7 @@ public class HrManagerController {
     // 调岗审批
     @GetMapping("/department-change-requests")
     public List<DepartmentChangeRequest> getAllPendingDepartmentChangeRequests() {
-        return departmentChangeRequestRepository.findByStatus("PENDING");
+        return departmentChangeRequestRepository.findByApprovalStatus("PENDING");
     }
     
     @PutMapping("/department-change-requests/{id}/approve")
@@ -211,7 +211,7 @@ public class HrManagerController {
         }
         
         return departmentChangeRequestRepository.findById(id).map(request -> {
-            request.setStatus("APPROVED");
+            request.setApprovalStatus("APPROVED");
             request.setUpdateBy(currentUserId);
             request.setUpdateTime(LocalDateTime.now());
             DepartmentChangeRequest savedRequest = departmentChangeRequestRepository.save(request);
@@ -241,7 +241,7 @@ public class HrManagerController {
         }
         
         return departmentChangeRequestRepository.findById(id).map(request -> {
-            request.setStatus("REJECTED");
+            request.setApprovalStatus("REJECTED");
             request.setUpdateBy(currentUserId);
             request.setUpdateTime(LocalDateTime.now());
             // 在实际应用中，可以将拒绝原因保存到另一个表或字段中

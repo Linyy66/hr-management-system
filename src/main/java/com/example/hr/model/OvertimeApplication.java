@@ -3,6 +3,7 @@ package com.example.hr.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,111 +14,59 @@ public class OvertimeApplication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String userId;
+    @Column(name = "archive_id", nullable = false, length = 12)
+    private String archiveId;
 
-    @Column(nullable = false)
-    private LocalDateTime overtimeDate;
+    @Column(name = "work_date", nullable = false)
+    private java.time.LocalDate workDate;
 
-    @Column(nullable = false)
-    private Double hours;
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime;
 
-    @Column(length = 500)
+    @Column(name = "end_time", nullable = false)
+    private LocalDateTime endTime;
+
+    @Column(name = "overtime_hours", nullable = false, precision = 5, scale = 1)
+    private BigDecimal overtimeHours;
+
+    @Column(name = "reason", nullable = false, columnDefinition = "TEXT")
     private String reason;
 
-    @Column(nullable = false)
-    private String status; // PENDING, APPROVED, REJECTED
+    @Column(name = "approval_status", length = 20)
+    private String approvalStatus; // 审批状态: PENDING(待审批) / APPROVED(已批准) / REJECTED(已拒绝)
 
-    @Column
-    private String approverId;
+    @Column(name = "approver", length = 20)
+    private String approver;
 
-    @Column
-    private LocalDateTime createTime;
-
-    @Column
-    private LocalDateTime updateTime;
-    
-    @Column
+    @Column(name = "approve_time")
     private LocalDateTime approveTime;
 
-    // Getters and setters
-    public Long getId() {
-        return id;
-    }
+    @Column(name = "create_by", length = 20)
+    private String createBy;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @Column(name = "create_time")
+    private LocalDateTime createTime;
 
-    public String getUserId() {
-        return userId;
-    }
+    @Column(name = "update_by", length = 20)
+    private String updateBy;
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    @Column(name = "update_time")
+    private LocalDateTime updateTime;
 
-    public LocalDateTime getOvertimeDate() {
-        return overtimeDate;
-    }
-
-    public void setOvertimeDate(LocalDateTime overtimeDate) {
-        this.overtimeDate = overtimeDate;
-    }
-
-    public Double getHours() {
-        return hours;
-    }
-
-    public void setHours(Double hours) {
-        this.hours = hours;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getApproverId() {
-        return approverId;
-    }
-
-    public void setApproverId(String approverId) {
-        this.approverId = approverId;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public LocalDateTime getApproveTime() {
-        return approveTime;
-    }
-
-    public void setApproveTime(LocalDateTime approveTime) {
-        this.approveTime = approveTime;
+    @Column(name = "version")
+    private Integer version = 1;
+    
+    // 获取审批状态描述
+    public String getApprovalStatusDescription() {
+        switch (approvalStatus) {
+            case "PENDING":
+                return "待审批";
+            case "APPROVED":
+                return "已批准";
+            case "REJECTED":
+                return "已拒绝";
+            default:
+                return approvalStatus;
+        }
     }
 }
