@@ -1,26 +1,28 @@
 package com.example.hr.service;
 
 import com.example.hr.model.AppUser;
+import com.example.hr.model.UserPrincipal;
 import com.example.hr.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
-    private final org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository,
-                                    org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -29,15 +31,15 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (opt.isPresent()) {
             AppUser u = opt.get();
             List<GrantedAuthority> auths = List.of(new SimpleGrantedAuthority("ROLE_" + u.getRole()));
-            return new User(u.getUsername(), u.getPassword(), u.isEnabled(),
-                    true, true, true, auths);
+            return new UserPrincipal(u.getUsername(), u.getPassword(), auths, u.isEnabled());
         }
 
         // fallback: built-in admin account (so admin/adminpass always works unless you created admin in DB)
         if ("admin".equals(username)) {
-            String encoded = passwordEncoder.encode("adminpass");
             List<GrantedAuthority> auths = List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
-            return new User("admin", encoded, true, true, true, true, auths);
+            // 使用BCrypt加密密码
+            String encoded = passwordEncoder.encode("adminpass");
+            return new UserPrincipal("admin", encoded, auths, true);
         }
 
         throw new UsernameNotFoundException("User not found: " + username);

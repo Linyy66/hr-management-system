@@ -1,7 +1,7 @@
 # HRMS Minimal Project 
 
 这是一个按你要求的最简实现骨架，包含基础配置、数据库建表脚本、实体、Repository、最小的 Controller 以及基于内存的 Spring Security。
-启动时输入http://localhost:8080/login.html
+启动时输入http://localhost:8081/login.html
 环境（根据你的要求）：
 - JDK: 21
 - Spring Boot: 2.6.14
@@ -14,10 +14,12 @@
 3. （可选）手动执行 schema.sql 创建表，或让 JPA 的 `spring.jpa.hibernate.ddl-auto=update` 自动建表。
 4. 在项目根目录运行：`mvn clean spring-boot:run` 或 `mvn clean package && java -jar target/hrms-minimal-0.0.1-SNAPSHOT.jar`。
 
-示例账号（内存）：
+示例账号（数据库）：
 - 人事专员: spec / specpass (ROLE_HR_SPEC)
 - 人事经理: mgr / mgrpass (ROLE_HR_MANAGER)
 - 系统管理员: admin / adminpass (ROLE_ADMIN)
+
+这些是系统内置的高权限账户，会在应用启动时自动创建。
 
 最小 API 示例：
 - GET /api/org1              -> 列出一级机构

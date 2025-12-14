@@ -13,12 +13,45 @@ public class AttendanceRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 12)
-    private String archiveId;
+    @Column(nullable = false)
+    private String userId;
 
-    private LocalDateTime clockTime;
-    private Long shiftId;
-    private String status; // PENDING / CONFIRMED / EXCEPTION
-    private String exceptionType;
-    private LocalDateTime createTime;
+    @Column
+    private LocalDateTime clockInTime;
+
+    @Column
+    private LocalDateTime clockOutTime;
+
+    // Getters and setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public LocalDateTime getClockInTime() {
+        return clockInTime;
+    }
+
+    public void setClockInTime(LocalDateTime clockInTime) {
+        this.clockInTime = clockInTime;
+    }
+
+    public LocalDateTime getClockOutTime() {
+        return clockOutTime;
+    }
+
+    public void setClockOutTime(LocalDateTime clockOutTime) {
+        this.clockOutTime = clockOutTime;
+    }
 }

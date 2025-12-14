@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考勤规则管理 - HRMS</title>
+    <link rel="stylesheet" href="/app/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>HRMS</h1>
+                <span>系统管理平台</span>
+            </div>
+            <div class="nav-menu">
+                <ul>
+                    <li><a href="/admin/index.html" class="nav-link">返回首页</a></li>
+                </ul>
+            </div>
+            <div class="user-info">
+                <span id="current-user">管理员</span>
+                <span class="role-badge admin">系统管理员</span>
+                <button id="logout-btn" class="btn-secondary btn-small">退出</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <div class="card">
+            <h2>考勤规则管理</h2>
+            <button id="add-rule-btn" class="btn-primary">新增规则</button>
+        </div>
+        
+        <div class="card">
+            <h3>规则搜索</h3>
+            <div class="search-bar">
+                <input type="text" id="rule-search" placeholder="按规则名称或适用机构搜索">
+                <button class="btn-primary">搜索</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>考勤规则列表</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>规则名称</th>
+                        <th>适用机构</th>
+                        <th>工作时间</th>
+                        <th>迟到阈值</th>
+                        <th>早退阈值</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="rules-body">
+                    <!-- 动态加载规则列表 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 移除所有JavaScript代码，使用纯后端HTML/CSS方式 -->
+</body>
+</html>

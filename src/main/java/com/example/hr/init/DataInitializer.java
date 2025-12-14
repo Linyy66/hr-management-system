@@ -36,7 +36,7 @@ public class DataInitializer implements ApplicationRunner {
         if (!userRepository.existsById(username)) {
             AppUser u = new AppUser();
             u.setUsername(username);
-            u.setPassword(passwordEncoder.encode(rawPassword));
+            u.setPassword(passwordEncoder.encode(rawPassword)); // 确保密码是加密的
             u.setRole(role);
             u.setEnabled(true);
             userRepository.save(u);
@@ -52,7 +52,7 @@ public class DataInitializer implements ApplicationRunner {
         createRoleIfNotExists("HR_MANAGER");
         createRoleIfNotExists("EMPLOYEE");
 
-        // ensure default accounts exist
+        // ensure default accounts exist with highest privileges
         createUserIfNotExists("admin", "adminpass", "ADMIN");
         createUserIfNotExists("spec", "specpass", "HR_SPEC");
         createUserIfNotExists("mgr", "mgrpass", "HR_MANAGER");

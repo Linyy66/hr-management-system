@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人档案详情 - HRMS</title>
+    <link rel="stylesheet" href="/app/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>HRMS</h1>
+                <span>员工自助服务平台</span>
+            </div>
+            <div class="nav-menu">
+                <ul>
+                    <li><a href="/employee/index.html" class="nav-link">返回首页</a></li>
+                </ul>
+            </div>
+            <div class="user-info">
+                <span id="current-user">张三</span>
+                <span class="role-badge employee">普通员工</span>
+                <button id="logout-btn" class="btn-secondary btn-small">退出</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <div class="card">
+            <h2>个人档案详情</h2>
+            <div class="profile-header">
+                <div class="avatar-placeholder">头像</div>
+                <div class="profile-basic-info">
+                    <h3 id="staff-name">张三</h3>
+                    <p>员工编号: <span id="archive-id">EMP001</span></p>
+                    <p>职位: <span id="position-name">软件工程师</span></p>
+                    <p>部门: <span id="department-name">技术部</span></p>
+                </div>
+            </div>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="basic">基本信息</button>
+                <button class="tab-button" data-tab="education">教育背景</button>
+                <button class="tab-button" data-tab="work">工作经历</button>
+            </div>
+            
+            <div class="tab-content active" id="basic-tab">
+                <h3>基本信息</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="profile-staff-name" value="张三" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>性别</label>
+                        <input type="text" id="profile-gender" value="男" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>出生日期</label>
+                        <input type="date" id="profile-birth-date" value="1990-01-01" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>身份证号</label>
+                        <input type="text" id="profile-id-card" value="110101199001011234" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>手机号</label>
+                        <input type="text" id="profile-mobile" value="13800138000">
+                    </div>
+                    <div class="form-group">
+                        <label>电话</label>
+                        <input type="text" id="profile-phone" value="010-12345678">
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="text" id="profile-email" value="zhangsan@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>紧急联系人</label>
+                        <input type="text" id="profile-emergency-contact" value="李四">
+                    </div>
+                    <div class="form-group">
+                        <label>紧急联系电话</label>
+                        <input type="text" id="profile-emergency-phone" value="13900139000">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>家庭住址</label>
+                        <input type="text" id="profile-address" value="北京市朝阳区某某街道某某号">
+                    </div>
+                </div>
+                
+                <button id="update-profile-btn" class="btn-primary">更新信息</button>
+            </div>
+            
+            <div class="tab-content" id="education-tab">
+                <h3>教育背景</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>学校名称</th>
+                            <th>学历</th>
+                            <th>专业</th>
+                            <th>入学时间</th>
+                            <th>毕业时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>清华大学</td>
+                            <td>本科</td>
+                            <td>计算机科学与技术</td>
+                            <td>2008-09-01</td>
+                            <td>2012-06-30</td>
+                        </tr>
+                        <tr>
+                            <td>清华大学</td>
+                            <td>硕士</td>
+                            <td>软件工程</td>
+                            <td>2012-09-01</td>
+                            <td>2015-06-30</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <button class="btn-primary" style="margin-top: 1rem;">添加教育经历</button>
+            </div>
+            
+            <div class="tab-content" id="work-tab">
+                <h3>工作经历</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>公司名称</th>
+                            <th>职位</th>
+                            <th>开始时间</th>
+                            <th>结束时间</th>
+                            <th>工作描述</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>前公司有限公司</td>
+                            <td>软件工程师</td>
+                            <td>2015-07-01</td>
+                            <td>2018-12-31</td>
+                            <td>负责Web应用程序开发和维护</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <button class="btn-primary" style="margin-top: 1rem;">添加工作经历</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 移除所有JavaScript代码，使用纯后端HTML/CSS方式 -->
+</body>
+</html>

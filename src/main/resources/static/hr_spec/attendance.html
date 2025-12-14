@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考勤异常处理 - HRMS</title>
+    <link rel="stylesheet" href="/app/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>HRMS</h1>
+                <span>人事专员平台</span>
+            </div>
+            <div class="nav-menu">
+                <ul>
+                    <li><a href="/hr_spec/index.html" class="nav-link">返回首页</a></li>
+                </ul>
+            </div>
+            <div class="user-info">
+                <span id="current-user">人事专员</span>
+                <span class="role-badge hr_spec">人事专员</span>
+                <button id="logout-btn" class="btn-secondary btn-small">退出</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <div class="card">
+            <h2>考勤异常处理</h2>
+        </div>
+        
+        <div class="card">
+            <h3>异常筛选</h3>
+            <div class="approval-filters">
+                <select id="exception-type">
+                    <option value="all">全部类型</option>
+                    <option value="late">迟到</option>
+                    <option value="early">早退</option>
+                    <option value="miss">漏打卡</option>
+                    <option value="absent">旷工</option>
+                </select>
+                <select id="exception-status">
+                    <option value="all">全部状态</option>
+                    <option value="pending">待处理</option>
+                    <option value="approved">已批准</option>
+                    <option value="rejected">已拒绝</option>
+                </select>
+                <button class="btn-primary">筛选</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>考勤异常列表</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>员工姓名</th>
+                        <th>员工编号</th>
+                        <th>日期</th>
+                        <th>异常类型</th>
+                        <th>申请时间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="exception-body">
+                    <!-- 动态加载异常列表 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 移除所有JavaScript代码，使用纯后端HTML/CSS方式 -->
+</body>
+</html>

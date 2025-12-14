@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人事报表 - HRMS</title>
+    <link rel="stylesheet" href="/app/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>HRMS</h1>
+                <span>人事经理平台</span>
+            </div>
+            <div class="nav-menu">
+                <ul>
+                    <li><a href="/hr_manager/index.html" class="nav-link">返回首页</a></li>
+                </ul>
+            </div>
+            <div class="user-info">
+                <span id="current-user">人事经理</span>
+                <span class="role-badge hr_manager">人事经理</span>
+                <button id="logout-btn" class="btn-secondary btn-small">退出</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <div class="card">
+            <h2>人事报表</h2>
+            <div class="report-filters">
+                <select id="report-type">
+                    <option value="attendance">考勤统计</option>
+                    <option value="leave">请假统计</option>
+                    <option value="overtime">加班统计</option>
+                    <option value="turnover">人员流动</option>
+                    <option value="structure">人员结构</option>
+                </select>
+                <input type="month" id="report-month" value="2023-06">
+                <button class="btn-primary" id="generate-report-btn">生成报表</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>考勤统计报表</h3>
+            <div class="chart-placeholder">
+                考勤统计图表区域
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>部门</th>
+                        <th>总人数</th>
+                        <th>出勤率</th>
+                        <th>迟到次数</th>
+                        <th>早退次数</th>
+                        <th>缺勤人数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>技术部</td>
+                        <td>50</td>
+                        <td>98.2%</td>
+                        <td>8</td>
+                        <td>5</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td>市场部</td>
+                        <td>30</td>
+                        <td>96.5%</td>
+                        <td>12</td>
+                        <td>7</td>
+                        <td>2</td>
+                    </tr>
+                    <tr>
+                        <td>人事部</td>
+                        <td>8</td>
+                        <td>99.1%</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="card">
+            <h3>请假统计报表</h3>
+            <div class="chart-placeholder">
+                请假统计图表区域
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>月份</th>
+                        <th>请假人次</th>
+                        <th>请假天数</th>
+                        <th>年假占比</th>
+                        <th>病假占比</th>
+                        <th>事假占比</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2023年5月</td>
+                        <td>25</td>
+                        <td>42</td>
+                        <td>45%</td>
+                        <td>30%</td>
+                        <td>25%</td>
+                    </tr>
+                    <tr>
+                        <td>2023年4月</td>
+                        <td>18</td>
+                        <td>28</td>
+                        <td>50%</td>
+                        <td>25%</td>
+                        <td>25%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="card">
+            <h3>加班统计报表</h3>
+            <div class="chart-placeholder">
+                加班统计图表区域
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>部门</th>
+                        <th>总加班人次</th>
+                        <th>总加班小时</th>
+                        <th>人均加班小时</th>
+                        <th>工作日加班</th>
+                        <th>周末加班</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>技术部</td>
+                        <td>42</td>
+                        <td>320</td>
+                        <td>7.6</td>
+                        <td>180</td>
+                        <td>140</td>
+                    </tr>
+                    <tr>
+                        <td>市场部</td>
+                        <td>25</td>
+                        <td>180</td>
+                        <td>7.2</td>
+                        <td>120</td>
+                        <td>60</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 移除所有JavaScript代码，使用纯后端HTML/CSS方式 -->
+</body>
+</html>

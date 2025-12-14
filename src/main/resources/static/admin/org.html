@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组织架构管理 - HRMS</title>
+    <link rel="stylesheet" href="/app/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>HRMS</h1>
+                <span>系统管理平台</span>
+            </div>
+            <div class="nav-menu">
+                <ul>
+                    <li><a href="/admin/index.html" class="nav-link">返回首页</a></li>
+                </ul>
+            </div>
+            <div class="user-info">
+                <span id="current-user">管理员</span>
+                <span class="role-badge admin">系统管理员</span>
+                <button id="logout-btn" class="btn-secondary btn-small">退出</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <div class="card">
+            <h2>组织架构管理</h2>
+            <div class="org-tree">
+                <div class="org-level">
+                    <h3>一级机构</h3>
+                    <ul id="org-level1-tree">
+                        <!-- 动态加载一级机构树 -->
+                    </ul>
+                    <button id="add-org1-btn" class="btn-primary">新增一级机构</button>
+                </div>
+                <div class="org-level">
+                    <h3>二级机构</h3>
+                    <ul id="org-level2-tree">
+                        <!-- 动态加载二级机构树 -->
+                    </ul>
+                    <button id="add-org2-btn" class="btn-primary">新增二级机构</button>
+                </div>
+                <div class="org-level">
+                    <h3>三级机构</h3>
+                    <ul id="org-level3-tree">
+                        <!-- 动态加载三级机构树 -->
+                    </ul>
+                    <button id="add-org3-btn" class="btn-primary">新增三级机构</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>机构列表</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>机构级别</th>
+                        <th>机构编码</th>
+                        <th>机构名称</th>
+                        <th>上级机构</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="org-list-body">
+                    <!-- 动态加载机构列表 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 移除所有JavaScript代码，使用纯后端HTML/CSS方式 -->
+</body>
+</html>

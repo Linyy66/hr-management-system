@@ -7,33 +7,43 @@
     <link rel="stylesheet" href="/app/styles.css">
 </head>
 <body>
-<div class="container">
-    <div class="card">
-        <h1>HRMS - 登录与注册</h1>
-        <h2>登录（用于 API Basic Auth）</h2>
+    <div class="container">
+        <div class="card" style="max-width: 500px; margin: 100px auto;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h1>HRMS</h1>
+                <p>人力资源管理系统</p>
+            </div>
+            
+            <h2 style="text-align: center;">用户登录</h2>
 
-        <div class="form-row">
-            <label for="username">用户名</label>
-            <input id="username" value="admin" />
-        </div>
-        <div class="form-row">
-            <label for="password">密码</label>
-            <input id="password" type="password" value="adminpass" />
-            <button id="btnSaveCreds">保存并登录</button>
-        </div>
-        <div id="loginStatus" class="status"></div>
+            <form method="post" action="/login">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input id="username" name="username" value="admin" autocomplete="username" />
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input id="password" name="password" type="password" value="adminpass" autocomplete="current-password" />
+                </div>
+                <div style="margin: 1.5rem 0;">
+                    <button class="btn-primary" style="width: 100%;">登录</button>
+                </div>
+            </form>
+            <p class="small">注意：这是演示页面，实际系统中填写用户名和密码后点击登录按钮可进入系统</p>
+            <div id="loginStatus" class="status"></div>
 
-        <div class="panel">
-            <button id="goRegister" class="btn-link">没有账号？去注册（仅普通员工自助注册）</button>
-        </div>
+            <div class="card" style="margin-top: 2rem; background: #f1f5f9;">
+                <p style="margin: 0;">还没有账号？ <a href="/register.html" class="btn-link">立即注册</a></p>
+            </div>
 
-        <div class="footer-note">
-            说明：默认账号：admin/adminpass（管理员）；spec/specpass（人事专员）；mgr/mgrpass（人事经理）。<br>
-            管理员可在登录后通过管理界面创建其他 HR 账号；普通员工请在注册页自助注册。
+            <div class="footer-note" style="margin-top: 2rem;">
+                说明：默认账号：admin/adminpass（管理员）；spec/specpass（人事专员）；mgr/mgrpass（人事经理）。<br>
+                这些是系统内置的高权限账户，可以直接使用。<br>
+                管理员可在登录后通过管理界面创建其他 HR 账号；普通员工请在注册页自助注册。
+            </div>
         </div>
     </div>
-</div>
 
-<script src="/app/js/login.js"></script>
+    <script src="/app/js/login.js"></script>
 </body>
 </html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工自助服务 - HRMS</title>
+    <link rel="stylesheet" href="/app/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>HRMS</h1>
+                <span>员工自助服务平台</span>
+            </div>
+            <div class="nav-menu">
+                <ul>
+                    <li><a href="#" class="nav-link active" data-pane="dashboard">仪表板</a></li>
+                    <li><a href="#" class="nav-link" data-pane="profile">个人档案</a></li>
+                    <li><a href="#" class="nav-link" data-pane="attendance">考勤管理</a></li>
+                    <li><a href="#" class="nav-link" data-pane="leave">请假申请</a></li>
+                    <li><a href="#" class="nav-link" data-pane="overtime">加班申请</a></li>
+                </ul>
+            </div>
+            <div class="user-info">
+                <span id="current-user"></span>
+                <span class="role-badge employee">普通员工</span>
+                <button id="logout-btn" class="btn-secondary btn-small">退出</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <!-- Dashboard Pane -->
+        <div id="dashboard" class="panel active">
+            <div class="card">
+                <h2>欢迎使用员工自助服务系统</h2>
+                <p>在这里您可以管理您的个人信息、考勤打卡、提交请假和加班申请。</p>
+            </div>
+            
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>本月考勤</h3>
+                    <div class="stat-value" id="attendance-count">0</div>
+                    <p>次打卡</p>
+                </div>
+                <div class="stat-card">
+                    <h3>剩余年假</h3>
+                    <div class="stat-value" id="remaining-leave">0</div>
+                    <p>天</p>
+                </div>
+                <div class="stat-card">
+                    <h3>待审批</h3>
+                    <div class="stat-value" id="pending-requests">0</div>
+                    <p>项申请</p>
+                </div>
+            </div>
+            
+            <div class="card dashboard-notices">
+                <h3>最新通知</h3>
+                <ul>
+                    <li>公司年度体检将于下月进行，请关注具体安排</li>
+                    <li>新的员工手册已发布，请及时查阅</li>
+                    <li>办公区域网络升级已完成</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Profile Pane -->
+        <div id="profile" class="panel">
+            <div class="card">
+                <h2>个人档案</h2>
+                <div class="profile-header">
+                    <div class="avatar-placeholder">头像</div>
+                    <div class="profile-basic-info">
+                        <h3 id="staff-name">-</h3>
+                        <p>员工编号: <span id="archive-id">-</span></p>
+                        <p>职位: <span id="position-name">-</span></p>
+                        <p>部门: <span id="department-name">-</span></p>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="profile-staff-name" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>性别</label>
+                        <input type="text" id="profile-gender" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>身份证号</label>
+                        <input type="text" id="profile-id-card" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>手机号</label>
+                        <input type="text" id="profile-mobile">
+                    </div>
+                    <div class="form-group">
+                        <label>电话</label>
+                        <input type="text" id="profile-phone">
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="text" id="profile-email">
+                    </div>
+                </div>
+                
+                <button id="update-profile-btn" class="btn-primary">更新信息</button>
+            </div>
+        </div>
+        
+        <!-- Attendance Pane -->
+        <div id="attendance" class="panel">
+            <div class="card">
+                <h2>考勤管理</h2>
+                <div class="attendance-actions">
+                    <button id="clock-in-btn" class="btn-primary">上班打卡</button>
+                    <button id="clock-out-btn" class="btn-secondary">下班打卡</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>考勤记录</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>上班时间</th>
+                            <th>下班时间</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-records-body">
+                        <!-- 动态填充考勤记录 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Leave Pane -->
+        <div id="leave" class="panel">
+            <div class="card">
+                <h2>请假申请</h2>
+                <form id="leave-application-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="leave-type">请假类型</label>
+                            <select id="leave-type" required>
+                                <option value="">请选择</option>
+                                <option value="annual">年假</option>
+                                <option value="sick">病假</option>
+                                <option value="personal">事假</option>
+                                <option value="marriage">婚假</option>
+                                <option value="maternity">产假</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="leave-days">请假天数</label>
+                            <input type="number" id="leave-days" min="0.5" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="leave-start-date">开始日期</label>
+                            <input type="date" id="leave-start-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="leave-end-date">结束日期</label>
+                            <input type="date" id="leave-end-date" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="leave-reason">请假原因</label>
+                            <textarea id="leave-reason" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">提交申请</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h3>我的请假记录</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>申请日期</th>
+                            <th>请假类型</th>
+                            <th>天数</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leave-applications-body">
+                        <!-- 动态填充请假记录 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Overtime Pane -->
+        <div id="overtime" class="panel">
+            <div class="card">
+                <h2>加班申请</h2>
+                <form id="overtime-application-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="overtime-date">加班日期</label>
+                            <input type="date" id="overtime-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="overtime-hours">加班小时数</label>
+                            <input type="number" id="overtime-hours" min="0.5" step="0.5" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="overtime-reason">加班原因</label>
+                            <textarea id="overtime-reason" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">提交申请</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h3>我的加班记录</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>申请日期</th>
+                            <th>加班日期</th>
+                            <th>小时数</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="overtime-applications-body">
+                        <!-- 动态填充加班记录 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="/app/js/utils.js"></script>
+    <script src="/app/js/employee.js"></script>
+</body>
+</html>

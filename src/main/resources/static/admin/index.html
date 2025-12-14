@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统管理 - HRMS</title>
+    <link rel="stylesheet" href="/app/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>HRMS</h1>
+                <span>系统管理平台</span>
+            </div>
+            <div class="nav-menu">
+                <ul>
+                    <li><a href="#" class="nav-link active" data-pane="dashboard">仪表板</a></li>
+                    <li><a href="#" class="nav-link" data-pane="org">组织架构</a></li>
+                    <li><a href="#" class="nav-link" data-pane="positions">职位管理</a></li>
+                    <li><a href="#" class="nav-link" data-pane="users">用户管理</a></li>
+                    <li><a href="#" class="nav-link" data-pane="roles">角色管理</a></li>
+                    <li><a href="#" class="nav-link" data-pane="attendance-rules">考勤规则</a></li>
+                </ul>
+            </div>
+            <div class="user-info">
+                <span id="current-user">管理员</span>
+                <span class="role-badge admin">系统管理员</span>
+                <button id="logout-btn" class="btn-secondary btn-small">退出</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <!-- Dashboard Pane -->
+        <div id="dashboard" class="panel active">
+            <div class="card">
+                <h2>系统管理仪表板</h2>
+                <p>欢迎使用系统管理平台，在这里您可以管理系统的所有基础设置。</p>
+            </div>
+            
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>一级机构</h3>
+                    <div class="stat-value" id="org1-count">3</div>
+                    <p>个</p>
+                </div>
+                <div class="stat-card">
+                    <h3>职位</h3>
+                    <div class="stat-value" id="position-count">15</div>
+                    <p>个</p>
+                </div>
+                <div class="stat-card">
+                    <h3>用户</h3>
+                    <div class="stat-value" id="user-count">28</div>
+                    <p>人</p>
+                </div>
+                <div class="stat-card">
+                    <h3>角色</h3>
+                    <div class="stat-value" id="role-count">4</div>
+                    <p>种</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>最近操作</h3>
+                <ul>
+                    <li>2023-06-01: 创建了新的职位 - 高级软件工程师</li>
+                    <li>2023-05-28: 添加了一级机构 - 市场部</li>
+                    <li>2023-05-25: 更新了用户权限设置</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Organization Pane -->
+        <div id="org" class="panel">
+            <div class="card">
+                <h2>组织架构管理</h2>
+                <button id="add-org-btn" class="btn-primary">新增机构</button>
+            </div>
+            
+            <div class="card">
+                <h3>一级机构</h3>
+                <div id="org-level1-list">
+                    <!-- 动态加载一级机构列表 -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>二级机构</h3>
+                <div id="org-level2-list">
+                    <!-- 动态加载二级机构列表 -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>三级机构</h3>
+                <div id="org-level3-list">
+                    <!-- 动态加载三级机构列表 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Positions Pane -->
+        <div id="positions" class="panel">
+            <div class="card">
+                <h2>职位管理</h2>
+                <button id="add-position-btn" class="btn-primary">新增职位</button>
+            </div>
+            
+            <div class="card">
+                <h3>职位列表</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>职位编码</th>
+                            <th>职位名称</th>
+                            <th>所属机构</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="positions-body">
+                        <!-- 动态加载职位列表 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Users Pane -->
+        <div id="users" class="panel">
+            <div class="card">
+                <h2>用户管理</h2>
+                <button id="add-user-btn" class="btn-primary">新增用户</button>
+            </div>
+            
+            <div class="card">
+                <h3>用户列表</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>用户名</th>
+                            <th>角色</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-body">
+                        <!-- 动态加载用户列表 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Roles Pane -->
+        <div id="roles" class="panel">
+            <div class="card">
+                <h2>角色管理</h2>
+                <button id="add-role-btn" class="btn-primary">新增角色</button>
+            </div>
+            
+            <div class="card">
+                <h3>角色列表</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>角色名称</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roles-body">
+                        <!-- 动态加载角色列表 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Attendance Rules Pane -->
+        <div id="attendance-rules" class="panel">
+            <div class="card">
+                <h2>考勤规则管理</h2>
+                <button class="btn-primary">新增规则</button>
+            </div>
+            
+            <div class="card">
+                <h3>规则搜索</h3>
+                <div class="search-bar">
+                    <input type="text" placeholder="按规则名称或适用机构搜索">
+                    <button class="btn-primary">搜索</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>规则列表</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>规则名称</th>
+                            <th>适用机构</th>
+                            <th>规则详情</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rules-body">
+                        <!-- 动态加载规则列表 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="/app/js/utils.js"></script>
+    <script src="/app/js/admin.js"></script>
+</body>
+</html>
