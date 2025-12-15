@@ -72,6 +72,7 @@ CREATE TABLE t_position (
 -- 员工档案表
 CREATE TABLE t_staff_archive (
                                  archive_id VARCHAR(12) PRIMARY KEY COMMENT '员工档案ID',
+                                 account_id VARCHAR(50) COMMENT '关联账号ID',
                                  org1_id VARCHAR(2) NOT NULL COMMENT '一级机构ID',
                                  org2_id VARCHAR(4) NOT NULL COMMENT '二级机构ID',
                                  org3_id VARCHAR(6) NOT NULL COMMENT '三级机构ID',
@@ -92,6 +93,7 @@ CREATE TABLE t_staff_archive (
                                  UNIQUE KEY uq_mobile (mobile),
                                  INDEX idx_org (org1_id, org2_id, org3_id),
                                  INDEX idx_staff_name (staff_name),
+                                 INDEX idx_account_id (account_id),
                                  FOREIGN KEY (org1_id) REFERENCES t_org_level1(org1_id),
                                  FOREIGN KEY (org2_id) REFERENCES t_org_level2(org2_id),
                                  FOREIGN KEY (org3_id) REFERENCES t_org_level3(org3_id),
@@ -125,16 +127,17 @@ CREATE TABLE t_department_change_log (
 CREATE TABLE t_attendance_record (
                                      id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
                                      archive_id VARCHAR(12) NOT NULL COMMENT '员工档案ID',
-                                     work_date DATE NOT NULL COMMENT '工作日期',
+                                     user_id VARCHAR(50) NOT NULL COMMENT '用户账号ID',
                                      clock_in_time DATETIME COMMENT '上班打卡时间',
                                      clock_out_time DATETIME COMMENT '下班打卡时间',
-                                     status VARCHAR(20) DEFAULT 'NORMAL' COMMENT '考勤状态(NORMAL/ABSENT/LATE/EARLY_LEAVE)',
+                                     abnormal BOOLEAN DEFAULT FALSE COMMENT '是否异常',
+                                     abnormal_reason VARCHAR(255) COMMENT '异常原因',
                                      create_by VARCHAR(20) COMMENT '创建人',
                                      create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                                      update_by VARCHAR(20) COMMENT '更新人',
                                      update_time DATETIME COMMENT '更新时间',
                                      version INT DEFAULT 1 NOT NULL COMMENT '版本号',
-                                     INDEX idx_archive_date (archive_id, work_date),
+                                     INDEX idx_user_id (user_id),
                                      FOREIGN KEY (archive_id) REFERENCES t_staff_archive(archive_id)
 ) COMMENT '考勤记录表';
 

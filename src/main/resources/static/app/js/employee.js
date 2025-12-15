@@ -9,6 +9,7 @@ let leaveApplications = []; // 请假申请记录
 let overtimeApplications = []; // 加班申请记录
 let transferApplications = []; // 调岗申请记录
 let operationLogs = []; // 操作日志
+let userProfile = null; // 用户档案信息
 
 // DOM加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
@@ -31,6 +32,12 @@ function initializeEmployeePage() {
     
     // 加载个人档案数据
     loadProfileData();
+    
+    // 默认加载一次所有数据
+    loadAttendanceData();
+    loadLeaveData();
+    loadOvertimeData();
+    loadTransferData();
 }
 
 // 绑定导航链接事件
@@ -119,6 +126,9 @@ function bindButtonEvents() {
             loadPositionOptions(this.value);
         });
     }
+    
+    // 页面加载时加载一级机构选项
+    loadOrg1Options();
 }
 
 // 显示当前用户信息
@@ -145,81 +155,63 @@ async function handleLogout() {
 
 // 上班打卡
 async function clockIn() {
-    const now = new Date();
-    const dateStr = now.toISOString().split('T')[0];
-    const timeStr = now.toTimeString().split(' ')[0];
-    
-    // 查找今天的记录或创建新记录
-    let record = attendanceRecords.find(r => r.date === dateStr);
-    if (!record) {
-        record = {
-            date: dateStr,
-            clockIn: null,
-            clockOut: null,
-            status: '缺卡'
-        };
-        attendanceRecords.push(record);
+    try {
+        const response = await fetch('/api/employee/attendance/clock-in', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+                }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.code === 200) {
+            alert(`上班打卡成功！时间：${new Date(result.data.clockInTime).toLocaleString()}`);
+            // 重新加载考勤记录
+            loadAttendanceData();
+            // 添加操作日志
+            addOperationLog('考勤打卡', `上班打卡时间: ${new Date(result.data.clockInTime).toLocaleString()}`, '成功');
+        } else {
+            alert(`打卡失败: ${result.message || '未知错误'}`);
+            // 添加操作日志
+            addOperationLog('考勤打卡', `上班打卡失败: ${result.message || '未知错误'}`, '失败');
+        }
+    } catch (error) {
+        console.error('Clock in error:', error);
+        alert('打卡失败，请稍后重试');
+        // 添加操作日志
+        addOperationLog('考勤打卡', '上班打卡失败: 系统错误', '失败');
     }
-    
-    // 设置上班时间
-    record.clockIn = timeStr;
-    updateRecordStatus(record);
-    
-    // 添加操作日志
-    addOperationLog('考勤打卡', `上班打卡时间: ${timeStr}`, '成功');
-    
-    // 更新UI
-    renderAttendanceRecords();
-    
-    alert(`上班打卡成功！时间：${timeStr}`);
 }
 
 // 下班打卡
 async function clockOut() {
-    const now = new Date();
-    const dateStr = now.toISOString().split('T')[0];
-    const timeStr = now.toTimeString().split(' ')[0];
-    
-    // 查找今天的记录或创建新记录
-    let record = attendanceRecords.find(r => r.date === dateStr);
-    if (!record) {
-        record = {
-            date: dateStr,
-            clockIn: null,
-            clockOut: null,
-            status: '缺卡'
-        };
-        attendanceRecords.push(record);
-    }
-    
-    // 设置下班时间
-    record.clockOut = timeStr;
-    updateRecordStatus(record);
-    
-    // 添加操作日志
-    addOperationLog('考勤打卡', `下班打卡时间: ${timeStr}`, '成功');
-    
-    // 更新UI
-    renderAttendanceRecords();
-    
-    alert(`下班打卡成功！时间：${timeStr}`);
-}
-
-// 更新考勤状态
-function updateRecordStatus(record) {
-    // 简单的状态判断逻辑（实际应用中应该从后端获取规则）
-    if (record.clockIn && record.clockOut) {
-        // 假设9点前为正常，9点后为迟到
-        const [hours, minutes] = record.clockIn.split(':');
-        if (parseInt(hours) < 9 || (parseInt(hours) === 9 && parseInt(minutes) === 0)) {
-            record.status = '正常';
+    try {
+        const response = await fetch('/api/employee/attendance/clock-out', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.code === 200) {
+            alert(`下班打卡成功！时间：${new Date(result.data.clockOutTime).toLocaleString()}`);
+            // 重新加载考勤记录
+            loadAttendanceData();
+            // 添加操作日志
+            addOperationLog('考勤打卡', `下班打卡时间: ${new Date(result.data.clockOutTime).toLocaleString()}`, '成功');
         } else {
-            record.status = '迟到';
+            alert(`签退失败: ${result.message || '未知错误'}`);
+            // 添加操作日志
+            addOperationLog('考勤打卡', `下班打卡失败: ${result.message || '未知错误'}`, '失败');
         }
-    } else if (record.clockIn || record.clockOut) {
-        record.status = '缺卡';
-    } else {
-        record.status = '缺卡';
+    } catch (error) {
+        console.error('Clock out error:', error);
+        alert('签退失败，请稍后重试');
+        // 添加操作日志
+        addOperationLog('考勤打卡', '下班打卡失败: 系统错误', '失败');
     }
 }
 
@@ -228,19 +220,45 @@ function renderAttendanceRecords() {
     const tbody = document.getElementById('attendance-records-body');
     if (!tbody) return;
     
+    // 检查是否有记录
+    if (!attendanceRecords || attendanceRecords.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">暂无考勤记录</td></tr>';
+        return;
+    }
+    
     // 按日期倒序排列
     const sortedRecords = [...attendanceRecords].sort((a, b) => 
-        new Date(b.date) - new Date(a.date)
+        new Date(b.clockInTime) - new Date(a.clockInTime)
     );
     
     tbody.innerHTML = '';
     sortedRecords.forEach(record => {
+        // 确保record不为null
+        if (!record) return;
+        
+        const date = record.clockInTime ? new Date(record.clockInTime).toISOString().split('T')[0] : '-';
+        const clockInTime = record.clockInTime ? new Date(record.clockInTime).toTimeString().substring(0, 5) : '-';
+        const clockOutTime = record.clockOutTime ? new Date(record.clockOutTime).toTimeString().substring(0, 5) : '-';
+        
+        // 简单的状态判断逻辑
+        let status = '缺卡';
+        if (record.clockInTime && record.clockOutTime) {
+            const [hours, minutes] = clockInTime.split(':');
+            if (parseInt(hours) < 9 || (parseInt(hours) === 9 && parseInt(minutes) === 0)) {
+                status = '正常';
+            } else {
+                status = '迟到';
+            }
+        } else if (record.clockInTime || record.clockOutTime) {
+            status = '缺卡';
+        }
+        
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${record.date}</td>
-            <td>${record.clockIn || '-'}</td>
-            <td>${record.clockOut || '-'}</td>
-            <td>${record.status}</td>
+            <td>${date}</td>
+            <td>${clockInTime}</td>
+            <td>${clockOutTime}</td>
+            <td>${status}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -263,31 +281,44 @@ async function submitLeaveApplication(e) {
         return;
     }
     
-    // 创建申请记录
-    const application = {
-        id: Date.now(), // 简单ID生成
-        applyDate: new Date().toISOString().split('T')[0],
-        leaveType,
-        leaveDays,
-        startDate,
-        endDate,
-        reason,
-        status: '待定' // 默认状态
-    };
-    
-    // 添加到申请列表
-    leaveApplications.push(application);
-    
-    // 添加操作日志
-    addOperationLog('请假申请', `提交${getLeaveTypeName(leaveType)}申请，天数:${leaveDays}`, '待审批');
-    
-    // 更新UI
-    renderLeaveApplications();
-    
-    // 重置表单
-    document.getElementById('leave-application-form').reset();
-    
-    alert('请假申请已提交');
+    try {
+        const requestData = {
+            leaveType,
+            leaveDays: parseFloat(leaveDays),
+            startDate: startDate + 'T00:00:00',
+            endDate: endDate + 'T00:00:00',
+            reason
+        };
+        
+        const response = await fetch('/api/employee/leave', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.code === 200) {
+            alert('请假申请已提交');
+            // 重置表单
+            document.getElementById('leave-application-form').reset();
+            // 重新加载请假数据
+            loadLeaveData();
+            // 添加操作日志
+            addOperationLog('请假申请', `提交了${getLeaveTypeDescription(leaveType)}申请，天数:${leaveDays}`, '待审批');
+        } else {
+            alert(`提交失败: ${result.message || '未知错误'}`);
+            // 添加操作日志
+            addOperationLog('请假申请', `提交${getLeaveTypeDescription(leaveType)}申请失败: ${result.message || '未知错误'}`, '失败');
+        }
+    } catch (error) {
+        console.error('Submit leave application error:', error);
+        alert('提交失败，请稍后重试');
+        // 添加操作日志
+        addOperationLog('请假申请', '提交请假申请失败: 系统错误', '失败');
+    }
 }
 
 // 渲染请假申请记录
@@ -299,11 +330,13 @@ function renderLeaveApplications() {
     leaveApplications.forEach(app => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${app.applyDate}</td>
+            <td>${app.createTime ? new Date(app.createTime).toISOString().split('T')[0] : '-'}</td>
             <td>${getLeaveTypeDescription(app.leaveType)}</td>
             <td>${app.leaveDays}</td>
-            <td>${app.startDate} 至 ${app.endDate}</td>
-            <td>${getApprovalStatusDescription(app.status)}</td>
+            <td>${getApprovalStatusDescription(app.approvalStatus)}</td>
+            <td>
+                <button class="btn-small btn-primary" onclick="viewLeaveApplication(${app.id})">查看详情</button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
@@ -326,13 +359,13 @@ function viewLeaveApplication(id) {
     const app = leaveApplications.find(a => a.id === id);
     if (app) {
         alert(`请假详情：
-申请日期: ${app.applyDate}
-请假类型: ${getLeaveTypeName(app.leaveType)}
+申请日期: ${app.createTime ? new Date(app.createTime).toISOString().split('T')[0] : '-'}
+请假类型: ${getLeaveTypeDescription(app.leaveType)}
 请假天数: ${app.leaveDays}
-开始日期: ${app.startDate}
-结束日期: ${app.endDate}
+开始日期: ${app.startDate ? new Date(app.startDate).toISOString().split('T')[0] : '-'}
+结束日期: ${app.endDate ? new Date(app.endDate).toISOString().split('T')[0] : '-'}
 请假原因: ${app.reason}
-状态: ${app.status}`);
+状态: ${getApprovalStatusDescription(app.approvalStatus)}`);
     }
 }
 
@@ -351,29 +384,42 @@ async function submitOvertimeApplication(e) {
         return;
     }
     
-    // 创建申请记录
-    const application = {
-        id: Date.now(), // 简单ID生成
-        applyDate: new Date().toISOString().split('T')[0],
-        overtimeDate,
-        overtimeHours,
-        reason,
-        status: '待定' // 默认状态
-    };
-    
-    // 添加到申请列表
-    overtimeApplications.push(application);
-    
-    // 添加操作日志
-    addOperationLog('加班申请', `提交加班申请，小时数:${overtimeHours}`, '待审批');
-    
-    // 更新UI
-    renderOvertimeApplications();
-    
-    // 重置表单
-    document.getElementById('overtime-application-form').reset();
-    
-    alert('加班申请已提交');
+    try {
+        const requestData = {
+            workDate: overtimeDate,
+            overtimeHours: parseFloat(overtimeHours),
+            reason
+        };
+        
+        const response = await fetch('/api/employee/overtime', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.code === 200) {
+            alert('加班申请已提交');
+            // 重置表单
+            document.getElementById('overtime-application-form').reset();
+            // 重新加载加班数据
+            loadOvertimeData();
+            // 添加操作日志
+            addOperationLog('加班申请', `提交了加班申请，日期:${overtimeDate}，小时数:${overtimeHours}`, '待审批');
+        } else {
+            alert(`提交失败: ${result.message || '未知错误'}`);
+            // 添加操作日志
+            addOperationLog('加班申请', `提交加班申请失败: ${result.message || '未知错误'}`, '失败');
+        }
+    } catch (error) {
+        console.error('Submit overtime application error:', error);
+        alert('提交失败，请稍后重试');
+        // 添加操作日志
+        addOperationLog('加班申请', '提交加班申请失败: 系统错误', '失败');
+    }
 }
 
 // 渲染加班申请记录
@@ -385,11 +431,13 @@ function renderOvertimeApplications() {
     overtimeApplications.forEach(app => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${app.applyDate}</td>
+            <td>${app.createTime ? new Date(app.createTime).toISOString().split('T')[0] : '-'}</td>
             <td>${app.workDate}</td>
-            <td>${app.hours}</td>
-            <td>${app.reason}</td>
-            <td>${getApprovalStatusDescription(app.status)}</td>
+            <td>${app.overtimeHours}</td>
+            <td>${getApprovalStatusDescription(app.approvalStatus)}</td>
+            <td>
+                <button class="btn-small btn-primary" onclick="viewOvertimeApplication(${app.id})">查看详情</button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
@@ -400,11 +448,11 @@ function viewOvertimeApplication(id) {
     const app = overtimeApplications.find(a => a.id === id);
     if (app) {
         alert(`加班详情：
-申请日期: ${app.applyDate}
-加班日期: ${app.overtimeDate}
+申请日期: ${app.createTime ? new Date(app.createTime).toISOString().split('T')[0] : '-'}
+加班日期: ${app.workDate}
 加班小时: ${app.overtimeHours}
 加班原因: ${app.reason}
-状态: ${app.status}`);
+状态: ${getApprovalStatusDescription(app.approvalStatus)}`);
     }
 }
 
@@ -429,14 +477,20 @@ function closeTransferModal() {
 // 加载一级机构选项
 async function loadOrg1Options() {
     try {
-        // 在实际应用中，这里应该从后端获取一级机构数据
         const org1Select = document.getElementById('transfer-org1');
         if (org1Select) {
-            // 模拟数据
-            org1Select.innerHTML = '<option value="">请选择</option>' +
-                '<option value="01">技术部</option>' +
-                '<option value="02">人事部</option>' +
-                '<option value="03">财务部</option>';
+            // 从后端获取一级机构数据
+            const response = await fetch('/api/hr-spec/org/level1');
+            const org1Data = await response.json();
+            
+            org1Select.innerHTML = '<option value="">请选择</option>';
+            
+            org1Data.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.org1Id;
+                option.textContent = org.org1Name;
+                org1Select.appendChild(option);
+            });
         }
     } catch (error) {
         console.error('Load org1 options error:', error);
@@ -456,20 +510,17 @@ async function loadOrg2Options(org1Id) {
             if (org3Select) org3Select.innerHTML = '<option value="">请选择</option>';
             if (positionSelect) positionSelect.innerHTML = '<option value="">请选择</option>';
             
-            // 在实际应用中，这里应该根据org1Id从后端获取二级机构数据
-            // 模拟数据
-            if (org1Id === '01') {
-                org2Select.innerHTML = '<option value="">请选择</option>' +
-                    '<option value="0101">开发组</option>' +
-                    '<option value="0102">测试组</option>';
-            } else if (org1Id === '02') {
-                org2Select.innerHTML = '<option value="">请选择</option>' +
-                    '<option value="0201">招聘组</option>' +
-                    '<option value="0202">培训组</option>';
-            } else if (org1Id === '03') {
-                org2Select.innerHTML = '<option value="">请选择</option>' +
-                    '<option value="0301">会计组</option>' +
-                    '<option value="0302">审计组</option>';
+            // 根据org1Id从后端获取二级机构数据
+            if (org1Id) {
+                const response = await fetch(`/api/hr-spec/org/level2/by-org1/${org1Id}`);
+                const org2Data = await response.json();
+                
+                org2Data.forEach(org => {
+                    const option = document.createElement('option');
+                    option.value = org.org2Id;
+                    option.textContent = org.org2Name;
+                    org2Select.appendChild(option);
+                });
             }
         }
     } catch (error) {
@@ -488,16 +539,17 @@ async function loadOrg3Options(org2Id) {
             org3Select.innerHTML = '<option value="">请选择</option>';
             if (positionSelect) positionSelect.innerHTML = '<option value="">请选择</option>';
             
-            // 在实际应用中，这里应该根据org2Id从后端获取三级机构数据
-            // 模拟数据
-            if (org2Id === '0101') {
-                org3Select.innerHTML = '<option value="">请选择</option>' +
-                    '<option value="010101">后端开发</option>' +
-                    '<option value="010102">前端开发</option>';
-            } else if (org2Id === '0102') {
-                org3Select.innerHTML = '<option value="">请选择</option>' +
-                    '<option value="010201">功能测试</option>' +
-                    '<option value="010202">性能测试</option>';
+            // 根据org2Id从后端获取三级机构数据
+            if (org2Id) {
+                const response = await fetch(`/api/hr-spec/org/level3/by-org2/${org2Id}`);
+                const org3Data = await response.json();
+                
+                org3Data.forEach(org => {
+                    const option = document.createElement('option');
+                    option.value = org.org3Id;
+                    option.textContent = org.org3Name;
+                    org3Select.appendChild(option);
+                });
             }
         }
     } catch (error) {
@@ -514,16 +566,17 @@ async function loadPositionOptions(org3Id) {
             // 清空下级选项
             positionSelect.innerHTML = '<option value="">请选择</option>';
             
-            // 在实际应用中，这里应该根据org3Id从后端获取职位数据
-            // 模拟数据
-            if (org3Id === '010101') {
-                positionSelect.innerHTML = '<option value="">请选择</option>' +
-                    '<option value="P001">高级后端工程师</option>' +
-                    '<option value="P002">后端工程师</option>';
-            } else if (org3Id === '010102') {
-                positionSelect.innerHTML = '<option value="">请选择</option>' +
-                    '<option value="P003">高级前端工程师</option>' +
-                    '<option value="P004">前端工程师</option>';
+            // 根据org3Id从后端获取职位数据
+            if (org3Id) {
+                const response = await fetch(`/api/hr-spec/positions/by-org3/${org3Id}`);
+                const positions = await response.json();
+                
+                positions.forEach(position => {
+                    const option = document.createElement('option');
+                    option.value = position.positionId;
+                    option.textContent = position.positionName;
+                    positionSelect.appendChild(option);
+                });
             }
         }
     } catch (error) {
@@ -548,34 +601,51 @@ async function submitTransferApplication(e) {
         return;
     }
     
-    // 创建申请记录
-    const application = {
-        id: Date.now(), // 简单ID生成
-        applyDate: new Date().toISOString().split('T')[0],
-        targetOrg1: org1,
-        targetOrg2: org2,
-        targetOrg3: org3,
-        targetPosition: position,
-        reason,
-        status: '待定' // 默认状态
-    };
-    
-    // 添加到申请列表
-    transferApplications.push(application);
-    
-    // 添加操作日志
-    addOperationLog('调岗申请', `申请调至${org1}-${org2}-${org3}部门，职位:${getPositionName(position)}`, '待审批');
-    
-    // 更新UI
-    renderTransferApplications();
-    
-    // 关闭模态框
-    closeTransferModal();
-    
-    // 重置表单
-    document.getElementById('transfer-form').reset();
-    
-    alert('调岗申请已提交');
+    try {
+        // 准备请求数据
+        const requestData = {
+            newOrg1Id: org1,
+            newOrg2Id: org2,
+            newOrg3Id: org3,
+            newPositionId: position,
+            changeReason: reason
+        };
+        
+        // 发送到后端保存
+        const response = await fetch('/api/employee/transfer-request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.code === 200) {
+            // 添加操作日志
+            addOperationLog('调岗申请', `申请调至${org1}-${org2}-${org3}部门，职位:${getPositionName(position)}`, '待审批');
+            
+            // 关闭模态框
+            closeTransferModal();
+            
+            // 重置表单
+            document.getElementById('transfer-form').reset();
+            
+            alert('调岗申请已提交');
+            // 重新加载调岗申请数据
+            loadTransferData();
+        } else {
+            alert(`提交失败: ${result.message || '未知错误'}`);
+            // 添加操作日志
+            addOperationLog('调岗申请', `提交调岗申请失败: ${result.message || '未知错误'}`, '失败');
+        }
+    } catch (error) {
+        console.error('Submit transfer application error:', error);
+        alert('提交失败，请稍后重试');
+        // 添加操作日志
+        addOperationLog('调岗申请', '提交调岗申请失败: 系统错误', '失败');
+    }
 }
 
 // 渲染调岗申请记录
@@ -662,22 +732,51 @@ function renderOperationLogs() {
 
 // 更新个人信息
 async function updateProfile() {
-    // 在实际应用中，这里应该发送请求到后端更新数据
-    alert('个人信息已更新');
-    
-    // 获取表单数据
-    const staffName = document.getElementById('profile-staff-name').value;
-    const gender = document.getElementById('profile-gender').value;
-    const age = document.getElementById('profile-age').value;
-    const mobile = document.getElementById('profile-mobile').value;
-    const phone = document.getElementById('profile-phone').value;
-    const email = document.getElementById('profile-email').value;
-    const bio = document.getElementById('profile-bio').value;
-    
-    // 添加操作日志
-    addOperationLog('个人信息更新', '更新了个人信息', '成功');
-    
-    console.log('Updating profile:', { staffName, gender, age, mobile, phone, email, bio });
+    try {
+        // 获取表单数据
+        const staffName = document.getElementById('profile-staff-name').value;
+        const gender = document.getElementById('profile-gender').value;
+        const age = document.getElementById('profile-age').value;
+        const mobile = document.getElementById('profile-mobile').value;
+        const phone = document.getElementById('profile-phone').value;
+        const email = document.getElementById('profile-email').value;
+        const bio = document.getElementById('profile-bio').value;
+        
+        const requestData = {
+            staffName,
+            gender,
+            age: age ? parseInt(age) : null,
+            mobile,
+            phone,
+            email,
+            bio
+        };
+        
+        const response = await fetch('/api/employee/profile', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            alert('个人信息已更新');
+            // 更新本地缓存
+            userProfile = result.data;
+            // 添加操作日志
+            addOperationLog('个人信息更新', '更新了个人信息', '成功');
+            // 重新加载个人档案数据以确保UI同步
+            loadProfileData();
+        } else {
+            alert(`更新失败: ${result.message || '未知错误'}`);
+        }
+    } catch (error) {
+        console.error('Update profile error:', error);
+        alert('更新失败，请稍后重试');
+    }
 }
 
 // 加载仪表板数据
@@ -770,7 +869,6 @@ function showPane(paneId) {
         // 如果是个人档案面板，加载数据
         if (paneId === 'profile') {
             loadProfileData();
-            loadTransferData();
         }
         
         // 如果是考勤面板，加载考勤数据
@@ -798,18 +896,15 @@ function showPane(paneId) {
 // 加载考勤数据
 async function loadAttendanceData() {
     try {
-        // 在实际应用中，这里应该从后端获取考勤数据
-        // 目前使用模拟数据
-        const today = new Date().toISOString().split('T')[0];
-        attendanceRecords = [
-            {
-                date: today,
-                clockIn: null,
-                clockOut: null,
-                status: '缺卡'
-            }
-        ];
-        renderAttendanceRecords();
+        const response = await fetch('/api/employee/attendance');
+        const result = await response.json();
+        
+        if (response.ok && result.code === 200) {
+            attendanceRecords = result.data || [];
+            renderAttendanceRecords();
+        } else {
+            console.error('Load attendance data error:', result.message);
+        }
     } catch (error) {
         console.error('Load attendance data error:', error);
     }
@@ -818,31 +913,15 @@ async function loadAttendanceData() {
 // 加载请假数据
 async function loadLeaveData() {
     try {
-        // 在实际应用中，这里应该从后端获取请假数据
-        // 目前使用模拟数据
-        leaveApplications = [
-            {
-                id: 1,
-                applyDate: '2025-12-01',
-                leaveType: 'annual',
-                leaveDays: 2,
-                startDate: '2025-12-10',
-                endDate: '2025-12-11',
-                reason: '年假',
-                status: '通过'
-            },
-            {
-                id: 2,
-                applyDate: '2025-12-05',
-                leaveType: 'sick',
-                leaveDays: 1,
-                startDate: '2025-12-15',
-                endDate: '2025-12-15',
-                reason: '感冒',
-                status: '未通过'
-            }
-        ];
-        renderLeaveApplications();
+        const response = await fetch('/api/employee/leave');
+        const result = await response.json();
+        
+        if (response.ok && result.code === 200) {
+            leaveApplications = result.data || [];
+            renderLeaveApplications();
+        } else {
+            console.error('Load leave data error:', result.message);
+        }
     } catch (error) {
         console.error('Load leave data error:', error);
     }
@@ -851,27 +930,15 @@ async function loadLeaveData() {
 // 加载加班数据
 async function loadOvertimeData() {
     try {
-        // 在实际应用中，这里应该从后端获取加班数据
-        // 目前使用模拟数据
-        overtimeApplications = [
-            {
-                id: 1,
-                applyDate: '2025-12-01',
-                overtimeDate: '2025-12-01',
-                overtimeHours: 2,
-                reason: '项目紧急上线',
-                status: '通过'
-            },
-            {
-                id: 2,
-                applyDate: '2025-12-03',
-                overtimeDate: '2025-12-05',
-                overtimeHours: 3,
-                reason: '处理客户问题',
-                status: '待定'
-            }
-        ];
-        renderOvertimeApplications();
+        const response = await fetch('/api/employee/overtime');
+        const result = await response.json();
+        
+        if (response.ok && result.code === 200) {
+            overtimeApplications = result.data || [];
+            renderOvertimeApplications();
+        } else {
+            console.error('Load overtime data error:', result.message);
+        }
     } catch (error) {
         console.error('Load overtime data error:', error);
     }
@@ -913,23 +980,56 @@ async function loadTransferData() {
 // 加载个人档案数据
 async function loadProfileData() {
     try {
-        // 在实际应用中，这里应该从后端获取员工档案数据
-        // 模拟数据（初始为空）
-        document.getElementById('staff-name').textContent = '-';
-        document.getElementById('archive-id').textContent = 'EMP0001';
-        document.getElementById('position-name').textContent = '-';
-        document.getElementById('department-name').textContent = '-';
+        const response = await fetch('/api/employee/profile');
+        const result = await response.json();
         
-        document.getElementById('profile-staff-name').value = '';
-        document.getElementById('profile-gender').value = '';
-        document.getElementById('profile-age').value = '';
-        document.getElementById('profile-mobile').value = '';
-        document.getElementById('profile-phone').value = '';
-        document.getElementById('profile-email').value = '';
-        document.getElementById('profile-bio').value = '';
+        if (response.ok && result.code === 200) {
+            userProfile = result.data;
+            
+            // 填充表单数据
+            if (userProfile) {
+                document.getElementById('staff-name').textContent = userProfile.staffName || '-';
+                document.getElementById('archive-id').textContent = userProfile.archiveId || '-';
+                document.getElementById('position-name').textContent = userProfile.positionId || '-';
+                document.getElementById('department-name').textContent = getOrgFullName(
+                    userProfile.org1Id, userProfile.org2Id, userProfile.org3Id) || '-';
+                
+                document.getElementById('profile-staff-name').value = userProfile.staffName || '';
+                document.getElementById('profile-gender').value = userProfile.gender || '';
+                document.getElementById('profile-age').value = userProfile.age || '';
+                document.getElementById('profile-mobile').value = userProfile.mobile || '';
+                document.getElementById('profile-phone').value = userProfile.phone || '';
+                document.getElementById('profile-email').value = userProfile.email || '';
+                document.getElementById('profile-bio').value = userProfile.bio || '';
+            }
+        } else {
+            console.error('Load profile data error:', result.message);
+        }
     } catch (error) {
         console.error('Load profile data error:', error);
     }
+}
+
+// 获取组织全名
+function getOrgFullName(org1Id, org2Id, org3Id) {
+    // 模拟数据映射
+    const orgNames = {
+        '01': '技术部',
+        '0101': '研发部',
+        '010101': '后端开发组',
+        '010102': '前端开发组',
+        '0102': '测试部',
+        '010201': '功能测试组',
+        '02': '人事部',
+        '0201': '招聘组',
+        '020101': '校园招聘组'
+    };
+    
+    const org1Name = orgNames[org1Id] || org1Id;
+    const org2Name = orgNames[org2Id] || org2Id;
+    const org3Name = orgNames[org3Id] || org3Id;
+    
+    return `${org1Name} > ${org2Name} > ${org3Name}`;
 }
 
 // 获取审批状态描述
@@ -937,6 +1037,8 @@ function getApprovalStatusDescription(status) {
     switch (status) {
         case 'PENDING':
             return '待审批';
+        case 'PENDING_FINAL_APPROVAL':
+            return '待终审';
         case 'APPROVED':
             return '已批准';
         case 'REJECTED':

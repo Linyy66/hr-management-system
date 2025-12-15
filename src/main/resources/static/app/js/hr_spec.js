@@ -67,6 +67,12 @@ function bindButtonEvents() {
         addStaffForm.addEventListener('submit', handleAddStaffSubmit);
     }
     
+    // 员工账号选择事件
+    const staffAccountSelect = document.getElementById('staff-account');
+    if (staffAccountSelect) {
+        staffAccountSelect.addEventListener('change', handleStaffAccountChange);
+    }
+    
     // 机构级联选择
     const org1Select = document.getElementById('staff-org1');
     const org2Select = document.getElementById('staff-org2');
@@ -131,26 +137,150 @@ async function handleLogout() {
 }
 
 // 切换新增员工档案表单显示
-function toggleAddStaffForm() {
-    const formSection = document.querySelector('#staff-archive .card:nth-child(2)');
+async function toggleAddStaffForm() {
+    const formSection = document.getElementById('add-staff-form-section');
     if (formSection) {
-        formSection.style.display = formSection.style.display === 'none' ? 'block' : 'none';
-        // 加载一级机构选项
-        loadOrg1Options();
+        const isHidden = formSection.style.display === 'none';
+        formSection.style.display = isHidden ? 'block' : 'none';
+        
+        // 如果是显示表单，则加载员工账号和一级机构选项
+        if (isHidden) {
+            await loadEmployeeAccounts();
+            await loadOrg1Options();
+        }
     }
 }
 
+// 加载员工账号选项
+async function loadEmployeeAccounts() {
+    const accountSelect = document.getElementById('staff-account');
+    if (accountSelect) {
+        accountSelect.innerHTML = '<option value="">请选择已注册的员工账号</option>';
+        
+        try {
+            // 获取所有普通员工用户
+            const response = await fetch('/api/hr-spec/users');
+            const users = await response.json();
+            
+            // 筛选普通员工（EMPLOYEE角色）
+            const employees = users.filter(user => user.role === 'EMPLOYEE');
+            
+            employees.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.username;
+                option.textContent = user.username;
+                accountSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Load employee accounts error:', error);
+        }
+    }
+}
+
+// 处理员工账号选择变化
+async function handleStaffAccountChange() {
+    const accountId = this.value;
+    const nameInput = document.getElementById('staff-name');
+    const archiveIdInput = document.getElementById('staff-archive-id');
+    const genderSelect = document.getElementById('staff-gender');
+    const ageInput = document.getElementById('staff-age');
+    const mobileInput = document.getElementById('staff-mobile');
+    const phoneInput = document.getElementById('staff-phone');
+    const emailInput = document.getElementById('staff-email');
+    const bioTextarea = document.getElementById('staff-bio');
+    
+    // 重置并禁用表单字段
+    resetAndDisableFields();
+    
+    if (!accountId) {
+        return;
+    }
+    
+    try {
+        // 在实际应用中，这里应该从后端获取员工的个人信息
+        // 目前使用模拟数据
+        nameInput.value = '张三'; // 模拟数据
+        archiveIdInput.value = 'EMP' + Math.floor(Math.random() * 10000); // 模拟员工编号
+        
+        // 启用可编辑字段
+        genderSelect.disabled = false;
+        ageInput.disabled = false;
+        mobileInput.disabled = false;
+        phoneInput.disabled = false;
+        emailInput.disabled = false;
+        bioTextarea.disabled = false;
+        
+    } catch (error) {
+        console.error('Load staff info error:', error);
+    }
+}
+
+// 重置并禁用表单字段
+function resetAndDisableFields() {
+    // 重置字段
+    document.getElementById('staff-name').value = '';
+    document.getElementById('staff-archive-id').value = '';
+    document.getElementById('staff-gender').value = '';
+    document.getElementById('staff-age').value = '';
+    document.getElementById('staff-mobile').value = '';
+    document.getElementById('staff-phone').value = '';
+    document.getElementById('staff-email').value = '';
+    document.getElementById('staff-bio').value = '';
+    
+    // 禁用字段
+    document.getElementById('staff-gender').disabled = true;
+    document.getElementById('staff-age').disabled = true;
+    document.getElementById('staff-mobile').disabled = true;
+    document.getElementById('staff-phone').disabled = true;
+    document.getElementById('staff-email').disabled = true;
+    document.getElementById('staff-bio').disabled = true;
+    
+    // 重置机构和职位选择
+    document.getElementById('staff-org1').value = '';
+    document.getElementById('staff-org2').innerHTML = '<option value="">请选择</option>';
+    document.getElementById('staff-org3').innerHTML = '<option value="">请选择</option>';
+    document.getElementById('staff-position').innerHTML = '<option value="">请选择</option>';
+}
+
 // 加载一级机构选项
-function loadOrg1Options() {
+async function loadOrg1Options() {
     const org1Select = document.getElementById('staff-org1');
     if (org1Select) {
         org1Select.innerHTML = '<option value="">请选择</option>';
-        orgData.level1.forEach(org => {
-            const option = document.createElement('option');
-            option.value = org.org1Id;
-            option.textContent = org.org1Name;
-            org1Select.appendChild(option);
-        });
+        
+        try {
+            const response = await fetch('/api/hr-spec/org/level1');
+            const org1List = await response.json();
+            
+            org1List.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.org1Id;
+                option.textContent = org.org1Name;
+                org1Select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Load org1 options error:', error);
+        }
+    }
+    
+    // 同时为调岗申请模态框加载一级机构选项
+    const transferOrg1Select = document.getElementById('transfer-org1');
+    if (transferOrg1Select) {
+        transferOrg1Select.innerHTML = '<option value="">请选择</option>';
+        
+        try {
+            const response = await fetch('/api/hr-spec/org/level1');
+            const org1List = await response.json();
+            
+            org1List.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.org1Id;
+                option.textContent = org.org1Name;
+                transferOrg1Select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Load org1 options for transfer error:', error);
+        }
     }
 }
 
@@ -266,7 +396,8 @@ async function handleAddStaffSubmit(e) {
     
     try {
         const formData = {
-            archiveId: account, // 使用账号作为员工档案ID
+            archiveId: document.getElementById('staff-archive-id').value, // 使用生成的员工编号
+            accountId: account, // 添加账号ID
             staffName: name,
             gender: gender,
             age: parseInt(age),
@@ -293,6 +424,10 @@ async function handleAddStaffSubmit(e) {
             
             // 重置表单
             document.getElementById('add-staff-form').reset();
+            resetAndDisableFields();
+            
+            // 隐藏表单
+            document.getElementById('add-staff-form-section').style.display = 'none';
             
             // 重新加载员工档案列表
             loadStaffArchiveData();
@@ -305,6 +440,13 @@ async function handleAddStaffSubmit(e) {
         console.error('Create staff archive error:', error);
         alert('创建员工档案失败，请稍后重试');
     }
+}
+
+// 取消新增员工档案
+function cancelAddStaff() {
+    document.getElementById('add-staff-form').reset();
+    resetAndDisableFields();
+    document.getElementById('add-staff-form-section').style.display = 'none';
 }
 
 // 加载仪表板数据
@@ -330,19 +472,19 @@ async function loadDashboardData() {
 async function loadOrgData() {
     try {
         // 加载一级机构
-        const org1Response = await fetch('/api/admin/org/level1');
+        const org1Response = await fetch('/api/hr-spec/org/level1');
         const org1Data = await org1Response.json();
-        orgData.level1 = org1Data.data || [];
+        orgData.level1 = org1Data || [];
         
         // 加载二级机构
-        const org2Response = await fetch('/api/admin/org/level2');
+        const org2Response = await fetch('/api/hr-spec/org/level2');
         const org2Data = await org2Response.json();
-        orgData.level2 = org2Data.data || [];
+        orgData.level2 = org2Data || [];
         
         // 加载三级机构
-        const org3Response = await fetch('/api/admin/org/level3');
+        const org3Response = await fetch('/api/hr-spec/org/level3');
         const org3Data = await org3Response.json();
-        orgData.level3 = org3Data.data || [];
+        orgData.level3 = org3Data || [];
         
         // 如果当前在组织架构面板，显示组织架构
         if (currentPane === 'org') {
@@ -778,16 +920,39 @@ async function loadStaffArchiveData() {
         }
     } catch (error) {
         console.error('Load staff archive data error:', error);
+        alert('加载员工档案数据失败');
     }
 }
 
 // 获取组织全名
 function getOrgFullName(org1Id, org2Id, org3Id) {
-    const org1 = orgData.level1.find(org => org.org1Id === org1Id);
-    const org2 = orgData.level2.find(org => org.org2Id === org2Id);
-    const org3 = orgData.level3.find(org => org.org3Id === org3Id);
+    // 尝试从全局orgData中获取组织名称
+    if (typeof orgData !== 'undefined' && orgData.level1 && orgData.level2 && orgData.level3) {
+        const org1 = orgData.level1.find(org => org.org1Id === org1Id);
+        const org2 = orgData.level2.find(org => org.org2Id === org2Id);
+        const org3 = orgData.level3.find(org => org.org3Id === org3Id);
+        
+        return `${org1 ? org1.org1Name : org1Id} > ${org2 ? org2.org2Name : org2Id} > ${org3 ? org3.org3Name : org3Id}`;
+    }
     
-    return `${org1 ? org1.org1Name : ''} > ${org2 ? org2.org2Name : ''} > ${org3 ? org3.org3Name : ''}`;
+    // 如果没有全局orgData，则使用模拟数据
+    const orgNames = {
+        '01': '技术部',
+        '0101': '研发部',
+        '010101': '后端开发组',
+        '010102': '前端开发组',
+        '0102': '测试部',
+        '010201': '功能测试组',
+        '02': '人事部',
+        '0201': '招聘组',
+        '020101': '校园招聘组'
+    };
+    
+    const org1Name = orgNames[org1Id] || org1Id;
+    const org2Name = orgNames[org2Id] || org2Id;
+    const org3Name = orgNames[org3Id] || org3Id;
+    
+    return `${org1Name} > ${org2Name} > ${org3Name}`;
 }
 
 // 获取员工档案状态描述
@@ -840,65 +1005,36 @@ async function deleteStaffArchive(id) {
 // 加载考勤数据
 async function loadAttendanceData() {
     try {
-        // 模拟从后端获取考勤数据
-        const normalAttendances = [
-            {
-                workId: 'W001',
-                staffName: '张三',
-                staffAccount: 'zhangsan',
-                date: '2025-12-14',
-                clockIn: '09:00',
-                clockOut: '18:00',
-                status: '正常'
-            },
-            {
-                workId: 'W002',
-                staffName: '李四',
-                staffAccount: 'lisi',
-                date: '2025-12-14',
-                clockIn: '08:50',
-                clockOut: '17:55',
-                status: '正常'
-            }
-        ];
+        // 从后端获取考勤数据
+        const response = await fetch('/api/hr-spec/attendance-records');
+        const attendanceRecords = await response.json();
         
-        const abnormalAttendances = [
-            {
-                workId: 'W003',
-                staffName: '王五',
-                staffAccount: 'wangwu',
-                date: '2025-12-14',
-                clockIn: '09:30',
-                clockOut: '18:00',
-                status: '迟到'
-            },
-            {
-                workId: 'W004',
-                staffName: '赵六',
-                staffAccount: 'zhaoliu',
-                date: '2025-12-14',
-                clockIn: '',
-                clockOut: '',
-                status: '缺卡'
-            }
-        ];
+        // 分离正常和异常记录（简化处理）
+        const normalAttendances = attendanceRecords.filter(record => 
+            record.clockInTime && record.clockOutTime);
+        const abnormalAttendances = attendanceRecords.filter(record => 
+            !record.clockInTime || !record.clockOutTime);
         
         // 渲染正常考勤记录
         const normalBody = document.getElementById('normal-attendance-body');
         if (normalBody) {
             normalBody.innerHTML = '';
             normalAttendances.forEach(record => {
+                const date = record.clockInTime ? new Date(record.clockInTime).toISOString().split('T')[0] : '-';
+                const clockIn = record.clockInTime ? new Date(record.clockInTime).toTimeString().substring(0, 5) : '-';
+                const clockOut = record.clockOutTime ? new Date(record.clockOutTime).toTimeString().substring(0, 5) : '-';
+                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${record.workId}</td>
-                    <td>${record.staffName}</td>
-                    <td>${record.staffAccount}</td>
-                    <td>${record.date}</td>
-                    <td>${record.clockIn || '-'}</td>
-                    <td>${record.clockOut || '-'}</td>
-                    <td>${record.status}</td>
+                    <td>${record.id}</td>
+                    <td>${record.userId}</td>
+                    <td>${record.userId}</td>
+                    <td>${date}</td>
+                    <td>${clockIn}</td>
+                    <td>${clockOut}</td>
+                    <td>正常</td>
                     <td>
-                        <button class="btn-small btn-danger" onclick="markAsAbnormal('${record.workId}')">标记异常</button>
+                        <button class="btn-small btn-danger" onclick="markAsAbnormal('${record.id}')">标记异常</button>
                     </td>
                 `;
                 normalBody.appendChild(tr);
@@ -910,17 +1046,22 @@ async function loadAttendanceData() {
         if (abnormalBody) {
             abnormalBody.innerHTML = '';
             abnormalAttendances.forEach(record => {
+                const date = record.clockInTime ? new Date(record.clockInTime).toISOString().split('T')[0] : '-';
+                const clockIn = record.clockInTime ? new Date(record.clockInTime).toTimeString().substring(0, 5) : '-';
+                const clockOut = record.clockOutTime ? new Date(record.clockOutTime).toTimeString().substring(0, 5) : '-';
+                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${record.workId}</td>
-                    <td>${record.staffName}</td>
-                    <td>${record.staffAccount}</td>
-                    <td>${record.date}</td>
-                    <td>${record.clockIn || '-'}</td>
-                    <td>${record.clockOut || '-'}</td>
-                    <td>${record.status}</td>
+                    <td>${record.id}</td>
+                    <td>${record.userId}</td>
+                    <td>${record.userId}</td>
+                    <td>${date}</td>
+                    <td>${clockIn}</td>
+                    <td>${clockOut}</td>
+                    <td>异常</td>
                     <td>
-                        <button class="btn-small btn-primary" onclick="approveAttendance('${record.workId}')">审批</button>
+                        <button class="btn-small btn-primary" onclick="markAsNormal('${record.id}')">标记正常</button>
+                        <button class="btn-small btn-secondary" onclick="viewAttendanceDetails('${record.id}')">查看详情</button>
                     </td>
                 `;
                 abnormalBody.appendChild(tr);
@@ -938,29 +1079,55 @@ async function markAsAbnormal(workId) {
     }
     
     try {
-        // 模拟标记为异常的操作
-        alert(`考勤记录 ${workId} 已标记为异常`);
-        // 重新加载数据
-        loadAttendanceData();
+        const response = await fetch(`/api/hr-spec/attendance-records/${workId}/mark-abnormal`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify('考勤异常')
+        });
+        
+        if (response.ok) {
+            alert(`考勤记录 ${workId} 已标记为异常`);
+            // 重新加载数据
+            loadAttendanceData();
+        } else {
+            alert('操作失败，请稍后重试');
+        }
     } catch (error) {
         console.error('Mark as abnormal error:', error);
         alert('操作失败，请稍后重试');
     }
 }
 
-// 审批考勤记录
-async function approveAttendance(workId) {
-    if (!confirm('确定要审批通过此考勤异常记录吗？')) {
+// 标记为正常
+async function markAsNormal(workId) {
+    if (!confirm('确定要将此考勤记录标记为正常吗？')) {
         return;
     }
     
     try {
-        // 模拟审批操作
-        alert(`考勤异常记录 ${workId} 已审批通过`);
-        // 重新加载数据
-        loadAttendanceData();
+        const response = await fetch(`/api/hr-spec/attendance-records/${workId}/mark-normal`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            alert(`考勤记录 ${workId} 已标记为正常`);
+            // 重新加载数据
+            loadAttendanceData();
+        } else {
+            alert('操作失败，请稍后重试');
+        }
     } catch (error) {
-        console.error('Approve attendance error:', error);
+        console.error('Mark as normal error:', error);
         alert('操作失败，请稍后重试');
     }
+}
+
+// 查看查看考勤详情
+function viewAttendanceDetails(workId) {
+    alert(`查看考勤详情: ${workId}\n在实际应用中，这里会显示详细的考勤信息。`);
 }

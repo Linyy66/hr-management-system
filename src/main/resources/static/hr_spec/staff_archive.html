@@ -32,6 +32,107 @@
             <button id="add-staff-btn" class="btn-primary">新增员工档案</button>
         </div>
         
+        <!-- 新增员工档案表单 -->
+        <div class="card" id="add-staff-form-section" style="display: none;">
+            <h3>新增员工档案</h3>
+            <form id="add-staff-form">
+                <div class="form-group">
+                    <label for="staff-account">员工账号 *</label>
+                    <select id="staff-account" name="staff-account" required>
+                        <option value="">请选择已注册的员工账号</option>
+                        <!-- 动态加载员工账号选项 -->
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="staff-name">员工姓名 *</label>
+                        <input type="text" id="staff-name" name="staff-name" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="staff-archive-id">员工编号 *</label>
+                        <input type="text" id="staff-archive-id" name="staff-archive-id" readonly>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="staff-gender">性别 *</label>
+                        <select id="staff-gender" name="staff-gender" required disabled>
+                            <option value="">请选择</option>
+                            <option value="M">男</option>
+                            <option value="F">女</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="staff-age">年龄 *</label>
+                        <input type="number" id="staff-age" name="staff-age" min="16" max="100" required disabled>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="staff-mobile">手机号 *</label>
+                    <input type="tel" id="staff-mobile" name="staff-mobile" required disabled>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="staff-phone">电话</label>
+                        <input type="tel" id="staff-phone" name="staff-phone" disabled>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="staff-email">邮箱</label>
+                        <input type="email" id="staff-email" name="staff-email" disabled>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="staff-bio">自我介绍</label>
+                    <textarea id="staff-bio" name="staff-bio" rows="3" disabled></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="staff-org1">一级机构 *</label>
+                    <select id="staff-org1" name="staff-org1" required>
+                        <option value="">请选择</option>
+                        <!-- 动态加载一级机构选项 -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="staff-org2">二级机构 *</label>
+                    <select id="staff-org2" name="staff-org2" required>
+                        <option value="">请选择</option>
+                        <!-- 动态加载二级机构选项 -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="staff-org3">三级机构 *</label>
+                    <select id="staff-org3" name="staff-org3" required>
+                        <option value="">请选择</option>
+                        <!-- 动态加载三级机构选项 -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="staff-position">职位 *</label>
+                    <select id="staff-position" name="staff-position" required>
+                        <option value="">请选择</option>
+                        <!-- 动态加载职位选项 -->
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">保存档案</button>
+                    <button type="button" class="btn-secondary" onclick="cancelAddStaff()">取消</button>
+                </div>
+            </form>
+        </div>
+        
         <div class="card">
             <h3>档案搜索</h3>
             <div class="search-bar">
@@ -62,6 +163,7 @@
         </div>
     </div>
 
-    <!-- 移除所有JavaScript代码，使用纯后端HTML/CSS方式 -->
+    <script src="/app/js/utils.js"></script>
+    <script src="/app/js/hr_spec.js"></script>
 </body>
 </html>

@@ -38,6 +38,12 @@ public class HrSpecController {
     private PositionRepository positionRepository;
     
     @Autowired
+    private AttendanceRecordRepository attendanceRecordRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
     private OrgStructureService orgStructureService;
     
     // Helper method to get current user ID
@@ -60,6 +66,11 @@ public class HrSpecController {
         // 验证必要的组织结构字段是否存在
         if (archive.getOrg3Id() == null || archive.getOrg3Id().isEmpty()) {
             return ResponseEntity.badRequest().body("三级机构ID不能为空");
+        }
+        
+        // 验证账号ID是否存在
+        if (archive.getAccountId() == null || archive.getAccountId().isEmpty()) {
+            return ResponseEntity.badRequest().body("账号ID不能为空");
         }
         
         // 从org3Id推断org2Id和org1Id
@@ -162,6 +173,45 @@ public class HrSpecController {
             application.setApprover(currentUserId);
             return ResponseEntity.ok(overtimeApplicationRepository.save(application));
         }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    // 获取所有员工的考勤记录
+    @GetMapping("/attendance-records")
+    public List<AttendanceRecord> getAllAttendanceRecords() {
+        return attendanceRecordRepository.findAll();
+    }
+    
+    // 根据员工ID获取考勤记录
+    @GetMapping("/attendance-records/user/{userId}")
+    public List<AttendanceRecord> getAttendanceRecordsByUserId(@PathVariable String userId) {
+        return attendanceRecordRepository.findByUserId(userId);
+    }
+    
+    // 标记考勤记录为异常
+    @PutMapping("/attendance-records/{id}/mark-abnormal")
+    public ResponseEntity<AttendanceRecord> markAttendanceAsAbnormal(@PathVariable Long id, 
+                                                                   @RequestBody(required = false) String reason) {
+        return attendanceRecordRepository.findById(id).map(record -> {
+            record.setAbnormal(true);
+            record.setAbnormalReason(reason != null ? reason : "考勤异常");
+            return ResponseEntity.ok(attendanceRecordRepository.save(record));
+        }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    // 标记考勤记录为正常
+    @PutMapping("/attendance-records/{id}/mark-normal")
+    public ResponseEntity<AttendanceRecord> markAttendanceAsNormal(@PathVariable Long id) {
+        return attendanceRecordRepository.findById(id).map(record -> {
+            record.setAbnormal(false);
+            record.setAbnormalReason(null);
+            return ResponseEntity.ok(attendanceRecordRepository.save(record));
+        }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    // 获取所有员工用户
+    @GetMapping("/users")
+    public List<AppUser> getAllUsers() {
+        return userRepository.findAll();
     }
     
     // 组织架构查看（用于员工建档时选择）

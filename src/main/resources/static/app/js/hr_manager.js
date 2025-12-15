@@ -257,11 +257,33 @@ function renderStaffTable(staffList) {
 
 // 获取组织全名
 function getOrgFullName(org1Id, org2Id, org3Id) {
-    const org1 = orgData.level1.find(org => org.org1Id === org1Id);
-    const org2 = orgData.level2.find(org => org.org2Id === org2Id);
-    const org3 = orgData.level3.find(org => org.org3Id === org3Id);
+    // 尝试从全局orgData中获取组织名称
+    if (typeof orgData !== 'undefined' && orgData.level1 && orgData.level2 && orgData.level3) {
+        const org1 = orgData.level1.find(org => org.org1Id === org1Id);
+        const org2 = orgData.level2.find(org => org.org2Id === org2Id);
+        const org3 = orgData.level3.find(org => org.org3Id === org3Id);
+        
+        return `${org1 ? org1.org1Name : org1Id} > ${org2 ? org2.org2Name : org2Id} > ${org3 ? org3.org3Name : org3Id}`;
+    }
     
-    return `${org1 ? org1.org1Name : ''} > ${org2 ? org2.org2Name : ''} > ${org3 ? org3.org3Name : ''}`;
+    // 如果没有全局orgData，则使用模拟数据
+    const orgNames = {
+        '01': '技术部',
+        '0101': '研发部',
+        '010101': '后端开发组',
+        '010102': '前端开发组',
+        '0102': '测试部',
+        '010201': '功能测试组',
+        '02': '人事部',
+        '0201': '招聘组',
+        '020101': '校园招聘组'
+    };
+    
+    const org1Name = orgNames[org1Id] || org1Id;
+    const org2Name = orgNames[org2Id] || org2Id;
+    const org3Name = orgNames[org3Id] || org3Id;
+    
+    return `${org1Name} > ${org2Name} > ${org3Name}`;
 }
 
 // 获取状态文本
@@ -899,5 +921,47 @@ function getLeaveTypeDescription(type) {
             return '婚假';
         default:
             return type;
+    }
+}
+
+// 加载一级机构选项
+async function loadOrg1Options() {
+    const org1Select = document.getElementById('staff-org1');
+    if (org1Select) {
+        org1Select.innerHTML = '<option value="">请选择</option>';
+        
+        try {
+            const response = await fetch('/api/hr-spec/org/level1');
+            const org1List = await response.json();
+            
+            org1List.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.org1Id;
+                option.textContent = org.org1Name;
+                org1Select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Load org1 options error:', error);
+        }
+    }
+    
+    // 同时为调岗申请模态框加载一级机构选项
+    const transferOrg1Select = document.getElementById('transfer-org1');
+    if (transferOrg1Select) {
+        transferOrg1Select.innerHTML = '<option value="">请选择</option>';
+        
+        try {
+            const response = await fetch('/api/hr-spec/org/level1');
+            const org1List = await response.json();
+            
+            org1List.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.org1Id;
+                option.textContent = org.org1Name;
+                transferOrg1Select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Load org1 options for transfer error:', error);
+        }
     }
 }

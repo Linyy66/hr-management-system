@@ -2,6 +2,7 @@ package com.example.hr.controller;
 
 import com.example.hr.model.AppUser;
 import com.example.hr.repository.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,10 +18,13 @@ public class AuthController {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public AuthController(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public AuthController(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, 
+                          ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -81,6 +85,9 @@ public class AuthController {
         u.setRole(role);
         u.setEnabled(true);
         userRepository.save(u);
+        
+        // 发布用户注册事件
+        eventPublisher.publishEvent(u);
         return ResponseEntity.ok(Map.of("result","ok","username", username,"role",role));
     }
 

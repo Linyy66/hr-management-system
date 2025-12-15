@@ -15,6 +15,9 @@ public class StaffArchive {
     @Column(length = 12)
     private String archiveId;
 
+    @Column(name = "account_id", length = 50)
+    private String accountId; // 关联的用户账号ID
+
     @Column(name = "org1_id", length = 2, nullable = false)
     private String org1Id;
 
