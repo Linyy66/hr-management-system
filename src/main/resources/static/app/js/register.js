@@ -34,7 +34,17 @@ async function handleRegister(e) {
         });
         
         if (response.redirected) {
-            window.location.href = response.url;
+            // 检查URL中是否包含成功参数
+            const urlParams = new URLSearchParams(response.url.split('?')[1]);
+            if (urlParams.get('success') === 'true') {
+                showStatus(statusDiv, '注册成功，请登录', 'success');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1000);
+            } else {
+                const error = urlParams.get('error');
+                showStatus(statusDiv, error || '注册失败', 'error');
+            }
         } else {
             const result = await response.json();
             if (result.result === 'ok') {

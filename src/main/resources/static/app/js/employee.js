@@ -160,12 +160,12 @@ async function clockIn() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-                }
+            }
         });
         
         const result = await response.json();
         
-        if (response.ok && result.code === 200) {
+        if (response.ok && result.success) {
             alert(`上班打卡成功！时间：${new Date(result.data.clockInTime).toLocaleString()}`);
             // 重新加载考勤记录
             loadAttendanceData();
@@ -196,7 +196,7 @@ async function clockOut() {
         
         const result = await response.json();
         
-        if (response.ok && result.code === 200) {
+        if (response.ok && result.success) {
             alert(`下班打卡成功！时间：${new Date(result.data.clockOutTime).toLocaleString()}`);
             // 重新加载考勤记录
             loadAttendanceData();
@@ -300,7 +300,7 @@ async function submitLeaveApplication(e) {
         
         const result = await response.json();
         
-        if (response.ok && result.code === 200) {
+        if (response.ok && result.success) {
             alert('请假申请已提交');
             // 重置表单
             document.getElementById('leave-application-form').reset();
@@ -401,7 +401,7 @@ async function submitOvertimeApplication(e) {
         
         const result = await response.json();
         
-        if (response.ok && result.code === 200) {
+        if (response.ok && result.success) {
             alert('加班申请已提交');
             // 重置表单
             document.getElementById('overtime-application-form').reset();
@@ -622,7 +622,7 @@ async function submitTransferApplication(e) {
         
         const result = await response.json();
         
-        if (response.ok && result.code === 200) {
+        if (response.ok && result.success) {
             // 添加操作日志
             addOperationLog('调岗申请', `申请调至${org1}-${org2}-${org3}部门，职位:${getPositionName(position)}`, '待审批');
             
@@ -657,11 +657,11 @@ function renderTransferApplications() {
     transferApplications.forEach(app => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${app.applyDate}</td>
-            <td>${app.currentDepartment}</td>
-            <td>${app.targetDepartment}</td>
-            <td>${app.reason}</td>
-            <td>${getApprovalStatusDescription(app.status)}</td>
+            <td>${app.createTime ? new Date(app.createTime).toISOString().split('T')[0] : '-'}</td>
+            <td>${getOrgFullName(app.oldOrg1Id, app.oldOrg2Id, app.oldOrg3Id)}</td>
+            <td>${getOrgFullName(app.newOrg1Id, app.newOrg2Id, app.newOrg3Id)}</td>
+            <td>${app.changeReason}</td>
+            <td>${getApprovalStatusDescription(app.approvalStatus)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -683,11 +683,11 @@ function viewTransferApplication(id) {
     const app = transferApplications.find(a => a.id === id);
     if (app) {
         alert(`调岗申请详情：
-申请日期: ${app.applyDate}
-目标部门: ${app.targetOrg1}-${app.targetOrg2}-${app.targetOrg3}
-目标职位: ${getPositionName(app.targetPosition)}
-变更原因: ${app.reason}
-状态: ${app.status}`);
+申请日期: ${app.createTime ? new Date(app.createTime).toISOString().split('T')[0] : '-'}
+目标部门: ${app.newOrg1Id}-${app.newOrg2Id}-${app.newOrg3Id}
+目标职位: ${getPositionName(app.newPositionId)}
+变更原因: ${app.changeReason}
+状态: ${app.approvalStatus}`);
     }
 }
 
@@ -899,7 +899,7 @@ async function loadAttendanceData() {
         const response = await fetch('/api/employee/attendance');
         const result = await response.json();
         
-        if (response.ok && result.code === 200) {
+        if (response.ok && result.success) {
             attendanceRecords = result.data || [];
             renderAttendanceRecords();
         } else {
@@ -916,7 +916,7 @@ async function loadLeaveData() {
         const response = await fetch('/api/employee/leave');
         const result = await response.json();
         
-        if (response.ok && result.code === 200) {
+        if (response.ok && result.success) {
             leaveApplications = result.data || [];
             renderLeaveApplications();
         } else {
@@ -933,7 +933,7 @@ async function loadOvertimeData() {
         const response = await fetch('/api/employee/overtime');
         const result = await response.json();
         
-        if (response.ok && result.code === 200) {
+        if (response.ok && result.success) {
             overtimeApplications = result.data || [];
             renderOvertimeApplications();
         } else {
@@ -947,31 +947,15 @@ async function loadOvertimeData() {
 // 加载调岗申请数据
 async function loadTransferData() {
     try {
-        // 在实际应用中，这里应该从后端获取调岗申请数据
-        // 目前使用模拟数据
-        transferApplications = [
-            {
-                id: 1,
-                applyDate: '2025-12-01',
-                targetOrg1: '01',
-                targetOrg2: '0101',
-                targetOrg3: '010101',
-                targetPosition: 'P001',
-                reason: '个人发展需要',
-                status: '通过'
-            },
-            {
-                id: 2,
-                applyDate: '2025-12-05',
-                targetOrg1: '02',
-                targetOrg2: '0201',
-                targetOrg3: '020101',
-                targetPosition: 'P003',
-                reason: '兴趣转换',
-                status: '待定'
-            }
-        ];
-        renderTransferApplications();
+        const response = await fetch('/api/employee/transfer-requests');
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            transferApplications = result.data || [];
+            renderTransferApplications();
+        } else {
+            console.error('Load transfer data error:', result.message);
+        }
     } catch (error) {
         console.error('Load transfer data error:', error);
     }
@@ -983,7 +967,7 @@ async function loadProfileData() {
         const response = await fetch('/api/employee/profile');
         const result = await response.json();
         
-        if (response.ok && result.code === 200) {
+        if (response.ok && result.success) {
             userProfile = result.data;
             
             // 填充表单数据

@@ -214,6 +214,14 @@ public class HrSpecController {
         return userRepository.findAll();
     }
     
+    // 根据用户名获取特定用户信息
+    @GetMapping("/users/{username}")
+    public ResponseEntity<AppUser> getUserByUsername(@PathVariable String username) {
+        return userRepository.findById(username)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
     // 组织架构查看（用于员工建档时选择）
     @GetMapping("/org/level1")
     public List<OrgLevel1> getAllOrgLevel1() {

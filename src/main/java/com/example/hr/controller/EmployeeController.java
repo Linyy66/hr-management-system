@@ -157,7 +157,7 @@ public class EmployeeController {
         record.setCreateBy(currentUserId);
         AttendanceRecord savedRecord = attendanceRecordRepository.save(record);
         
-        return ResponseEntity.ok(ApiResponse.success("打卡成功", savedRecord));
+        return ResponseEntity.ok(ApiResponse.success(savedRecord));
     }
     
     /**
@@ -187,7 +187,7 @@ public class EmployeeController {
         record.setUpdateTime(LocalDateTime.now());
         record.setUpdateBy(currentUserId);
         AttendanceRecord savedRecord = attendanceRecordRepository.save(record);
-        return ResponseEntity.ok(ApiResponse.success("签退成功", savedRecord));
+        return ResponseEntity.ok(ApiResponse.success(savedRecord));
     }
     
     /**
@@ -239,7 +239,7 @@ public class EmployeeController {
         leaveApplication.setCreateBy(currentUserId);
         
         LeaveApplication savedApplication = leaveApplicationRepository.save(leaveApplication);
-        return ResponseEntity.ok(ApiResponse.success("请假申请提交成功", savedApplication));
+        return ResponseEntity.ok(ApiResponse.success(savedApplication));
     }
     
     /**
@@ -296,7 +296,7 @@ public class EmployeeController {
         }
         
         OvertimeApplication savedApplication = overtimeApplicationRepository.save(overtimeApplication);
-        return ResponseEntity.ok(ApiResponse.success("加班申请提交成功", savedApplication));
+        return ResponseEntity.ok(ApiResponse.success(savedApplication));
     }
     
     /**
@@ -352,6 +352,6 @@ public class EmployeeController {
         request.setCreateBy(currentUserId);
 
         DepartmentChangeRequest savedRequest = departmentChangeRequestRepository.save(request);
-        return ResponseEntity.ok(ApiResponse.success("调岗申请提交成功", savedRequest));
+        return ResponseEntity.ok(ApiResponse.success(savedRequest));
     }
 }

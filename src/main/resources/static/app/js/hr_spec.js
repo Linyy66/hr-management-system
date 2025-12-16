@@ -112,6 +112,29 @@ function bindButtonEvents() {
             }
         });
     }
+    
+    // 为调岗申请模态框也绑定机构级联选择
+    const transferOrg1Select = document.getElementById('transfer-org1');
+    const transferOrg2Select = document.getElementById('transfer-org2');
+    const transferOrg3Select = document.getElementById('transfer-org3');
+    
+    if (transferOrg1Select) {
+        transferOrg1Select.addEventListener('change', function() {
+            loadTransferOrg2Options(this.value);
+        });
+    }
+    
+    if (transferOrg2Select) {
+        transferOrg2Select.addEventListener('change', function() {
+            loadTransferOrg3Options(this.value);
+        });
+    }
+    
+    if (transferOrg3Select) {
+        transferOrg3Select.addEventListener('change', function() {
+            loadTransferPositionOptions(this.value);
+        });
+    }
 }
 
 // 显示当前用户信息
@@ -138,9 +161,9 @@ async function handleLogout() {
 
 // 切换新增员工档案表单显示
 async function toggleAddStaffForm() {
-    const formSection = document.getElementById('add-staff-form-section');
+    const formSection = document.getElementById('add-staff-form');
     if (formSection) {
-        const isHidden = formSection.style.display === 'none';
+        const isHidden = formSection.style.display === 'none' || !formSection.style.display;
         formSection.style.display = isHidden ? 'block' : 'none';
         
         // 如果是显示表单，则加载员工账号和一级机构选项
@@ -159,20 +182,68 @@ async function loadEmployeeAccounts() {
         
         try {
             // 获取所有普通员工用户
-            const response = await fetch('/api/hr-spec/users');
-            const users = await response.json();
+            const usersResponse = await fetch('/api/hr-spec/users');
+            let users = [];
+            if (usersResponse.ok) {
+                users = await usersResponse.json();
+            } else {
+                console.error('Failed to load users, status:', usersResponse.status);
+                throw new Error('Failed to load users');
+            }
             
-            // 筛选普通员工（EMPLOYEE角色）
-            const employees = users.filter(user => user.role === 'EMPLOYEE');
+            // 获取已有档案的员工账号列表
+            const staffResponse = await fetch('/api/hr-spec/staff');
+            let staffArchives = [];
+            if (staffResponse.ok) {
+                staffArchives = await staffResponse.json();
+            } else {
+                console.error('Failed to load staff archives, status:', staffResponse.status);
+                throw new Error('Failed to load staff archives');
+            }
             
-            employees.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.username;
-                option.textContent = user.username;
-                accountSelect.appendChild(option);
+            const existingAccountIds = staffArchives.map(archive => archive.accountId);
+            
+            // 筛选可用的员工账号（启用状态、角色为EMPLOYEE且尚未创建档案的用户）
+            const availableEmployees = users.filter(user => {
+                // 检查用户是否已启用
+                if (!user.enabled) return false;
+                
+                // 检查用户角色是否为员工
+                if (user.role !== 'EMPLOYEE') return false;
+                
+                // 检查用户是否已经有档案
+                if (existingAccountIds.includes(user.username)) return false;
+                
+                return true;
             });
+            
+            // 添加调试日志
+            console.log('Users:', users);
+            console.log('Staff archives:', staffArchives);
+            console.log('Existing account IDs:', existingAccountIds);
+            console.log('Available employees:', availableEmployees);
+            
+            if (availableEmployees.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = '暂无可用员工账号';
+                option.disabled = true;
+                accountSelect.appendChild(option);
+            } else {
+                availableEmployees.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.username;
+                    option.textContent = `${user.username} (${getUserRoleDisplayName(user.role)})`;
+                    accountSelect.appendChild(option);
+                });
+            }
         } catch (error) {
             console.error('Load employee accounts error:', error);
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '加载员工账号失败: ' + error.message;
+            option.disabled = true;
+            accountSelect.appendChild(option);
         }
     }
 }
@@ -196,22 +267,30 @@ async function handleStaffAccountChange() {
         return;
     }
     
+    // 自动生成员工编号
+    archiveIdInput.value = 'EMP' + Date.now(); // 生成唯一员工编号
+    
+    // 启用可编辑字段
+    nameInput.disabled = false;
+    genderSelect.disabled = false;
+    ageInput.disabled = false;
+    mobileInput.disabled = false;
+    phoneInput.disabled = false;
+    emailInput.disabled = false;
+    bioTextarea.disabled = false;
+    
+    // 尝试从用户信息中获取默认值
     try {
-        // 在实际应用中，这里应该从后端获取员工的个人信息
-        // 目前使用模拟数据
-        nameInput.value = '张三'; // 模拟数据
-        archiveIdInput.value = 'EMP' + Math.floor(Math.random() * 10000); // 模拟员工编号
-        
-        // 启用可编辑字段
-        genderSelect.disabled = false;
-        ageInput.disabled = false;
-        mobileInput.disabled = false;
-        phoneInput.disabled = false;
-        emailInput.disabled = false;
-        bioTextarea.disabled = false;
-        
+        const response = await fetch(`/api/hr-spec/users/${accountId}`);
+        if (response.ok) {
+            const userData = await response.json();
+            // 如果能获取到更多用户信息，可以在这里填充
+            console.log('User data:', userData);
+        } else {
+            console.log('Failed to fetch user data, status:', response.status);
+        }
     } catch (error) {
-        console.error('Load staff info error:', error);
+        console.error('获取用户详细信息失败:', error);
     }
 }
 
@@ -228,6 +307,7 @@ function resetAndDisableFields() {
     document.getElementById('staff-bio').value = '';
     
     // 禁用字段
+    document.getElementById('staff-name').disabled = true;
     document.getElementById('staff-gender').disabled = true;
     document.getElementById('staff-age').disabled = true;
     document.getElementById('staff-mobile').disabled = true;
@@ -370,6 +450,92 @@ async function loadPositionOptions(org3Id) {
     }
 }
 
+// 为调岗申请加载二级机构选项
+async function loadTransferOrg2Options(org1Id) {
+    const org2Select = document.getElementById('transfer-org2');
+    const org3Select = document.getElementById('transfer-org3');
+    const positionSelect = document.getElementById('transfer-position');
+    
+    if (org2Select) {
+        org2Select.innerHTML = '<option value="">请选择</option>';
+        if (org3Select) org3Select.innerHTML = '<option value="">请选择</option>';
+        if (positionSelect) positionSelect.innerHTML = '<option value="">请选择</option>';
+        
+        if (!org1Id) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/hr-spec/org/level2/by-org1/${org1Id}`);
+            const org2List = await response.json();
+            
+            org2List.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.org2Id;
+                option.textContent = org.org2Name;
+                org2Select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Load transfer org2 options error:', error);
+        }
+    }
+}
+
+// 为调岗申请加载三级机构选项
+async function loadTransferOrg3Options(org2Id) {
+    const org3Select = document.getElementById('transfer-org3');
+    const positionSelect = document.getElementById('transfer-position');
+    
+    if (org3Select) {
+        org3Select.innerHTML = '<option value="">请选择</option>';
+        if (positionSelect) positionSelect.innerHTML = '<option value="">请选择</option>';
+        
+        if (!org2Id) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/hr-spec/org/level3/by-org2/${org2Id}`);
+            const org3List = await response.json();
+            
+            org3List.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.org3Id;
+                option.textContent = org.org3Name;
+                org3Select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Load transfer org3 options error:', error);
+        }
+    }
+}
+
+// 为调岗申请加载职位选项
+async function loadTransferPositionOptions(org3Id) {
+    const positionSelect = document.getElementById('transfer-position');
+    if (positionSelect) {
+        positionSelect.innerHTML = '<option value="">请选择</option>';
+        
+        if (!org3Id) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/hr-spec/positions/by-org3/${org3Id}`);
+            const positions = await response.json();
+            
+            positions.forEach(pos => {
+                const option = document.createElement('option');
+                option.value = pos.positionId;
+                option.textContent = pos.positionName;
+                positionSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Load transfer positions error:', error);
+        }
+    }
+}
+
 // 处理新增员工档案提交
 async function handleAddStaffSubmit(e) {
     e.preventDefault();
@@ -396,7 +562,7 @@ async function handleAddStaffSubmit(e) {
     
     try {
         const formData = {
-            archiveId: document.getElementById('staff-archive-id').value, // 使用生成的员工编号
+            archiveId: 'EMP' + Date.now(), // 生成员工编号
             accountId: account, // 添加账号ID
             staffName: name,
             gender: gender,
@@ -410,6 +576,8 @@ async function handleAddStaffSubmit(e) {
             email: email,
             bio: bio
         };
+        
+        console.log('Submitting staff data:', formData); // 调试日志
         
         const response = await fetch('/api/hr-spec/staff', {
             method: 'POST',
@@ -427,10 +595,13 @@ async function handleAddStaffSubmit(e) {
             resetAndDisableFields();
             
             // 隐藏表单
-            document.getElementById('add-staff-form-section').style.display = 'none';
+            document.getElementById('add-staff-form').style.display = 'none';
             
             // 重新加载员工档案列表
             loadStaffArchiveData();
+            
+            // 重新加载员工账号列表
+            await loadEmployeeAccounts();
         } else {
             const errorData = await response.text();
             console.error('Create staff archive error response:', errorData);
@@ -444,9 +615,12 @@ async function handleAddStaffSubmit(e) {
 
 // 取消新增员工档案
 function cancelAddStaff() {
-    document.getElementById('add-staff-form').reset();
-    resetAndDisableFields();
-    document.getElementById('add-staff-form-section').style.display = 'none';
+    const form = document.getElementById('add-staff-form');
+    if (form) {
+        form.reset();
+        resetAndDisableFields();
+        form.style.display = 'none';
+    }
 }
 
 // 加载仪表板数据
@@ -1130,4 +1304,20 @@ async function markAsNormal(workId) {
 // 查看查看考勤详情
 function viewAttendanceDetails(workId) {
     alert(`查看考勤详情: ${workId}\n在实际应用中，这里会显示详细的考勤信息。`);
+}
+
+// 获取用户角色显示名称
+function getUserRoleDisplayName(role) {
+    switch (role) {
+        case 'ADMIN':
+            return '系统管理员';
+        case 'HR_MANAGER':
+            return '人事经理';
+        case 'HR_SPEC':
+            return '人事专员';
+        case 'EMPLOYEE':
+            return '普通员工';
+        default:
+            return role;
+    }
 }

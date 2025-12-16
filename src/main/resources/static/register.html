@@ -36,9 +36,25 @@
                     <button class="btn-primary" style="width: 100%;" type="submit">注册并返回登录</button>
                 </div>
             </form>
-            <p class="small">注意：这是演示页面，实际系统中填写信息后点击注册按钮可完成注册</p>
+            <p class="small">注册</p>
 
-            <div id="registerStatus" class="status"></div>
+            <div id="registerStatus" class="status">
+                <script>
+                    // 检查URL参数并显示相应消息
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const success = urlParams.get('success');
+                    const error = urlParams.get('error');
+                    const statusDiv = document.getElementById('registerStatus');
+                    
+                    if (success === 'true') {
+                        statusDiv.textContent = '注册成功，请登录';
+                        statusDiv.className = 'status success';
+                    } else if (error) {
+                        statusDiv.textContent = decodeURIComponent(error);
+                        statusDiv.className = 'status error';
+                    }
+                </script>
+            </div>
 
             <div class="card" style="margin-top: 2rem; background: #f1f5f9;">
                 <p style="margin: 0;">已有账号？ <a href="/login.html" class="btn-link">立即登录</a></p>
