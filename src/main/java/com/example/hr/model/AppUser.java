@@ -20,4 +20,10 @@ public class AppUser {
 
     @Column(nullable = false)
     private boolean enabled = true;
+
+    @Column(length = 18)
+    private String idCard; // 身份证号
+
+    @Column(length = 50)
+    private String email; // 邮箱
 }

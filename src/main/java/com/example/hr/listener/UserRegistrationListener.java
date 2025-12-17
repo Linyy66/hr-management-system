@@ -38,38 +38,37 @@ public class UserRegistrationListener {
     }
 
     /**
-     * 为新注册的员工创建档案
-     * @param user 新注册的用户
+     * 创建员工档案
      */
     private void createEmployeeArchive(AppUser user) {
-        // 检查是否已存在该用户的档案
-        if (staffArchiveRepository.findByAccountId(user.getUsername()).isEmpty()) {
-            StaffArchive archive = new StaffArchive();
-            
-            // 生成唯一的档案ID
-            String archiveId = "EMP" + UUID.randomUUID().toString().substring(0, 9).toUpperCase();
-            archive.setArchiveId(archiveId);
-            
-            // 关联用户账号
-            archive.setAccountId(user.getUsername());
-            
-            // 设置默认值
-            archive.setStaffName(""); // 姓名初始为空，由员工首次登录时填写
-            archive.setGender(""); // 性别初始为空
-            archive.setOrg1Id("01"); // 默认分配到技术中心
-            archive.setOrg2Id("0101"); // 默认分配到研发部
-            archive.setOrg3Id("010101"); // 默认分配到后端开发组
-            archive.setPositionId("P002"); // 默认职位为后端工程师
-            archive.setMobile(""); // 手机号初始为空
-            archive.setStatus("PENDING"); // 初始状态为待审批
-            
-            // 设置时间戳
-            archive.setCreateTime(LocalDateTime.now());
-            archive.setUpdateTime(LocalDateTime.now());
-            archive.setCreateBy(user.getUsername());
-            
-            // 保存档案
-            staffArchiveRepository.save(archive);
-        }
+        // 生成随机员工编号
+        String archiveId = "EMP" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        
+        // 创建员工档案
+        StaffArchive archive = new StaffArchive();
+        archive.setArchiveId(archiveId);
+        archive.setAccountId(user.getUsername());
+        archive.setStaffName(user.getUsername()); // 初始姓名为用户名
+        archive.setGender("M"); // 默认性别为男
+        archive.setAge(18); // 默认年龄为18
+        // 使用默认值或从其他来源获取手机号和邮箱
+        archive.setMobile("13800138000"); // 默认手机号
+        archive.setEmail("user@example.com"); // 默认邮箱
+        archive.setBio("一切都很顺利"); // 默认自我介绍
+        archive.setStatus("NORMAL");
+        archive.setCreateBy(user.getUsername());
+        archive.setCreateTime(LocalDateTime.now());
+        archive.setVersion(1);
+        
+        // 设置默认机构和职位（需要根据实际业务逻辑调整）
+        archive.setOrg1Id("01"); // 默认一级机构ID
+        archive.setOrg2Id("0101"); // 默认二级机构ID
+        archive.setOrg3Id("010101"); // 默认三级机构ID
+        archive.setPositionId("P001"); // 默认职位ID
+        
+        staffArchiveRepository.save(archive);
+        
+        // 添加日志
+        System.out.println("自动创建员工档案: " + archiveId);
     }
 }

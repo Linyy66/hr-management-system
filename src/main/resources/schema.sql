@@ -82,7 +82,7 @@ CREATE TABLE t_staff_archive (
                                  age INT COMMENT '年龄',
                                  bio TEXT COMMENT '自我介绍',
                                  mobile VARCHAR(11) NOT NULL COMMENT '手机号',
-                                 phone VARCHAR(20) COMMENT '电话',
+                                 id_card VARCHAR(18) COMMENT '身份证号',
                                  email VARCHAR(50) COMMENT '邮箱',
                                  status VARCHAR(20) DEFAULT 'PENDING' COMMENT '员工状态(PENDING/NORMAL/DELETED/REJECTED)',
                                  create_by VARCHAR(20) COMMENT '创建人',

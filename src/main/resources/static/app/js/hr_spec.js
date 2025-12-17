@@ -256,7 +256,7 @@ async function handleStaffAccountChange() {
     const genderSelect = document.getElementById('staff-gender');
     const ageInput = document.getElementById('staff-age');
     const mobileInput = document.getElementById('staff-mobile');
-    const phoneInput = document.getElementById('staff-phone');
+    const idCardInput = document.getElementById('staff-phone');
     const emailInput = document.getElementById('staff-email');
     const bioTextarea = document.getElementById('staff-bio');
     
@@ -275,7 +275,7 @@ async function handleStaffAccountChange() {
     genderSelect.disabled = false;
     ageInput.disabled = false;
     mobileInput.disabled = false;
-    phoneInput.disabled = false;
+    idCardInput.disabled = false;
     emailInput.disabled = false;
     bioTextarea.disabled = false;
     
@@ -284,8 +284,17 @@ async function handleStaffAccountChange() {
         const response = await fetch(`/api/hr-spec/users/${accountId}`);
         if (response.ok) {
             const userData = await response.json();
-            // 如果能获取到更多用户信息，可以在这里填充
-            console.log('User data:', userData);
+            
+            // 填充基本信息
+            nameInput.value = userData.username || '';
+            genderSelect.value = userData.gender || '';
+            ageInput.value = userData.age || '';
+            mobileInput.value = userData.mobile || '';
+            idCardInput.value = userData.idCard || '';
+            emailInput.value = userData.email || '';
+            bioTextarea.value = userData.bio || '';
+            
+            console.log('User data filled:', userData);
         } else {
             console.log('Failed to fetch user data, status:', response.status);
         }
@@ -572,7 +581,7 @@ async function handleAddStaffSubmit(e) {
             org3Id: org3,
             positionId: position,
             mobile: mobile,
-            phone: phone,
+            idCard: phone,
             email: email,
             bio: bio
         };
