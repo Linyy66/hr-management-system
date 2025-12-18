@@ -18,6 +18,8 @@
 - 人事专员: spec / specpass (ROLE_HR_SPEC)
 - 人事经理: mgr / mgrpass (ROLE_HR_MANAGER)
 - 系统管理员: admin / adminpass (ROLE_ADMIN)
+- 薪酬专员: xczy / xczypass (ROLE_SL_SPEC)
+- 薪酬经理: xcjl / xcjlpass (ROLE_SL_MANAGER)
 
 这些是系统内置的高权限账户，会在应用启动时自动创建。
 
