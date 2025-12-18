@@ -84,7 +84,7 @@ CREATE TABLE t_staff_archive (
                                  mobile VARCHAR(11) NOT NULL COMMENT '手机号',
                                  id_card VARCHAR(18) COMMENT '身份证号',
                                  email VARCHAR(50) COMMENT '邮箱',
-                                 status VARCHAR(20) DEFAULT 'PENDING' COMMENT '员工状态(PENDING/NORMAL/DELETED/REJECTED)',
+                                 status VARCHAR(20) DEFAULT 'PENDING' COMMENT '员工状态(PENDING/NORMAL/DELETED/REJECTED/RESIGNED/RESIGN_PENDING)',
                                  create_by VARCHAR(20) COMMENT '创建人',
                                  create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                                  update_by VARCHAR(20) COMMENT '更新人',
@@ -99,6 +99,41 @@ CREATE TABLE t_staff_archive (
                                  FOREIGN KEY (org3_id) REFERENCES t_org_level3(org3_id),
                                  FOREIGN KEY (position_id) REFERENCES t_position(position_id)
 ) COMMENT '员工档案表';
+
+-- 员工个人信息表
+CREATE TABLE t_employee_profile (
+                                   profile_id VARCHAR(12) PRIMARY KEY COMMENT '个人信息ID',
+                                   account_id VARCHAR(50) UNIQUE COMMENT '关联账号ID',
+                                   staff_name VARCHAR(20) COMMENT '员工姓名',
+                                   gender CHAR(1) COMMENT '性别(M/F)',
+                                   age INT COMMENT '年龄',
+                                   bio TEXT COMMENT '自我介绍',
+                                   mobile VARCHAR(11) COMMENT '手机号',
+                                   phone VARCHAR(20) COMMENT '电话',
+                                   email VARCHAR(50) COMMENT '邮箱',
+                                   address TEXT COMMENT '住址',
+                                   emergency_contact VARCHAR(20) COMMENT '紧急联系人',
+                                   emergency_phone VARCHAR(20) COMMENT '紧急联系电话',
+                                   create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                   update_time DATETIME COMMENT '更新时间',
+                                   version INT DEFAULT 1 NOT NULL COMMENT '版本号',
+                                   INDEX idx_account_id (account_id)
+) COMMENT '员工个人信息表';
+
+-- 离职申请表
+CREATE TABLE t_resignation_application (
+                                          id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+                                          archive_id VARCHAR(12) NOT NULL COMMENT '员工档案ID',
+                                          reason TEXT COMMENT '离职原因',
+                                          approval_status VARCHAR(20) DEFAULT 'PENDING' COMMENT '审批状态(PENDING/APPROVED/REJECTED)',
+                                          approver VARCHAR(50) COMMENT '审批人',
+                                          approve_time DATETIME COMMENT '审批时间',
+                                          create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                          update_time DATETIME COMMENT '更新时间',
+                                          INDEX idx_archive_id (archive_id),
+                                          INDEX idx_approval_status (approval_status),
+                                          FOREIGN KEY (archive_id) REFERENCES t_staff_archive(archive_id)
+) COMMENT '离职申请表';
 
 -- 调岗日志表
 CREATE TABLE t_department_change_log (

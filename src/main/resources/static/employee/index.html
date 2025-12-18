@@ -128,6 +128,7 @@
                         <div class="card">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h2>个人档案</h2>
+                                <button id="resign-btn" class="btn-danger">申请离职</button>
                             </div>
                             <div class="profile-header">
                                 <div class="profile-basic-info">
@@ -175,6 +176,26 @@
                             
                             <button id="update-profile-btn" class="btn-primary">更新信息</button>
                             <button id="transfer-department-btn" class="btn-secondary">申请变更部门/职位</button>
+                        </div>
+                        
+                        <!-- Resignation Modal -->
+                        <div id="resignation-modal" class="modal" style="display:none;">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h2>离职申请</h2>
+                                    <span class="close" onclick="closeResignationModal()">&times;</span>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="resignation-form">
+                                        <div class="form-group full-width">
+                                            <label for="resignation-reason">离职原因 *</label>
+                                            <textarea id="resignation-reason" rows="5" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn-danger">提交离职申请</button>
+                                        <button type="button" class="btn-secondary" onclick="closeResignationModal()">取消</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Transfer Department/Position Modal -->

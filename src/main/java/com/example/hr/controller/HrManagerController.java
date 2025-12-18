@@ -43,7 +43,13 @@ public class HrManagerController {
     private OrgLevel3Repository orgLevel3Repository;
     
     @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
     private OrgStructureService orgStructureService;
+    
+    @Autowired
+    private ResignationApplicationRepository resignationApplicationRepository;
     
     // Helper method to get current user ID
     private String getCurrentUserId() {
@@ -115,6 +121,296 @@ public class HrManagerController {
             archive.setUpdateTime(LocalDateTime.now());
             return ResponseEntity.ok(staffArchiveRepository.save(archive));
         }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    /**
+     * 批准员工离职申请
+     */
+    @PutMapping("/staff/{id}/approve-resignation")
+    public ResponseEntity<ApiResponse<String>> approveResignation(@PathVariable String id) {
+        Optional<StaffArchive> staffArchiveOpt = staffArchiveRepository.findById(id);
+        if (!staffArchiveOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        StaffArchive staffArchive = staffArchiveOpt.get();
+        
+        // 检查状态是否为离职申请中
+        if (!"RESIGN_PENDING".equals(staffArchive.getStatus())) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("员工档案状态不是离职申请中，无法批准离职"));
+        }
+        
+        // 更新员工状态为已离职
+        staffArchive.setStatus("RESIGNED");
+        staffArchive.setUpdateTime(LocalDateTime.now());
+        staffArchiveRepository.save(staffArchive);
+        
+        // 禁用员工账户
+        String accountId = staffArchive.getAccountId();
+        if (accountId != null && !accountId.isEmpty()) {
+            Optional<AppUser> userOpt = userRepository.findById(accountId);
+            if (userOpt.isPresent()) {
+                AppUser user = userOpt.get();
+                user.setEnabled(false);
+                userRepository.save(user);
+            }
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success("员工离职申请已批准，账户已禁用"));
+    }
+    
+    /**
+     * 拒绝员工离职申请
+     */
+    @PutMapping("/staff/{id}/reject-resignation")
+    public ResponseEntity<ApiResponse<String>> rejectResignation(@PathVariable String id) {
+        Optional<StaffArchive> staffArchiveOpt = staffArchiveRepository.findById(id);
+        if (!staffArchiveOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        StaffArchive staffArchive = staffArchiveOpt.get();
+        
+        // 检查状态是否为离职申请中
+        if (!"RESIGN_PENDING".equals(staffArchive.getStatus())) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("员工档案状态不是离职申请中，无法拒绝离职"));
+        }
+        
+        // 恢复员工状态为正常
+        staffArchive.setStatus("NORMAL");
+        staffArchive.setUpdateTime(LocalDateTime.now());
+        staffArchiveRepository.save(staffArchive);
+        
+        return ResponseEntity.ok(ApiResponse.success("员工离职申请已拒绝"));
+    }
+    
+    /**
+     * 获取所有待审批的离职申请
+     */
+    @GetMapping("/resignation-applications")
+    public List<ResignationApplication> getAllPendingResignationApplications() {
+        List<ResignationApplication> applications = resignationApplicationRepository.findByApprovalStatus("PENDING");
+        
+        // 补充申请人姓名信息
+        for (ResignationApplication app : applications) {
+            Optional<StaffArchive> staffOpt = staffArchiveRepository.findById(app.getArchiveId());
+            if (staffOpt.isPresent()) {
+                app.setApplicantName(staffOpt.get().getStaffName());
+            }
+        }
+        
+        return applications;
+    }
+    
+    /**
+     * 获取特定离职申请
+     */
+    @GetMapping("/resignation-applications/{id}")
+    public ResponseEntity<ResignationApplication> getResignationApplication(@PathVariable Long id) {
+        Optional<ResignationApplication> appOpt = resignationApplicationRepository.findById(id);
+        if (!appOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        ResignationApplication app = appOpt.get();
+        
+        // 补充申请人姓名信息
+        Optional<StaffArchive> staffOpt = staffArchiveRepository.findById(app.getArchiveId());
+        if (staffOpt.isPresent()) {
+            app.setApplicantName(staffOpt.get().getStaffName());
+        }
+        
+        return ResponseEntity.ok(app);
+    }
+    
+    /**
+     * 批准员工离职申请
+     */
+    @PutMapping("/resignation-applications/{id}/approve")
+    public ResponseEntity<ApiResponse<String>> approveResignation(@PathVariable Long id) {
+        Optional<ResignationApplication> resignationAppOpt = resignationApplicationRepository.findById(id);
+        if (!resignationAppOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        ResignationApplication resignationApp = resignationAppOpt.get();
+        
+        // 检查状态是否为待审批
+        if (!"PENDING".equals(resignationApp.getApprovalStatus())) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("离职申请状态不是待审批，无法批准"));
+        }
+        
+        // 更新离职申请状态
+        resignationApp.setApprovalStatus("APPROVED");
+        resignationApp.setApproveTime(LocalDateTime.now());
+        resignationApp.setUpdateTime(LocalDateTime.now());
+        resignationApplicationRepository.save(resignationApp);
+        
+        // 更新员工档案状态
+        Optional<StaffArchive> staffArchiveOpt = staffArchiveRepository.findById(resignationApp.getArchiveId());
+        if (!staffArchiveOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        StaffArchive staffArchive = staffArchiveOpt.get();
+        
+        // 更新员工状态为已离职
+        staffArchive.setStatus("RESIGNED");
+        staffArchive.setUpdateTime(LocalDateTime.now());
+        staffArchiveRepository.save(staffArchive);
+        
+        // 禁用员工账户
+        String accountId = staffArchive.getAccountId();
+        if (accountId != null && !accountId.isEmpty()) {
+            Optional<AppUser> userOpt = userRepository.findById(accountId);
+            if (userOpt.isPresent()) {
+                AppUser user = userOpt.get();
+                user.setEnabled(false);
+                userRepository.save(user);
+            }
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success("员工离职申请已批准，账户已禁用"));
+    }
+    
+    /**
+     * 拒绝员工离职申请
+     */
+    @PutMapping("/resignation-applications/{id}/reject")
+    public ResponseEntity<ApiResponse<String>> rejectResignation(@PathVariable Long id) {
+        Optional<ResignationApplication> resignationAppOpt = resignationApplicationRepository.findById(id);
+        if (!resignationAppOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        ResignationApplication resignationApp = resignationAppOpt.get();
+        
+        // 检查状态是否为待审批
+        if (!"PENDING".equals(resignationApp.getApprovalStatus())) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("离职申请状态不是待审批，无法拒绝"));
+        }
+        
+        // 更新离职申请状态
+        resignationApp.setApprovalStatus("REJECTED");
+        resignationApp.setApproveTime(LocalDateTime.now());
+        resignationApp.setUpdateTime(LocalDateTime.now());
+        resignationApplicationRepository.save(resignationApp);
+        
+        // 恢复员工档案状态为正常
+        Optional<StaffArchive> staffArchiveOpt = staffArchiveRepository.findById(resignationApp.getArchiveId());
+        if (!staffArchiveOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        StaffArchive staffArchive = staffArchiveOpt.get();
+        
+        // 恢复员工状态为正常
+        staffArchive.setStatus("NORMAL");
+        staffArchive.setUpdateTime(LocalDateTime.now());
+        staffArchiveRepository.save(staffArchive);
+        
+        return ResponseEntity.ok(ApiResponse.success("员工离职申请已拒绝"));
+    }
+    
+    /**
+     * 批准员工离职申请（通过员工档案ID）
+     */
+    @PutMapping("/staff/{id}/approve-resign")
+    public ResponseEntity<ApiResponse<String>> approveResignationByStaffId(@PathVariable String id) {
+        // 先查找员工档案
+        Optional<StaffArchive> staffArchiveOpt = staffArchiveRepository.findById(id);
+        if (!staffArchiveOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        StaffArchive staffArchive = staffArchiveOpt.get();
+        
+        // 检查状态是否为离职申请中
+        if (!"RESIGN_PENDING".equals(staffArchive.getStatus())) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("员工档案状态不是离职申请中，无法批准离职"));
+        }
+        
+        // 查找对应的离职申请
+        Optional<ResignationApplication> resignationAppOpt = resignationApplicationRepository
+                .findByArchiveIdAndApprovalStatus(id, "PENDING");
+        if (!resignationAppOpt.isPresent()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("未找到对应的待审批离职申请"));
+        }
+        
+        ResignationApplication resignationApp = resignationAppOpt.get();
+        
+        // 更新离职申请状态
+        resignationApp.setApprovalStatus("APPROVED");
+        resignationApp.setApproveTime(LocalDateTime.now());
+        resignationApp.setUpdateTime(LocalDateTime.now());
+        resignationApplicationRepository.save(resignationApp);
+        
+        // 更新员工状态为已离职
+        staffArchive.setStatus("RESIGNED");
+        staffArchive.setUpdateTime(LocalDateTime.now());
+        staffArchiveRepository.save(staffArchive);
+        
+        // 禁用员工账户
+        String accountId = staffArchive.getAccountId();
+        if (accountId != null && !accountId.isEmpty()) {
+            Optional<AppUser> userOpt = userRepository.findById(accountId);
+            if (userOpt.isPresent()) {
+                AppUser user = userOpt.get();
+                user.setEnabled(false);
+                userRepository.save(user);
+            }
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success("员工离职申请已批准，账户已禁用"));
+    }
+    
+    /**
+     * 拒绝员工离职申请（通过员工档案ID）
+     */
+    @PutMapping("/staff/{id}/reject-resign")
+    public ResponseEntity<ApiResponse<String>> rejectResignationByStaffId(@PathVariable String id) {
+        // 先查找员工档案
+        Optional<StaffArchive> staffArchiveOpt = staffArchiveRepository.findById(id);
+        if (!staffArchiveOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        StaffArchive staffArchive = staffArchiveOpt.get();
+        
+        // 检查状态是否为离职申请中
+        if (!"RESIGN_PENDING".equals(staffArchive.getStatus())) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("员工档案状态不是离职申请中，无法拒绝离职"));
+        }
+        
+        // 查找对应的离职申请
+        Optional<ResignationApplication> resignationAppOpt = resignationApplicationRepository
+                .findByArchiveIdAndApprovalStatus(id, "PENDING");
+        if (!resignationAppOpt.isPresent()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("未找到对应的待审批离职申请"));
+        }
+        
+        ResignationApplication resignationApp = resignationAppOpt.get();
+        
+        // 更新离职申请状态
+        resignationApp.setApprovalStatus("REJECTED");
+        resignationApp.setApproveTime(LocalDateTime.now());
+        resignationApp.setUpdateTime(LocalDateTime.now());
+        resignationApplicationRepository.save(resignationApp);
+        
+        // 恢复员工状态为正常
+        staffArchive.setStatus("NORMAL");
+        staffArchive.setUpdateTime(LocalDateTime.now());
+        staffArchiveRepository.save(staffArchive);
+        
+        return ResponseEntity.ok(ApiResponse.success("员工离职申请已拒绝"));
     }
     
     // 请假审批

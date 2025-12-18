@@ -320,11 +320,12 @@ public class AdminController {
     }
     
     @PutMapping("/users/{username}")
-    public ResponseEntity<AppUser> updateUser(@PathVariable String username, @RequestBody AppUser user) {
+    public ResponseEntity<ApiResponse<AppUser>> updateUser(@PathVariable String username, @RequestBody AppUser user) {
         return userRepository.findById(username).map(existing -> {
             existing.setRole(user.getRole());
             existing.setEnabled(user.isEnabled());
-            return ResponseEntity.ok(userRepository.save(existing));
+            AppUser saved = userRepository.save(existing);
+            return ResponseEntity.ok(ApiResponse.success("用户更新成功", saved));
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
@@ -374,6 +375,11 @@ public class AdminController {
     
     @PostMapping("/attendance-rules")
     public ResponseEntity<ApiResponse<AttendanceRule>> createAttendanceRule(@RequestBody AttendanceRule rule) {
+        // 检查三级机构是否存在
+        if (!orgStructureService.existsOrgLevel3(rule.getOrg3Id())) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("指定的三级机构不存在"));
+        }
+        
         rule.setCreateTime(LocalDateTime.now());
         AttendanceRule savedRule = attendanceRuleRepository.save(rule);
         return ResponseEntity.ok(ApiResponse.success("考勤规则创建成功", savedRule));
@@ -382,7 +388,7 @@ public class AdminController {
     @PutMapping("/attendance-rules/{id}")
     public ResponseEntity<ApiResponse<AttendanceRule>> updateAttendanceRule(@PathVariable Long id, @RequestBody AttendanceRule rule) {
         return attendanceRuleRepository.findById(id).map(existing -> {
-            existing.setOrg1Id(rule.getOrg1Id());
+            existing.setOrg3Id(rule.getOrg3Id());
             existing.setRuleJson(rule.getRuleJson());
             existing.setStatus(rule.getStatus());
             AttendanceRule saved = attendanceRuleRepository.save(existing);

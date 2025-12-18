@@ -662,7 +662,7 @@ function renderUserTable(users) {
             <td>${getUserRoleDescription(user.role)}</td>
             <td>${user.enabled ? '启用' : '禁用'}</td>
             <td>
-                <button class="btn-small btn-primary" onclick='editUser(${JSON.stringify(user).replace(/'/g, "\\'")})'>编辑</button>
+                <button class="btn-small btn-primary" onclick='openEditUserModal("${user.username}", "${user.role}", ${user.enabled})'>编辑</button>
                 <button class="btn-small btn-danger" onclick="deleteUser('${user.username}')">删除</button>
             </td>
         `;
@@ -1407,6 +1407,11 @@ function editPosition(position) {
     // 这里可以打开一个编辑模态框，允许修改职位名称和所属机构
     alert(`编辑职位: ${position.positionName}\n职位ID: ${position.positionId}`);
     // 实际实现中，应该打开编辑模态框并预填数据
+}
+
+// 编辑用户
+function editUser(user) {
+    openEditUserModal(user.username, user.role, user.enabled);
 }
 
 // 删除职位

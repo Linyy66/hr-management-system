@@ -68,6 +68,18 @@ function bindButtonEvents() {
         updateProfileBtn.addEventListener('click', updateProfile);
     }
     
+    // 离职申请按钮
+    const resignBtn = document.getElementById('resign-btn');
+    if (resignBtn) {
+        resignBtn.addEventListener('click', showResignationModal);
+    }
+    
+    // 离职申请表单提交
+    const resignationForm = document.getElementById('resignation-form');
+    if (resignationForm) {
+        resignationForm.addEventListener('submit', submitResignation);
+    }
+    
     // 考勤打卡按钮
     const clockInBtn = document.getElementById('clock-in-btn');
     if (clockInBtn) {
@@ -150,6 +162,77 @@ async function handleLogout() {
             console.error('Logout error:', error);
             window.location.href = '/login.html';
         }
+    }
+}
+
+// 显示离职申请模态框
+function showResignationModal() {
+    const modal = document.getElementById('resignation-modal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+// 关闭离职申请模态框
+function closeResignationModal() {
+    const modal = document.getElementById('resignation-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// 提交离职申请
+async function submitResignation(e) {
+    e.preventDefault();
+    
+    // 获取离职原因
+    const reason = document.getElementById('resignation-reason').value.trim();
+    
+    // 基本验证
+    if (!reason) {
+        alert('请填写离职原因');
+        return;
+    }
+    
+    if (!confirm('确定要提交离职申请吗？一旦提交需要等待人事经理审批。')) {
+        return;
+    }
+    
+    try {
+        const requestData = {
+            reason: reason
+        };
+        
+        const response = await fetch('/api/employee/resign', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            alert('离职申请已提交，请等待人事经理审批');
+            // 关闭模态框
+            closeResignationModal();
+            // 清空表单
+            document.getElementById('resignation-form').reset();
+            // 添加操作日志
+            addOperationLog('离职申请', '提交了离职申请', '待审批');
+            // 重新加载个人档案数据
+            loadProfileData();
+        } else {
+            alert(`提交失败: ${result.message || '未知错误'}`);
+            // 添加操作日志
+            addOperationLog('离职申请', `提交离职申请失败: ${result.message || '未知错误'}`, '失败');
+        }
+    } catch (error) {
+        console.error('Submit resignation error:', error);
+        alert('提交失败，请稍后重试');
+        // 添加操作日志
+        addOperationLog('离职申请', '提交离职申请失败: 系统错误', '失败');
     }
 }
 
@@ -973,10 +1056,9 @@ async function loadProfileData() {
             // 填充表单数据
             if (userProfile) {
                 document.getElementById('staff-name').textContent = userProfile.staffName || '-';
-                document.getElementById('archive-id').textContent = userProfile.archiveId || '-';
-                document.getElementById('position-name').textContent = userProfile.positionId || '-';
-                document.getElementById('department-name').textContent = getOrgFullName(
-                    userProfile.org1Id, userProfile.org2Id, userProfile.org3Id) || '-';
+                document.getElementById('archive-id').textContent = userProfile.profileId || '-';
+                document.getElementById('position-name').textContent = '-' || '-';
+                document.getElementById('department-name').textContent = '-' || '-';
                 
                 document.getElementById('profile-staff-name').value = userProfile.staffName || '';
                 document.getElementById('profile-gender').value = userProfile.gender || '';
@@ -985,6 +1067,14 @@ async function loadProfileData() {
                 document.getElementById('profile-phone').value = userProfile.phone || '';
                 document.getElementById('profile-email').value = userProfile.email || '';
                 document.getElementById('profile-bio').value = userProfile.bio || '';
+                
+                // 根据员工状态显示或隐藏离职按钮
+                const resignBtn = document.getElementById('resign-btn');
+                if (resignBtn) {
+                    resignBtn.style.display = 'block';
+                    resignBtn.disabled = false;
+                    resignBtn.textContent = '申请离职';
+                }
             }
         } else {
             console.error('Load profile data error:', result.message);

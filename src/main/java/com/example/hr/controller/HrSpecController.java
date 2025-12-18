@@ -117,11 +117,18 @@ public class HrSpecController {
     public ResponseEntity<StaffArchive> updateStaffArchive(@PathVariable String id, 
                                                         @RequestBody StaffArchive archive) {
         return staffArchiveRepository.findById(id).map(existing -> {
-            // 人事专员只能更新部分字段
+            // 人事专员可以更新所有字段
             existing.setStaffName(archive.getStaffName());
+            existing.setGender(archive.getGender());
+            existing.setAge(archive.getAge());
             existing.setPhone(archive.getPhone());
             existing.setMobile(archive.getMobile());
             existing.setEmail(archive.getEmail());
+            existing.setBio(archive.getBio());
+            existing.setOrg1Id(archive.getOrg1Id());
+            existing.setOrg2Id(archive.getOrg2Id());
+            existing.setOrg3Id(archive.getOrg3Id());
+            existing.setPositionId(archive.getPositionId());
             existing.setUpdateTime(LocalDateTime.now());
             // 更新后状态重新设为待审批
             existing.setStatus("PENDING");

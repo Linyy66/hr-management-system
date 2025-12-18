@@ -92,6 +92,23 @@ function bindButtonEvents() {
     if (downloadReportBtn) {
         downloadReportBtn.addEventListener('click', downloadReport);
     }
+    
+    // 考勤规则相关事件
+    const addRuleBtn = document.getElementById('add-rule-btn');
+    if (addRuleBtn) {
+        addRuleBtn.addEventListener('click', openAddRuleModal);
+    }
+    
+    const ruleModal = document.getElementById('rule-modal');
+    if (ruleModal) {
+        const closeBtn = ruleModal.querySelector('.close');
+        const cancelBtn = document.getElementById('cancel-rule');
+        const submitBtn = document.getElementById('submit-rule');
+        
+        if (closeBtn) closeBtn.addEventListener('click', closeRuleModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeRuleModal);
+        if (submitBtn) submitBtn.addEventListener('click', handleRuleSubmit);
+    }
 }
 
 // 显示当前用户信息
@@ -158,9 +175,32 @@ async function loadOrgData() {
         const org3Response = await fetch('/api/hr-manager/org/level3');
         const org3Data = await org3Response.json();
         orgData.level3 = org3Data || [];
+        
+        // 填充三级机构下拉框（用于考勤规则）
+        populateOrg3Select();
     } catch (error) {
         console.error('Load organization data error:', error);
     }
+}
+
+// 填充三级机构下拉框
+function populateOrg3Select() {
+    const select = document.getElementById('rule-org3');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">请选择三级机构</option>';
+    
+    orgData.level3.forEach(org3 => {
+        // 查找对应的二级机构
+        const level2Org = orgData.level2.find(o => o.org2Id === org3.org2Id);
+        // 查找对应的一级机构
+        const level1Org = level2Org ? orgData.level1.find(o => o.org1Id === level2Org.org1Id) : null;
+        
+        const option = document.createElement('option');
+        option.value = org3.org3Id;
+        option.textContent = `${level1Org ? level1Org.org1Name : ''} > ${level2Org ? level2Org.org2Name : ''} > ${org3.org3Name}`;
+        select.appendChild(option);
+    });
 }
 
 // 显示指定面板
@@ -201,6 +241,10 @@ function showPane(paneId) {
                     currentPageTitle.textContent = '审批管理';
                     loadApprovalData(); // 加载审批数据
                     break;
+                case 'attendance-rules':
+                    currentPageTitle.textContent = '考勤规则管理';
+                    loadAttendanceRules(); // 加载考勤规则数据
+                    break;
                 case 'reports':
                     currentPageTitle.textContent = '人事报表';
                     break;
@@ -239,16 +283,19 @@ function renderStaffTable(staffList) {
     staffList.forEach(staff => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${staff.staffId}</td>
+            <td>${staff.archiveId}</td>
             <td>${staff.staffName}</td>
-            <td>${staff.gender}</td>
+            <td>${staff.gender === 'M' ? '男' : (staff.gender === 'F' ? '女' : staff.gender)}</td>
             <td>${getOrgFullName(staff.org1Id, staff.org2Id, staff.org3Id)}</td>
             <td>${staff.positionId}</td>
             <td>${staff.mobile}</td>
             <td>${getStatusText(staff.status)}</td>
             <td>
-                <button class="btn-small btn-primary" onclick="viewStaffDetails('${staff.staffId}')">查看</button>
-                <button class="btn-small btn-secondary" onclick="rollbackStaffChanges('${staff.staffId}')">打回</button>
+                ${staff.status === 'RESIGN_PENDING' ? 
+                  `<button class="btn-small btn-primary" onclick="approveResignation('${staff.archiveId}')">批准离职</button>
+                   <button class="btn-small btn-danger" onclick="rejectResignation('${staff.archiveId}')">拒绝离职</button>` :
+                  `<button class="btn-small btn-primary" onclick="viewStaffDetails('${staff.archiveId}')">查看</button>`
+                }
             </td>
         `;
         tbody.appendChild(tr);
@@ -297,6 +344,10 @@ function getStatusText(status) {
             return '已拒绝';
         case 'DELETED':
             return '已删除';
+        case 'RESIGNED':
+            return '已离职';
+        case 'RESIGN_PENDING':
+            return '离职申请中';
         default:
             return status;
     }
@@ -311,9 +362,9 @@ async function viewStaffDetails(staffId) {
         if (response.ok) {
             alert(`员工详情:
 
-员工编号: ${staff.staffId}
+员工编号: ${staff.archiveId}
 姓名: ${staff.staffName}
-性别: ${staff.gender}
+性别: ${staff.gender === 'M' ? '男' : (staff.gender === 'F' ? '女' : staff.gender)}
 年龄: ${staff.age}
 手机: ${staff.mobile}
 邮箱: ${staff.email}
@@ -324,6 +375,64 @@ async function viewStaffDetails(staffId) {
     } catch (error) {
         console.error('View staff details error:', error);
         alert('获取员工详情失败');
+    }
+}
+
+// 批准员工离职申请
+async function approveResignation(staffId) {
+    if (!confirm('确定要批准该员工的离职申请吗？批准后该员工账户将被禁用。')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/hr-manager/staff/${staffId}/approve-resignation`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            alert('员工离职申请已批准，账户已禁用');
+            // 重新加载员工数据
+            loadStaffData();
+        } else {
+            alert(`操作失败: ${result.message || '未知错误'}`);
+        }
+    } catch (error) {
+        console.error('Approve resignation error:', error);
+        alert('操作失败');
+    }
+}
+
+// 拒绝员工离职申请
+async function rejectResignation(staffId) {
+    if (!confirm('确定要拒绝该员工的离职申请吗？')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/hr-manager/staff/${staffId}/reject-resignation`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            alert('员工离职申请已拒绝');
+            // 重新加载员工数据
+            loadStaffData();
+        } else {
+            alert(`操作失败: ${result.message || '未知错误'}`);
+        }
+    } catch (error) {
+        console.error('Reject resignation error:', error);
+        alert('操作失败');
     }
 }
 
@@ -372,8 +481,8 @@ async function handleStaffSearch() {
         // 根据姓名、员工账号、员工编号搜索
         const filteredStaff = allStaff.filter(staff => 
             staff.staffName.includes(keyword) || 
-            staff.accountId.includes(keyword) || 
-            staff.staffId.includes(keyword)
+            (staff.accountId && staff.accountId.includes(keyword)) || 
+            staff.archiveId.includes(keyword)
         );
         
         renderStaffTable(filteredStaff);
@@ -398,6 +507,10 @@ async function loadApprovalData() {
         const deptChangeResponse = await fetch('/api/hr-manager/department-change-requests');
         departmentChangeRequests = await deptChangeResponse.json();
         
+        // 加载离职申请
+        const resignationResponse = await fetch('/api/hr-manager/resignation-applications');
+        resignationApplications = await resignationResponse.json();
+        
         // 渲染审批表格
         renderApprovalTables();
     } catch (error) {
@@ -410,6 +523,7 @@ function renderApprovalTables() {
     renderLeaveApprovalTable(leaveApplications);
     renderOvertimeApprovalTable(overtimeApplications);
     renderDepartmentChangeApprovalTable(departmentChangeRequests);
+    renderResignationApprovalTable(resignationApplications);
 }
 
 // 渲染请假审批表格
@@ -481,6 +595,119 @@ function renderDepartmentChangeApprovalTable(requests) {
         `;
         tbody.appendChild(tr);
     });
+}
+
+// 渲染离职审批表格
+function renderResignationApprovalTable(applications) {
+    const tbody = document.getElementById('resignation-approvals-body');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    applications.forEach(app => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${app.applicantName || '未知'}</td>
+            <td>${app.createTime ? new Date(app.createTime).toLocaleString() : ''}</td>
+            <td>${app.approvalStatus ? getApprovalStatusDescription(app.approvalStatus) : ''}</td>
+            <td>
+                <button class="btn-small btn-primary" onclick="viewResignationApplication(${app.id})">查看详情</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// 查看离职申请详情
+async function viewResignationApplication(id) {
+    try {
+        const response = await fetch(`/api/hr-manager/resignation-applications/${id}`);
+        const application = await response.json();
+        
+        if (response.ok) {
+            // 显示模态框并填充数据
+            document.getElementById('resignation-applicant').textContent = application.applicantName || '未知';
+            document.getElementById('resignation-apply-time').textContent = application.createTime ? new Date(application.createTime).toLocaleString() : '';
+            document.getElementById('resignation-status').textContent = application.approvalStatus ? getApprovalStatusDescription(application.approvalStatus) : '';
+            document.getElementById('resignation-reason-detail').value = application.reason || '';
+            
+            // 绑定审批按钮事件
+            document.getElementById('approve-resignation-btn').onclick = () => approveResignationApplication(id);
+            document.getElementById('reject-resignation-btn').onclick = () => rejectResignationApplication(id);
+            
+            // 显示模态框
+            document.getElementById('resignation-detail-modal').style.display = 'block';
+        } else {
+            alert('获取离职申请详情失败');
+        }
+    } catch (error) {
+        console.error('View resignation application error:', error);
+        alert('获取离职申请详情失败');
+    }
+}
+
+// 关闭离职申请详情模态框
+function closeResignationDetailModal() {
+    document.getElementById('resignation-detail-modal').style.display = 'none';
+}
+
+// 批准离职申请
+async function approveResignationApplication(id) {
+    if (!confirm('确定要批准该员工的离职申请吗？批准后该员工账户将被禁用。')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/hr-manager/resignation-applications/${id}/approve`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            alert('员工离职申请已批准，账户已禁用');
+            closeResignationDetailModal();
+            // 重新加载审批数据
+            loadApprovalData();
+        } else {
+            alert(`操作失败: ${result.message || '未知错误'}`);
+        }
+    } catch (error) {
+        console.error('Approve resignation error:', error);
+        alert('操作失败');
+    }
+}
+
+// 拒绝离职申请
+async function rejectResignationApplication(id) {
+    if (!confirm('确定要拒绝该员工的离职申请吗？')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/hr-manager/resignation-applications/${id}/reject`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            alert('员工离职申请已拒绝');
+            closeResignationDetailModal();
+            // 重新加载审批数据
+            loadApprovalData();
+        } else {
+            alert(`操作失败: ${result.message || '未知错误'}`);
+        }
+    } catch (error) {
+        console.error('Reject resignation error:', error);
+        alert('操作失败');
+    }
 }
 
 // 根据档案ID获取员工姓名
@@ -921,6 +1148,231 @@ function getLeaveTypeDescription(type) {
             return '婚假';
         default:
             return type;
+    }
+}
+
+// 加载考勤规则数据
+async function loadAttendanceRules() {
+    try {
+        const response = await fetch('/api/hr-manager/attendance-rules');
+        const result = await response.json();
+        const rules = result.data || [];
+        renderRulesTable(rules);
+    } catch (error) {
+        console.error('Load attendance rules error:', error);
+        alert('加载考勤规则失败');
+    }
+}
+
+// 渲染规则表格
+function renderRulesTable(rules) {
+    const tbody = document.getElementById('rules-body');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (!rules || rules.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="6">暂无考勤规则</td>';
+        tbody.appendChild(tr);
+        return;
+    }
+    
+    rules.forEach(rule => {
+        // 解析规则JSON
+        let ruleDetails = {};
+        try {
+            ruleDetails = JSON.parse(rule.ruleJson);
+        } catch (e) {
+            console.error('Parse rule JSON error:', e);
+        }
+        
+        // 获取适用机构信息
+        let orgInfo = '未知机构';
+        if (rule.org3Id) {
+            const org3 = orgData.level3.find(o => o.org3Id === rule.org3Id);
+            if (org3) {
+                const org2 = orgData.level2.find(o => o.org2Id === org3.org2Id);
+                const org1 = org2 ? orgData.level1.find(o => o.org1Id === org2.org1Id) : null;
+                orgInfo = `${org1 ? org1.org1Name : ''} > ${org2 ? org2.org2Name : ''} > ${org3.org3Name}`;
+            }
+        }
+        
+        const tr = document.createElement('tr');
+        tr.className = 'clickable-row';
+        tr.innerHTML = `
+            <td>${ruleDetails.name || '未命名规则'}</td>
+            <td>${orgInfo}</td>
+            <td>${ruleDetails.workStart || '-'}</td>
+            <td>${ruleDetails.workEnd || '-'}</td>
+            <td>${rule.status === 'ACTIVE' ? '启用' : '停用'}</td>
+            <td>
+                <button class="btn-small btn-primary" onclick='editRule(${JSON.stringify(rule).replace(/'/g, "\\'")})'>编辑</button>
+                <button class="btn-small btn-danger" onclick="deleteRule(${rule.id})">删除</button>
+            </td>
+        `;
+        tr.addEventListener('click', (event) => {
+            // 阻止按钮点击时触发行点击事件
+            if (event.target.tagName !== 'BUTTON') {
+                editRule(rule);
+            }
+        });
+        tbody.appendChild(tr);
+    });
+}
+
+// 打开新增规则模态框
+function openAddRuleModal() {
+    const modal = document.getElementById('rule-modal');
+    if (!modal) return;
+    
+    // 清空表单
+    document.getElementById('rule-form').reset();
+    document.getElementById('rule-id').value = '';
+    document.getElementById('rule-modal-title').textContent = '新增考勤规则';
+    
+    // 设置默认上班下班时间
+    document.getElementById('work-start-time').value = '09:00';
+    document.getElementById('work-end-time').value = '18:00';
+    
+    // 显示模态框
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+// 关闭规则模态框
+function closeRuleModal() {
+    const modal = document.getElementById('rule-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// 编辑规则
+function editRule(rule) {
+    const modal = document.getElementById('rule-modal');
+    if (!modal) return;
+    
+    // 填充表单数据
+    document.getElementById('rule-id').value = rule.id || '';
+    
+    // 解析规则JSON
+    let ruleDetails = {};
+    try {
+        ruleDetails = JSON.parse(rule.ruleJson);
+    } catch (e) {
+        console.error('Parse rule JSON error:', e);
+    }
+    
+    document.getElementById('rule-name').value = ruleDetails.name || '';
+    document.getElementById('rule-org3').value = rule.org3Id || '';
+    document.getElementById('work-start-time').value = ruleDetails.workStart || '09:00';
+    document.getElementById('work-end-time').value = ruleDetails.workEnd || '18:00';
+    document.getElementById('rule-status').value = rule.status || 'ACTIVE';
+    document.getElementById('rule-modal-title').textContent = '编辑考勤规则';
+    
+    // 显示模态框
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+// 处理规则提交
+async function handleRuleSubmit() {
+    const id = document.getElementById('rule-id').value;
+    const name = document.getElementById('rule-name').value.trim();
+    const org3Id = document.getElementById('rule-org3').value;
+    const workStart = document.getElementById('work-start-time').value;
+    const workEnd = document.getElementById('work-end-time').value;
+    const status = document.getElementById('rule-status').value;
+    
+    // 基本验证
+    if (!name) {
+        alert('请输入规则名称');
+        return;
+    }
+    
+    if (!org3Id) {
+        alert('请选择适用的三级机构');
+        return;
+    }
+    
+    if (!workStart || !workEnd) {
+        alert('请设置上班时间和下班时间');
+        return;
+    }
+    
+    // 构造规则JSON
+    const ruleJson = JSON.stringify({
+        name: name,
+        workStart: workStart,
+        workEnd: workEnd
+    });
+    
+    try {
+        let response;
+        const requestData = {
+            org3Id: org3Id,
+            ruleJson: ruleJson,
+            status: status
+        };
+        
+        if (id) {
+            // 更新规则
+            response = await fetch(`/api/hr-manager/attendance-rules/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+        } else {
+            // 创建规则
+            response = await fetch('/api/hr-manager/attendance-rules', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+        }
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            alert(id ? '规则更新成功' : '规则创建成功');
+            closeRuleModal();
+            loadAttendanceRules(); // 重新加载规则列表
+        } else {
+            alert('操作失败: ' + (result.message || '未知错误'));
+        }
+    } catch (error) {
+        console.error('Save rule error:', error);
+        alert('保存规则时发生错误，请稍后重试');
+    }
+}
+
+// 删除规则
+async function deleteRule(id) {
+    if (!confirm('确定要删除这条考勤规则吗？')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/hr-manager/attendance-rules/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            alert('规则删除成功');
+            loadAttendanceRules(); // 重新加载规则列表
+        } else {
+            const result = await response.json();
+            alert('删除失败: ' + (result.message || '未知错误'));
+        }
+    } catch (error) {
+        console.error('Delete rule error:', error);
+        alert('删除规则时发生错误，请稍后重试');
     }
 }
 

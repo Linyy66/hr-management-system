@@ -12,13 +12,17 @@ public class AttendanceRule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 2)
-    private String org1Id;
+    @Column(length = 6)
+    private String org3Id;
+
+    public void setOrg1Id(String org1Id) {
+        // 为了兼容已有的API，但实际使用org3Id
+    }
 
     @Lob
     private String ruleJson;
 
-    private String status; // PENDING / APPROVED / REJECTED
+    private String status; // ACTIVE / INACTIVE
 
     private String createBy;
     private java.time.LocalDateTime createTime;

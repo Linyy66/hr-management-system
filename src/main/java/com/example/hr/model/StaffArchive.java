@@ -52,7 +52,7 @@ public class StaffArchive {
     private String email;
     
     @Column(name = "status")
-    private String status; // 员工档案状态: PENDING(待审批) / NORMAL(正常) / DELETED(已删除) / REJECTED(已拒绝)
+    private String status; // 员工档案状态: PENDING(待审批) / NORMAL(正常) / DELETED(已删除) / REJECTED(已拒绝) / RESIGNED(已离职) / RESIGN_PENDING(离职申请中)
 
     @Column(name = "create_by")
     private String createBy;
@@ -84,6 +84,10 @@ public class StaffArchive {
                 return "已删除";
             case "REJECTED":
                 return "已拒绝";
+            case "RESIGNED":
+                return "已离职";
+            case "RESIGN_PENDING":
+                return "离职申请中";
             default:
                 return status;
         }

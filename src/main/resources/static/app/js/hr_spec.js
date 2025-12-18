@@ -260,24 +260,17 @@ async function handleStaffAccountChange() {
     const emailInput = document.getElementById('staff-email');
     const bioTextarea = document.getElementById('staff-bio');
     
-    // 重置并禁用表单字段
-    resetAndDisableFields();
+    // 重置并启用表单字段
+    resetAndEnableFields();
     
     if (!accountId) {
         return;
     }
     
     // 自动生成员工编号
-    archiveIdInput.value = 'EMP' + Date.now(); // 生成唯一员工编号
-    
-    // 启用可编辑字段
-    nameInput.disabled = false;
-    genderSelect.disabled = false;
-    ageInput.disabled = false;
-    mobileInput.disabled = false;
-    idCardInput.disabled = false;
-    emailInput.disabled = false;
-    bioTextarea.disabled = false;
+    if (archiveIdInput) {
+        archiveIdInput.value = 'EMP' + Date.now(); // 生成唯一员工编号
+    }
     
     // 尝试从用户信息中获取默认值
     try {
@@ -286,13 +279,10 @@ async function handleStaffAccountChange() {
             const userData = await response.json();
             
             // 填充基本信息
-            nameInput.value = userData.username || '';
-            genderSelect.value = userData.gender || '';
-            ageInput.value = userData.age || '';
-            mobileInput.value = userData.mobile || '';
-            idCardInput.value = userData.idCard || '';
-            emailInput.value = userData.email || '';
-            bioTextarea.value = userData.bio || '';
+            if (nameInput) {
+                nameInput.value = userData.username || '';
+            }
+            // 其他字段保持空白让用户填写
             
             console.log('User data filled:', userData);
         } else {
@@ -303,8 +293,8 @@ async function handleStaffAccountChange() {
     }
 }
 
-// 重置并禁用表单字段
-function resetAndDisableFields() {
+// 重置并启用表单字段
+function resetAndEnableFields() {
     // 重置字段
     document.getElementById('staff-name').value = '';
     document.getElementById('staff-archive-id').value = '';
@@ -315,14 +305,14 @@ function resetAndDisableFields() {
     document.getElementById('staff-email').value = '';
     document.getElementById('staff-bio').value = '';
     
-    // 禁用字段
-    document.getElementById('staff-name').disabled = true;
-    document.getElementById('staff-gender').disabled = true;
-    document.getElementById('staff-age').disabled = true;
-    document.getElementById('staff-mobile').disabled = true;
-    document.getElementById('staff-phone').disabled = true;
-    document.getElementById('staff-email').disabled = true;
-    document.getElementById('staff-bio').disabled = true;
+    // 启用所有字段
+    document.getElementById('staff-name').disabled = false;
+    document.getElementById('staff-gender').disabled = false;
+    document.getElementById('staff-age').disabled = false;
+    document.getElementById('staff-mobile').disabled = false;
+    document.getElementById('staff-phone').disabled = false;
+    document.getElementById('staff-email').disabled = false;
+    document.getElementById('staff-bio').disabled = false;
     
     // 重置机构和职位选择
     document.getElementById('staff-org1').value = '';
@@ -571,7 +561,6 @@ async function handleAddStaffSubmit(e) {
     
     try {
         const formData = {
-            archiveId: 'EMP' + Date.now(), // 生成员工编号
             accountId: account, // 添加账号ID
             staffName: name,
             gender: gender,
@@ -586,6 +575,11 @@ async function handleAddStaffSubmit(e) {
             bio: bio
         };
         
+        // 如果有员工编号，则添加到formData中
+        if (archiveIdInput && archiveIdInput.value) {
+            formData.archiveId = archiveIdInput.value;
+        }
+
         console.log('Submitting staff data:', formData); // 调试日志
         
         const response = await fetch('/api/hr-spec/staff', {

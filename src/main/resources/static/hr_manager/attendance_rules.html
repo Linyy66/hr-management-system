@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考勤规则管理 - HRMS</title>
+    <link rel="stylesheet" href="/app/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>HRMS</h1>
+                <span>人事经理平台</span>
+            </div>
+            <div class="nav-menu">
+                <ul>
+                    <li><a href="/hr_manager/index.html" class="nav-link">返回首页</a></li>
+                </ul>
+            </div>
+            <div class="user-info">
+                <span id="current-user">人事经理</span>
+                <span class="role-badge hr_manager">人事经理</span>
+                <button id="logout-btn" class="btn-secondary btn-small">退出</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <div class="card">
+            <h2>考勤规则管理</h2>
+            <button id="add-rule-btn" class="btn-primary">新增规则</button>
+        </div>
+        
+        <div class="card">
+            <h3>规则列表</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>规则名称</th>
+                        <th>适用机构</th>
+                        <th>上班时间</th>
+                        <th>下班时间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="rules-body">
+                    <!-- 动态加载规则列表 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 新增/编辑考勤规则模态框 -->
+    <div id="rule-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="rule-modal-title">新增考勤规则</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="rule-form">
+                    <input type="hidden" id="rule-id">
+                    <div class="form-group">
+                        <label for="rule-name">规则名称 *</label>
+                        <input type="text" id="rule-name" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rule-org3">适用三级机构 *</label>
+                        <select id="rule-org3" class="form-control" required>
+                            <option value="">请选择三级机构</option>
+                            <!-- 动态加载三级机构选项 -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="work-start-time">上班时间 *</label>
+                            <input type="time" id="work-start-time" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="work-end-time">下班时间 *</label>
+                            <input type="time" id="work-end-time" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rule-status">状态</label>
+                        <select id="rule-status" class="form-control">
+                            <option value="ACTIVE">启用</option>
+                            <option value="INACTIVE">停用</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-rule" class="btn-secondary">取消</button>
+                <button id="submit-rule" class="btn-primary">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/app/js/utils.js"></script>
+    <script src="/app/js/hr_manager_attendance.js"></script>
+</body>
+</html>

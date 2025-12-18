@@ -1,7 +1,9 @@
 package com.example.hr.listener;
 
 import com.example.hr.model.AppUser;
+import com.example.hr.model.EmployeeProfile;
 import com.example.hr.model.StaffArchive;
+import com.example.hr.repository.EmployeeProfileRepository;
 import com.example.hr.repository.StaffArchiveRepository;
 import com.example.hr.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class UserRegistrationListener {
 
     @Autowired
     private StaffArchiveRepository staffArchiveRepository;
+    
+    @Autowired
+    private EmployeeProfileRepository employeeProfileRepository;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -34,6 +39,7 @@ public class UserRegistrationListener {
         // 只有当用户角色为员工时才创建员工档案
         if ("EMPLOYEE".equals(user.getRole())) {
             createEmployeeArchive(user);
+            createEmployeeProfile(user);
         }
     }
 
@@ -47,7 +53,7 @@ public class UserRegistrationListener {
         // 创建员工档案
         StaffArchive archive = new StaffArchive();
         archive.setArchiveId(archiveId);
-        archive.setAccountId(user.getUsername());
+        archive.setAccountId(user.getUsername()); // 关键：设置账号ID为用户名
         archive.setStaffName(user.getUsername()); // 初始姓名为用户名
         archive.setGender("M"); // 默认性别为男
         archive.setAge(18); // 默认年龄为18
@@ -55,7 +61,7 @@ public class UserRegistrationListener {
         archive.setMobile("13800138000"); // 默认手机号
         archive.setEmail("user@example.com"); // 默认邮箱
         archive.setBio("一切都很顺利"); // 默认自我介绍
-        archive.setStatus("NORMAL");
+        archive.setStatus("NORMAL"); // 默认状态为正常
         archive.setCreateBy(user.getUsername());
         archive.setCreateTime(LocalDateTime.now());
         archive.setVersion(1);
@@ -69,6 +75,33 @@ public class UserRegistrationListener {
         staffArchiveRepository.save(archive);
         
         // 添加日志
-        System.out.println("自动创建员工档案: " + archiveId);
+        System.out.println("自动创建员工档案: " + archiveId + " 关联账号: " + user.getUsername());
+    }
+    
+    /**
+     * 创建员工个人信息
+     */
+    private void createEmployeeProfile(AppUser user) {
+        // 生成随机个人信息编号
+        String profileId = "PRF" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        
+        // 创建员工个人信息
+        EmployeeProfile profile = new EmployeeProfile();
+        profile.setProfileId(profileId);
+        profile.setAccountId(user.getUsername()); // 关键：设置账号ID为用户名
+        profile.setStaffName(user.getUsername()); // 初始姓名为用户名
+        profile.setGender("M"); // 默认性别为男
+        profile.setAge(18); // 默认年龄为18
+        profile.setMobile("13800138000"); // 默认手机号
+        profile.setEmail("user@example.com"); // 默认邮箱
+        profile.setBio("一切都很顺利"); // 默认自我介绍
+        profile.setCreateTime(LocalDateTime.now());
+        profile.setUpdateTime(LocalDateTime.now());
+        profile.setVersion(1);
+        
+        employeeProfileRepository.save(profile);
+        
+        // 添加日志
+        System.out.println("自动创建员工个人信息: " + profileId + " 关联账号: " + user.getUsername());
     }
 }
