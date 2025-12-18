@@ -45,13 +45,3 @@ spring:
       org.hibernate.engine.jdbc.spi.SqlExceptionHelper: ERROR
       org.springframework.orm.jpa: DEBUG
 
-  # Hibernate 配置
-  spring:
-    jpa:
-      properties:
-        hibernate:
-          format_sql: true
-          show_sql: true
-          use_sql_comments: true
-      show-sql: true
-

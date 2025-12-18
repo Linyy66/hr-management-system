@@ -121,7 +121,7 @@ public class HrSpecController {
             existing.setStaffName(archive.getStaffName());
             existing.setGender(archive.getGender());
             existing.setAge(archive.getAge());
-            existing.setPhone(archive.getPhone());
+            existing.setIdCard(archive.getIdCard());
             existing.setMobile(archive.getMobile());
             existing.setEmail(archive.getEmail());
             existing.setBio(archive.getBio());

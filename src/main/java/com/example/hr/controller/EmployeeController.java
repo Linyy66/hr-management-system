@@ -106,7 +106,7 @@ public class EmployeeController {
         existingArchive.setAge(updatedArchive.getAge());
         existingArchive.setBio(updatedArchive.getBio());
         existingArchive.setMobile(updatedArchive.getMobile());
-        existingArchive.setPhone(updatedArchive.getPhone());
+        existingArchive.setIdCard(updatedArchive.getIdCard());
         existingArchive.setEmail(updatedArchive.getEmail());
         existingArchive.setUpdateTime(LocalDateTime.now());
         
@@ -203,9 +203,10 @@ public class EmployeeController {
         }
         
         // 检查今天是否已经打过卡
-        LocalDate today = LocalDate.now();
+        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+        LocalDateTime todayEnd = LocalDate.now().plusDays(1).atStartOfDay();
         List<AttendanceRecord> todayRecords = attendanceRecordRepository
-                .findByUserIdAndClockInTimeBetween(currentUserId, today, today.plusDays(1));
+                .findByUserIdAndClockInTimeBetween(currentUserId, todayStart, todayEnd);
         
         // 检查是否已经有今天的打卡记录
         for (AttendanceRecord record : todayRecords) {
@@ -252,9 +253,10 @@ public class EmployeeController {
         }
         
         // 查找今天的考勤记录
-        LocalDate today = LocalDate.now();
+        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+        LocalDateTime todayEnd = LocalDate.now().plusDays(1).atStartOfDay();
         List<AttendanceRecord> todayRecords = attendanceRecordRepository
-                .findByUserIdAndClockInTimeBetween(currentUserId, today, today.plusDays(1));
+                .findByUserIdAndClockInTimeBetween(currentUserId, todayStart, todayEnd);
         
         if (todayRecords.isEmpty()) {
             return ResponseEntity.ok(ApiResponse.error("未找到今天的考勤记录"));

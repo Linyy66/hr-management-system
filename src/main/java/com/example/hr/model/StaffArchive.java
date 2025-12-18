@@ -45,8 +45,8 @@ public class StaffArchive {
     @Column(name = "mobile", length = 11, nullable = false)
     private String mobile;
 
-    @Column(name = "phone", length = 20)
-    private String phone;
+    @Column(name = "id_card", length = 18)
+    private String idCard;
 
     @Column(name = "email", length = 50)
     private String email;

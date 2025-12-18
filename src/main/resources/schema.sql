@@ -100,25 +100,6 @@ CREATE TABLE t_staff_archive (
                                  FOREIGN KEY (position_id) REFERENCES t_position(position_id)
 ) COMMENT '员工档案表';
 
--- 员工个人信息表
-CREATE TABLE t_employee_profile (
-                                   profile_id VARCHAR(12) PRIMARY KEY COMMENT '个人信息ID',
-                                   account_id VARCHAR(50) UNIQUE COMMENT '关联账号ID',
-                                   staff_name VARCHAR(20) COMMENT '员工姓名',
-                                   gender CHAR(1) COMMENT '性别(M/F)',
-                                   age INT COMMENT '年龄',
-                                   bio TEXT COMMENT '自我介绍',
-                                   mobile VARCHAR(11) COMMENT '手机号',
-                                   phone VARCHAR(20) COMMENT '电话',
-                                   email VARCHAR(50) COMMENT '邮箱',
-                                   address TEXT COMMENT '住址',
-                                   emergency_contact VARCHAR(20) COMMENT '紧急联系人',
-                                   emergency_phone VARCHAR(20) COMMENT '紧急联系电话',
-                                   create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                   update_time DATETIME COMMENT '更新时间',
-                                   version INT DEFAULT 1 NOT NULL COMMENT '版本号',
-                                   INDEX idx_account_id (account_id)
-) COMMENT '员工个人信息表';
 
 -- 离职申请表
 CREATE TABLE t_resignation_application (
@@ -257,3 +238,7 @@ INSERT INTO t_user (username, password, role, enabled) VALUES
                                                            ('hrmanager', '$2a$10$w9ziBXXD3d0f46w5mkE4MeVUxdNhMr6u55KUMrYoPsuNzbx8EIyjO', 'HR_MANAGER', 1), -- 密码: adminpass
                                                            ('hrspec', '$2a$10$w9ziBXXD3d0f46w5mkE4MeVUxdNhMr6u55KUMrYoPsuNzbx8EIyjO', 'HR_SPECIALIST', 1), -- 密码: adminpass
                                                            ('employee', '$2a$10$w9ziBXXD3d0f46w5mkE4MeVUxdNhMr6u55KUMrYoPsuNzbx8EIyjO', 'EMPLOYEE', 1); -- 密码: adminpass
+
+-- 员工档案
+INSERT INTO t_staff_archive (archive_id, account_id, org1_id, org2_id, org3_id, position_id, staff_name, gender, age, mobile, id_card, email, status, create_by) VALUES
+                           ('EMP00001', 'employee', '01', '0101', '010101', 'P002', '张三', 'M', 28, '13800138000', '110101199001011234', 'zhangsan@example.com', 'NORMAL', 'admin');

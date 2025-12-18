@@ -64,6 +64,7 @@ public class UserRegistrationListener {
             archive.setAge(18); // 默认年龄为18
             // 使用默认值或从其他来源获取手机号和邮箱
             archive.setMobile("13800138000"); // 默认手机号
+            archive.setIdCard("110101199001011234"); // 默认身份证号
             archive.setEmail("user@example.com"); // 默认邮箱
             archive.setBio("一切都很顺利"); // 默认自我介绍
             archive.setStatus("NORMAL"); // 默认状态为正常
@@ -75,7 +76,7 @@ public class UserRegistrationListener {
             archive.setOrg1Id("01"); // 默认一级机构ID
             archive.setOrg2Id("0101"); // 默认二级机构ID
             archive.setOrg3Id("010101"); // 默认三级机构ID
-            archive.setPositionId("P001"); // 默认职位ID
+            archive.setPositionId("P002"); // 默认职位ID
             
             staffArchiveRepository.save(archive);
             

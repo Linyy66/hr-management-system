@@ -821,7 +821,7 @@ async function updateProfile() {
         const gender = document.getElementById('profile-gender').value;
         const age = document.getElementById('profile-age').value;
         const mobile = document.getElementById('profile-mobile').value;
-        const phone = document.getElementById('profile-phone').value;
+        const idCard = document.getElementById('profile-phone').value;
         const email = document.getElementById('profile-email').value;
         const bio = document.getElementById('profile-bio').value;
         
@@ -830,7 +830,7 @@ async function updateProfile() {
             gender,
             age: age ? parseInt(age) : null,
             mobile,
-            phone,
+            idCard: idCard,
             email,
             bio
         };
@@ -1044,7 +1044,7 @@ async function loadProfileData() {
                 document.getElementById('profile-gender').value = userProfile.gender || '';
                 document.getElementById('profile-age').value = userProfile.age || '';
                 document.getElementById('profile-mobile').value = userProfile.mobile || '';
-                document.getElementById('profile-phone').value = userProfile.phone || '';
+                document.getElementById('profile-phone').value = userProfile.idCard || '';
                 document.getElementById('profile-email').value = userProfile.email || '';
                 document.getElementById('profile-bio').value = userProfile.bio || '';
                 
