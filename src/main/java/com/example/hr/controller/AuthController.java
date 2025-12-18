@@ -37,12 +37,16 @@ public class AuthController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String password,
             @RequestParam(required = false) String role) {
+        System.out.println("Register form request received: username=" + username + ", role=" + role);
         ResponseEntity<?> response = register(username, password, role);
+        System.out.println("Register service response: " + response.getStatusCode());
         if (response.getStatusCode().is2xxSuccessful()) {
+            System.out.println("Registration successful, redirecting to success page");
             return "redirect:/register.html?success=true";
         } else {
             Map<String, String> body = (Map<String, String>) response.getBody();
             String error = body != null ? body.get("error") : "注册失败";
+            System.out.println("Registration failed: " + error);
             return "redirect:/register.html?error=" + error;
         }
     }
@@ -57,13 +61,16 @@ public class AuthController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String password,
             @RequestParam(required = false) String role) {
+        System.out.println("Register JSON request received: username=" + username + ", role=" + role);
         
         if (username == null || password == null || role == null) {
+            System.out.println("Missing required fields: username=" + username + ", password=" + (password != null) + ", role=" + role);
             return ResponseEntity.badRequest().body(Map.of("error", "username/password/role 必填"));
         }
 
         // 允许的角色
         if (!role.equals("EMPLOYEE") && !role.equals("HR_SPEC") && !role.equals("HR_MANAGER") && !role.equals("ADMIN")) {
+            System.out.println("Invalid role: " + role);
             return ResponseEntity.badRequest().body(Map.of("error", "role 必须是 EMPLOYEE/HR_SPEC/HR_MANAGER/ADMIN"));
         }
 
@@ -71,11 +78,13 @@ public class AuthController {
         if (!"EMPLOYEE".equals(role)) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth == null || !auth.isAuthenticated() || auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                System.out.println("Non-employee role registration attempted without admin privileges");
                 return ResponseEntity.status(403).body(Map.of("error", "仅管理员可以创建此角色的用户"));
             }
         }
 
         if (userRepository.existsById(username)) {
+            System.out.println("Username already exists: " + username);
             return ResponseEntity.status(409).body(Map.of("error", "用户已存在"));
         }
         
@@ -84,10 +93,17 @@ public class AuthController {
         u.setPassword(passwordEncoder.encode(password));
         u.setRole(role);
         u.setEnabled(true);
-        userRepository.save(u);
+        AppUser savedUser = userRepository.save(u);
+        System.out.println("User saved successfully: " + savedUser.getUsername() + ", role: " + savedUser.getRole());
         
-        // 发布用户注册事件
-        eventPublisher.publishEvent(u);
+        try {
+            // 发布用户注册事件
+            eventPublisher.publishEvent(savedUser);
+            System.out.println("User registration event published for: " + savedUser.getUsername());
+        } catch (Exception e) {
+            System.err.println("Failed to publish user registration event for: " + savedUser.getUsername() + ", error: " + e.getMessage());
+            e.printStackTrace();
+        }
         return ResponseEntity.ok(Map.of("result","ok","username", username,"role",role));
     }
 

@@ -68,12 +68,16 @@ public class StaffArchive {
     
     @Column(name = "version")
     private Integer version = 1;
-
+    
     // 反向关联，mappedBy 对应子实体的 staffArchive 字段名
     @OneToMany(mappedBy = "staffArchive", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StaffEducation> educations = new ArrayList<>();
     
-    // 获取状态的中文描述
+    // 添加是否人事专员的标识字段
+    @Column(name = "is_hr_manager", length = 1)
+    private String isHrManager = "N"; // Y/N
+    
+    // 获取state的中文描述
     public String getStatusDescription() {
         switch (status) {
             case "PENDING":

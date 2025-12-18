@@ -865,37 +865,17 @@ async function updateProfile() {
 // 加载仪表板数据
 async function loadDashboardData() {
     try {
-        // 在实际应用中，这里应该从后端获取统计数据
-        // 模拟数据
-        document.getElementById('attendance-count').textContent = '0';
-        document.getElementById('remaining-leave').textContent = '0';
-        document.getElementById('pending-requests').textContent = '0';
+        // 从后端获取统计数据
+        const statsResponse = await fetch('/api/employee/dashboard/stats');
+        const stats = await statsResponse.json();
         
-        // 初始化一些操作日志
-        operationLogs = [
-            {
-                id: 1,
-                timestamp: '2025/12/14 09:00:00',
-                operationType: '考勤打卡',
-                details: '上班打卡时间: 09:00:00',
-                status: '成功'
-            },
-            {
-                id: 2,
-                timestamp: '2025/12/14 18:00:00',
-                operationType: '考勤打卡',
-                details: '下班打卡时间: 18:00:00',
-                status: '成功'
-            },
-            {
-                id: 3,
-                timestamp: '2025/12/10 10:30:00',
-                operationType: '请假申请',
-                details: '提交年假申请，天数:2',
-                status: '通过'
-            }
-        ];
+        document.getElementById('attendance-count').textContent = stats.attendanceCount || 0;
+        document.getElementById('remaining-leave').textContent = stats.remainingLeave || 0;
+        document.getElementById('pending-requests').textContent = stats.pendingRequests || 0;
         
+        // 加载操作日志
+        const logsResponse = await fetch('/api/employee/dashboard/logs');
+        operationLogs = await logsResponse.json();
         renderOperationLogs();
     } catch (error) {
         console.error('Load dashboard data error:', error);
@@ -1056,7 +1036,7 @@ async function loadProfileData() {
             // 填充表单数据
             if (userProfile) {
                 document.getElementById('staff-name').textContent = userProfile.staffName || '-';
-                document.getElementById('archive-id').textContent = userProfile.profileId || '-';
+                document.getElementById('archive-id').textContent = userProfile.archiveId || '-';
                 document.getElementById('position-name').textContent = '-' || '-';
                 document.getElementById('department-name').textContent = '-' || '-';
                 
@@ -1077,33 +1057,33 @@ async function loadProfileData() {
                 }
             }
         } else {
+            // 显示错误信息而不是静默失败
             console.error('Load profile data error:', result.message);
+            // 如果是"未找到员工档案"错误，提示用户联系管理员
+            if (result.message && result.message.includes('未找到')) {
+                alert('未找到您的员工档案，请联系管理员处理');
+            } else {
+                alert('加载个人档案失败: ' + (result.message || '未知错误'));
+            }
         }
     } catch (error) {
         console.error('Load profile data error:', error);
+        alert('加载个人档案失败，请稍后重试');
     }
 }
 
 // 获取组织全名
 function getOrgFullName(org1Id, org2Id, org3Id) {
-    // 模拟数据映射
-    const orgNames = {
-        '01': '技术部',
-        '0101': '研发部',
-        '010101': '后端开发组',
-        '010102': '前端开发组',
-        '0102': '测试部',
-        '010201': '功能测试组',
-        '02': '人事部',
-        '0201': '招聘组',
-        '020101': '校园招聘组'
-    };
-    
-    const org1Name = orgNames[org1Id] || org1Id;
-    const org2Name = orgNames[org2Id] || org2Id;
-    const org3Name = orgNames[org3Id] || org3Id;
-    
-    return `${org1Name} > ${org2Name} > ${org3Name}`;
+    // 从后端API获取组织全名
+    return fetch(`/api/employee/org/full-name?org1Id=${org1Id}&org2Id=${org2Id}&org3Id=${org3Id}`)
+        .then(response => response.json())
+        .then(data => {
+            return data.fullName;
+        })
+        .catch(error => {
+            console.error('Error fetching org full name:', error);
+            return `${org1Id} > ${org2Id} > ${org3Id}`;
+        });
 }
 
 // 获取审批状态描述

@@ -296,29 +296,43 @@ async function handleStaffAccountChange() {
 // 重置并启用表单字段
 function resetAndEnableFields() {
     // 重置字段
-    document.getElementById('staff-name').value = '';
-    document.getElementById('staff-archive-id').value = '';
-    document.getElementById('staff-gender').value = '';
-    document.getElementById('staff-age').value = '';
-    document.getElementById('staff-mobile').value = '';
-    document.getElementById('staff-phone').value = '';
-    document.getElementById('staff-email').value = '';
-    document.getElementById('staff-bio').value = '';
+    const nameField = document.getElementById('staff-name');
+    const archiveIdField = document.getElementById('staff-archive-id');
+    const genderField = document.getElementById('staff-gender');
+    const ageField = document.getElementById('staff-age');
+    const mobileField = document.getElementById('staff-mobile');
+    const phoneField = document.getElementById('staff-phone');
+    const emailField = document.getElementById('staff-email');
+    const bioField = document.getElementById('staff-bio');
+    
+    if (nameField) nameField.value = '';
+    if (archiveIdField) archiveIdField.value = '';
+    if (genderField) genderField.value = '';
+    if (ageField) ageField.value = '';
+    if (mobileField) mobileField.value = '';
+    if (phoneField) phoneField.value = '';
+    if (emailField) emailField.value = '';
+    if (bioField) bioField.value = '';
     
     // 启用所有字段
-    document.getElementById('staff-name').disabled = false;
-    document.getElementById('staff-gender').disabled = false;
-    document.getElementById('staff-age').disabled = false;
-    document.getElementById('staff-mobile').disabled = false;
-    document.getElementById('staff-phone').disabled = false;
-    document.getElementById('staff-email').disabled = false;
-    document.getElementById('staff-bio').disabled = false;
+    if (nameField) nameField.disabled = false;
+    if (genderField) genderField.disabled = false;
+    if (ageField) ageField.disabled = false;
+    if (mobileField) mobileField.disabled = false;
+    if (phoneField) phoneField.disabled = false;
+    if (emailField) emailField.disabled = false;
+    if (bioField) bioField.disabled = false;
     
     // 重置机构和职位选择
-    document.getElementById('staff-org1').value = '';
-    document.getElementById('staff-org2').innerHTML = '<option value="">请选择</option>';
-    document.getElementById('staff-org3').innerHTML = '<option value="">请选择</option>';
-    document.getElementById('staff-position').innerHTML = '<option value="">请选择</option>';
+    const org1Field = document.getElementById('staff-org1');
+    const org2Field = document.getElementById('staff-org2');
+    const org3Field = document.getElementById('staff-org3');
+    const positionField = document.getElementById('staff-position');
+    
+    if (org1Field) org1Field.value = '';
+    if (org2Field) org2Field.innerHTML = '<option value="">请选择</option>';
+    if (org3Field) org3Field.innerHTML = '<option value="">请选择</option>';
+    if (positionField) positionField.innerHTML = '<option value="">请选择</option>';
 }
 
 // 加载一级机构选项
@@ -634,12 +648,22 @@ async function loadDashboardData() {
         const staffArchives = await staffResponse.json();
         const pendingArchives = staffArchives.filter(archive => archive.status === 'PENDING').length;
         
-        // 获取考勤异常数量（这里我们假设有一个API可以获取）
-        // 由于没有直接的API，我们暂时使用模拟数据
+        // 获取考勤异常数量（从后端API获取）
+        const attendanceExceptionResponse = await fetch('/api/hr-spec/attendance-exceptions/count');
+        const attendanceExceptions = await attendanceExceptionResponse.json();
+        
+        // 获取今日入职员工数量
+        const newHiresResponse = await fetch('/api/hr-spec/new-hires/today/count');
+        const newHires = await newHiresResponse.json();
+        
+        // 获取本周离职员工数量
+        const resignationsResponse = await fetch('/api/hr-spec/resignations/week/count');
+        const resignations = await resignationsResponse.json();
+        
         document.getElementById('pending-archives').textContent = pendingArchives;
-        document.getElementById('attendance-exceptions').textContent = '5';
-        document.getElementById('new-hires').textContent = '2';
-        document.getElementById('resignations').textContent = '1';
+        document.getElementById('attendance-exceptions').textContent = attendanceExceptions;
+        document.getElementById('new-hires').textContent = newHires;
+        document.getElementById('resignations').textContent = resignations;
     } catch (error) {
         console.error('Load dashboard data error:', error);
     }
@@ -1112,24 +1136,16 @@ function getOrgFullName(org1Id, org2Id, org3Id) {
         return `${org1 ? org1.org1Name : org1Id} > ${org2 ? org2.org2Name : org2Id} > ${org3 ? org3.org3Name : org3Id}`;
     }
     
-    // 如果没有全局orgData，则使用模拟数据
-    const orgNames = {
-        '01': '技术部',
-        '0101': '研发部',
-        '010101': '后端开发组',
-        '010102': '前端开发组',
-        '0102': '测试部',
-        '010201': '功能测试组',
-        '02': '人事部',
-        '0201': '招聘组',
-        '020101': '校园招聘组'
-    };
-    
-    const org1Name = orgNames[org1Id] || org1Id;
-    const org2Name = orgNames[org2Id] || org2Id;
-    const org3Name = orgNames[org3Id] || org3Id;
-    
-    return `${org1Name} > ${org2Name} > ${org3Name}`;
+    // 如果没有全局orgData，则从后端API获取
+    fetch(`/api/hr-spec/org/full-name?org1Id=${org1Id}&org2Id=${org2Id}&org3Id=${org3Id}`)
+        .then(response => response.json())
+        .then(data => {
+            return data.fullName;
+        })
+        .catch(error => {
+            console.error('Error fetching org full name:', error);
+            return `${org1Id} > ${org2Id} > ${org3Id}`;
+        });
 }
 
 // 获取员工档案状态描述
@@ -1149,15 +1165,288 @@ function getStaffArchiveStatusDescription(status) {
 }
 
 // 查看员工档案
-function viewStaffArchive(id) {
-    // 在实际应用中，这里应该从后端获取员工档案详情
-    alert(`查看员工档案: ${id}\n在实际应用中，这里会显示员工的详细信息。`);
+async function viewStaffArchive(id) {
+    try {
+        // 获取员工档案详情
+        const response = await fetch(`/api/hr-spec/staff/${id}`);
+        const staffArchive = await response.json();
+        
+        if (!response.ok) {
+            alert('获取员工档案详情失败');
+            return;
+        }
+        
+        // 显示员工档案详情
+        let detailMessage = `
+员工编号: ${staffArchive.archiveId}
+员工账号: ${staffArchive.accountId || '无'}
+姓名: ${staffArchive.staffName}
+性别: ${staffArchive.gender === 'M' ? '男' : (staffArchive.gender === 'F' ? '女' : staffArchive.gender)}
+年龄: ${staffArchive.age || '无'}
+手机号: ${staffArchive.mobile || '无'}
+身份证号: ${staffArchive.idCard || '无'}
+邮箱: ${staffArchive.email || '无'}
+部门: ${getOrgFullName(staffArchive.org1Id, staffArchive.org2Id, staffArchive.org3Id)}
+职位: ${staffArchive.positionId || '无'}
+状态: ${getStaffArchiveStatusDescription(staffArchive.status)}
+自我介绍: ${staffArchive.bio || '无'}
+`;
+        
+        alert(detailMessage);
+    } catch (error) {
+        console.error('View staff archive error:', error);
+        alert('获取员工档案详情失败');
+    }
 }
 
 // 编辑员工档案
-function editStaffArchive(id) {
-    // 在实际应用中，这里应该打开编辑模态框并预填数据
-    alert(`编辑员工档案: ${id}\n在实际应用中，这里会打开编辑界面。`);
+async function editStaffArchive(id) {
+    try {
+        // 获取员工档案详情
+        const response = await fetch(`/api/hr-spec/staff/${id}`);
+        const staffArchive = await response.json();
+        
+        if (!response.ok) {
+            alert('获取员工档案详情失败');
+            return;
+        }
+        
+        // 填充编辑表单
+        document.getElementById('edit-staff-id').value = staffArchive.archiveId;
+        document.getElementById('edit-staff-account').value = staffArchive.accountId || '';
+        document.getElementById('edit-staff-name').value = staffArchive.staffName || '';
+        document.getElementById('edit-staff-gender').value = staffArchive.gender || '';
+        document.getElementById('edit-staff-age').value = staffArchive.age || '';
+        document.getElementById('edit-staff-mobile').value = staffArchive.mobile || '';
+        document.getElementById('edit-staff-phone').value = staffArchive.idCard || '';
+        document.getElementById('edit-staff-email').value = staffArchive.email || '';
+        document.getElementById('edit-staff-bio').value = staffArchive.bio || '';
+        
+        // 加载组织机构选项并设置选中值
+        await loadEditOrgOptions(staffArchive.org1Id, staffArchive.org2Id, staffArchive.org3Id, staffArchive.positionId);
+        
+        // 显示模态框
+        const modal = document.getElementById('edit-staff-modal');
+        if (modal) {
+            modal.style.display = 'block';
+            
+            // 绑定表单提交事件
+            const editForm = document.getElementById('edit-staff-form');
+            if (editForm) {
+                editForm.onsubmit = handleEditStaffSubmit;
+            }
+        }
+    } catch (error) {
+        console.error('Edit staff archive error:', error);
+        alert('获取员工档案详情失败');
+    }
+}
+
+// 加载编辑表单的组织机构选项
+async function loadEditOrgOptions(org1Id, org2Id, org3Id, positionId) {
+    try {
+        // 加载一级机构
+        const org1Response = await fetch('/api/hr-spec/org/level1');
+        const org1List = await org1Response.json();
+        
+        const org1Select = document.getElementById('edit-staff-org1');
+        org1Select.innerHTML = '<option value="">请选择</option>';
+        org1List.forEach(org => {
+            const option = document.createElement('option');
+            option.value = org.org1Id;
+            option.textContent = org.org1Name;
+            if (org.org1Id === org1Id) {
+                option.selected = true;
+            }
+            org1Select.appendChild(option);
+        });
+        
+        // 加载二级机构
+        if (org1Id) {
+            const org2Response = await fetch(`/api/hr-spec/org/level2/by-org1/${org1Id}`);
+            const org2List = await org2Response.json();
+            
+            const org2Select = document.getElementById('edit-staff-org2');
+            org2Select.innerHTML = '<option value="">请选择</option>';
+            org2List.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.org2Id;
+                option.textContent = org.org2Name;
+                if (org.org2Id === org2Id) {
+                    option.selected = true;
+                }
+                org2Select.appendChild(option);
+            });
+        }
+        
+        // 加载三级机构
+        if (org2Id) {
+            const org3Response = await fetch(`/api/hr-spec/org/level3/by-org2/${org2Id}`);
+            const org3List = await org3Response.json();
+            
+            const org3Select = document.getElementById('edit-staff-org3');
+            org3Select.innerHTML = '<option value="">请选择</option>';
+            org3List.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.org3Id;
+                option.textContent = org.org3Name;
+                if (org.org3Id === org3Id) {
+                    option.selected = true;
+                }
+                org3Select.appendChild(option);
+            });
+        }
+        
+        // 加载职位
+        if (org3Id) {
+            const positionResponse = await fetch(`/api/hr-spec/positions/by-org3/${org3Id}`);
+            const positions = await positionResponse.json();
+            
+            const positionSelect = document.getElementById('edit-staff-position');
+            positionSelect.innerHTML = '<option value="">请选择</option>';
+            positions.forEach(pos => {
+                const option = document.createElement('option');
+                option.value = pos.positionId;
+                option.textContent = pos.positionName;
+                if (pos.positionId === positionId) {
+                    option.selected = true;
+                }
+                positionSelect.appendChild(option);
+            });
+        }
+        
+        // 绑定级联选择事件
+        document.getElementById('edit-staff-org1').onchange = async function() {
+            const selectedOrg1Id = this.value;
+            document.getElementById('edit-staff-org2').innerHTML = '<option value="">请选择</option>';
+            document.getElementById('edit-staff-org3').innerHTML = '<option value="">请选择</option>';
+            document.getElementById('edit-staff-position').innerHTML = '<option value="">请选择</option>';
+            
+            if (selectedOrg1Id) {
+                const org2Response = await fetch(`/api/hr-spec/org/level2/by-org1/${selectedOrg1Id}`);
+                const org2List = await org2Response.json();
+                
+                const org2Select = document.getElementById('edit-staff-org2');
+                org2List.forEach(org => {
+                    const option = document.createElement('option');
+                    option.value = org.org2Id;
+                    option.textContent = org.org2Name;
+                    org2Select.appendChild(option);
+                });
+            }
+        };
+        
+        document.getElementById('edit-staff-org2').onchange = async function() {
+            const selectedOrg2Id = this.value;
+            document.getElementById('edit-staff-org3').innerHTML = '<option value="">请选择</option>';
+            document.getElementById('edit-staff-position').innerHTML = '<option value="">请选择</option>';
+            
+            if (selectedOrg2Id) {
+                const org3Response = await fetch(`/api/hr-spec/org/level3/by-org2/${selectedOrg2Id}`);
+                const org3List = await org3Response.json();
+                
+                const org3Select = document.getElementById('edit-staff-org3');
+                org3List.forEach(org => {
+                    const option = document.createElement('option');
+                    option.value = org.org3Id;
+                    option.textContent = org.org3Name;
+                    org3Select.appendChild(option);
+                });
+            }
+        };
+        
+        document.getElementById('edit-staff-org3').onchange = async function() {
+            const selectedOrg3Id = this.value;
+            document.getElementById('edit-staff-position').innerHTML = '<option value="">请选择</option>';
+            
+            if (selectedOrg3Id) {
+                const positionResponse = await fetch(`/api/hr-spec/positions/by-org3/${selectedOrg3Id}`);
+                const positions = await positionResponse.json();
+                
+                const positionSelect = document.getElementById('edit-staff-position');
+                positions.forEach(pos => {
+                    const option = document.createElement('option');
+                    option.value = pos.positionId;
+                    option.textContent = pos.positionName;
+                    positionSelect.appendChild(option);
+                });
+            }
+        };
+    } catch (error) {
+        console.error('Load edit org options error:', error);
+        alert('加载组织机构选项失败');
+    }
+}
+
+// 处理编辑员工档案提交
+async function handleEditStaffSubmit(e) {
+    e.preventDefault();
+    
+    // 获取表单数据
+    const id = document.getElementById('edit-staff-id').value;
+    const name = document.getElementById('edit-staff-name').value;
+    const gender = document.getElementById('edit-staff-gender').value;
+    const age = document.getElementById('edit-staff-age').value;
+    const org1 = document.getElementById('edit-staff-org1').value;
+    const org2 = document.getElementById('edit-staff-org2').value;
+    const org3 = document.getElementById('edit-staff-org3').value;
+    const position = document.getElementById('edit-staff-position').value;
+    const mobile = document.getElementById('edit-staff-mobile').value;
+    const phone = document.getElementById('edit-staff-phone').value;
+    const email = document.getElementById('edit-staff-email').value;
+    const bio = document.getElementById('edit-staff-bio').value;
+    
+    // 基本验证
+    if (!id || !name || !gender || !age || !org1 || !org2 || !org3 || !position || !mobile) {
+        alert('请填写所有必填字段');
+        return;
+    }
+    
+    try {
+        const formData = {
+            staffName: name,
+            gender: gender,
+            age: parseInt(age),
+            org1Id: org1,
+            org2Id: org2,
+            org3Id: org3,
+            positionId: position,
+            mobile: mobile,
+            idCard: phone,
+            email: email,
+            bio: bio
+        };
+        
+        const response = await fetch(`/api/hr-spec/staff/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            alert('员工档案更新成功');
+            closeEditStaffModal();
+            // 重新加载员工档案列表
+            loadStaffArchiveData();
+        } else {
+            const errorData = await response.text();
+            console.error('Update staff archive error response:', errorData);
+            alert('更新员工档案失败: ' + errorData);
+        }
+    } catch (error) {
+        console.error('Update staff archive error:', error);
+        alert('更新员工档案失败，请稍后重试');
+    }
+}
+
+// 关闭编辑员工档案模态框
+function closeEditStaffModal() {
+    const modal = document.getElementById('edit-staff-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // 删除员工档案

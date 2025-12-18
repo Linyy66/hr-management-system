@@ -220,6 +220,87 @@
                         </div>
                     </div>
                     
+                    <!-- Edit Staff Archive Modal -->
+                    <div id="edit-staff-modal" class="modal" style="display:none;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2>编辑员工档案</h2>
+                                <span class="close" onclick="closeEditStaffModal()">&times;</span>
+                            </div>
+                            <div class="modal-body">
+                                <form id="edit-staff-form">
+                                    <input type="hidden" id="edit-staff-id">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="edit-staff-account">员工账号</label>
+                                            <input type="text" id="edit-staff-account" class="form-control" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-staff-name">员工姓名</label>
+                                            <input type="text" id="edit-staff-name" class="form-control" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-staff-gender">性别</label>
+                                            <select id="edit-staff-gender" class="form-control" required>
+                                                <option value="">请选择</option>
+                                                <option value="M">男</option>
+                                                <option value="F">女</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-staff-age">年龄</label>
+                                            <input type="number" id="edit-staff-age" class="form-control" min="18" max="100" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-staff-org1">一级机构</label>
+                                            <select id="edit-staff-org1" class="form-control" required>
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-staff-org2">二级机构</label>
+                                            <select id="edit-staff-org2" class="form-control" required>
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-staff-org3">三级机构</label>
+                                            <select id="edit-staff-org3" class="form-control" required>
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-staff-position">职位</label>
+                                            <select id="edit-staff-position" class="form-control" required>
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="edit-staff-mobile">手机号</label>
+                                            <input type="text" id="edit-staff-mobile" class="form-control" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-staff-phone">身份证号</label>
+                                            <input type="text" id="edit-staff-phone" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-staff-email">邮箱</label>
+                                            <input type="email" id="edit-staff-email" class="form-control">
+                                        </div>
+                                        <div class="form-group full-width">
+                                            <label for="edit-staff-bio">自我介绍</label>
+                                            <textarea id="edit-staff-bio" class="form-control" rows="3"></textarea>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn-primary">更新员工档案</button>
+                                    <button type="button" class="btn-secondary" onclick="closeEditStaffModal()">取消</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Attendance Management Pane -->
                     <div id="attendance" class="panel">
                         <div class="card">

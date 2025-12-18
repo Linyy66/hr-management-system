@@ -33,27 +33,32 @@ async function handleRegister(e) {
             body: formData
         });
         
+        // 检查是否是重定向响应
         if (response.redirected) {
             // 检查URL中是否包含成功参数
-            const urlParams = new URLSearchParams(response.url.split('?')[1]);
+            const url = new URL(response.url);
+            const urlParams = url.searchParams;
+            
             if (urlParams.get('success') === 'true') {
                 showStatus(statusDiv, '注册成功，请登录', 'success');
                 setTimeout(() => {
                     window.location.href = '/login.html';
-                }, 1000);
+                }, 1500);
             } else {
                 const error = urlParams.get('error');
                 showStatus(statusDiv, error || '注册失败', 'error');
             }
         } else {
+            // 处理JSON响应
             const result = await response.json();
-            if (result.result === 'ok') {
+            if (response.ok && result.result === 'ok') {
                 showStatus(statusDiv, '注册成功，请登录', 'success');
                 setTimeout(() => {
                     window.location.href = '/login.html';
-                }, 1000);
+                }, 1500);
             } else {
-                showStatus(statusDiv, result.error || '注册失败', 'error');
+                const errorMessage = result.error || '注册失败';
+                showStatus(statusDiv, errorMessage, 'error');
             }
         }
     } catch (error) {
@@ -63,6 +68,8 @@ async function handleRegister(e) {
 }
 
 function showStatus(element, message, type) {
-    element.textContent = message;
-    element.className = 'status ' + type;
+    if (element) {
+        element.textContent = message;
+        element.className = 'status ' + type;
+    }
 }

@@ -266,4 +266,30 @@ public class HrSpecController {
     public List<Position> getPositionsByOrg3(@PathVariable String org3Id) {
         return positionRepository.findByOrg3Id(org3Id);
     }
+    
+    // 获取今日入职员工数量
+    @GetMapping("/new-hires/today/count")
+    public Long getTodayNewHiresCount() {
+        LocalDateTime todayStart = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime todayEnd = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        
+        return staffArchiveRepository.countByCreateTimeBetweenAndStatus(todayStart, todayEnd, "NORMAL");
+    }
+
+    
+    // 获取本周离职员工数量
+    @GetMapping("/resignations/week/count")
+    public Long getWeekResignationCount() {
+        LocalDateTime weekStart = LocalDateTime.now().minusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime weekEnd = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        
+        return staffArchiveRepository.countByCreateTimeBetweenAndStatus(weekStart, weekEnd, "RESIGNED");
+    }
+    
+    // 获取考勤异常数量
+    @GetMapping("/attendance-exceptions/count")
+    public Long getAttendanceExceptionsCount() {
+        return attendanceRecordRepository.countByAbnormal(true);
+    }
+
 }

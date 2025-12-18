@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/employee")
@@ -20,9 +19,6 @@ public class EmployeeController {
     
     @Autowired
     private StaffArchiveRepository staffArchiveRepository;
-    
-    @Autowired
-    private EmployeeProfileRepository employeeProfileRepository;
     
     @Autowired
     private AttendanceRecordRepository attendanceRecordRepository;
@@ -55,73 +51,67 @@ public class EmployeeController {
      * 获取当前员工的档案信息
      */
     @GetMapping("/profile")
-    public ResponseEntity<ApiResponse<EmployeeProfile>> getMyProfile() {
+    public ResponseEntity<ApiResponse<StaffArchive>> getMyProfile() {
         String currentUserId = getCurrentUserId();
         if (currentUserId == null) {
             return ResponseEntity.status(401).body(ApiResponse.error("未认证"));
         }
         
-        // 根据用户ID查找对应的员工个人信息
-        Optional<EmployeeProfile> profileOpt = employeeProfileRepository.findOneByAccountId(currentUserId);
-        if (!profileOpt.isPresent()) {
-            return ResponseEntity.ok(ApiResponse.error("未找到员工个人信息"));
-        }
+        System.out.println("Fetching profile for user: " + currentUserId);
         
-        EmployeeProfile profile = profileOpt.get();
-        // 检查员工状态，如果已经离职则不允许访问
+        // 根据用户ID查找对应的员工档案
         List<StaffArchive> archives = staffArchiveRepository.findByAccountId(currentUserId);
-        if (!archives.isEmpty()) {
-            StaffArchive archive = archives.get(0);
-            if ("RESIGNED".equals(archive.getStatus())) {
-                return ResponseEntity.status(403).body(ApiResponse.error("员工已离职，无法访问"));
-            }
+        if (archives.isEmpty()) {
+            System.err.println("Staff archive not found for user: " + currentUserId);
+            return ResponseEntity.ok(ApiResponse.error("未找到员工档案"));
         }
         
-        return ResponseEntity.ok(ApiResponse.success(profile));
+        StaffArchive archive = archives.get(0);
+        // 检查员工状态，如果已经离职则不允许访问
+        if ("RESIGNED".equals(archive.getStatus())) {
+            return ResponseEntity.status(403).body(ApiResponse.error("员工已离职，无法访问"));
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success(archive));
     }
     
     /**
      * 更新当前员工的档案信息
      */
     @PutMapping("/profile")
-    public ResponseEntity<ApiResponse<EmployeeProfile>> updateMyProfile(@RequestBody EmployeeProfile updatedProfile) {
+    public ResponseEntity<ApiResponse<StaffArchive>> updateMyProfile(@RequestBody StaffArchive updatedArchive) {
         String currentUserId = getCurrentUserId();
         if (currentUserId == null) {
             return ResponseEntity.status(401).body(ApiResponse.error("未认证"));
         }
         
-        // 根据用户ID查找对应的员工个人信息
-        Optional<EmployeeProfile> profileOpt = employeeProfileRepository.findOneByAccountId(currentUserId);
-        if (!profileOpt.isPresent()) {
-            return ResponseEntity.ok(ApiResponse.error("未找到员工个人信息"));
+        System.out.println("Updating profile for user: " + currentUserId);
+        
+        // 根据用户ID查找对应的员工档案
+        List<StaffArchive> archives = staffArchiveRepository.findByAccountId(currentUserId);
+        if (archives.isEmpty()) {
+            return ResponseEntity.ok(ApiResponse.error("未找到员工档案"));
         }
         
-        EmployeeProfile existingProfile = profileOpt.get();
+        StaffArchive existingArchive = archives.get(0);
         
         // 检查员工状态，如果已经离职则不允许更新
-        List<StaffArchive> archives = staffArchiveRepository.findByAccountId(currentUserId);
-        if (!archives.isEmpty()) {
-            StaffArchive archive = archives.get(0);
-            if ("RESIGNED".equals(archive.getStatus())) {
-                return ResponseEntity.status(403).body(ApiResponse.error("员工已离职，无法更新"));
-            }
+        if ("RESIGNED".equals(existingArchive.getStatus())) {
+            return ResponseEntity.status(403).body(ApiResponse.error("员工已离职，无法更新"));
         }
         
         // 更新可编辑字段
-        existingProfile.setStaffName(updatedProfile.getStaffName());
-        existingProfile.setGender(updatedProfile.getGender());
-        existingProfile.setAge(updatedProfile.getAge());
-        existingProfile.setBio(updatedProfile.getBio());
-        existingProfile.setMobile(updatedProfile.getMobile());
-        existingProfile.setPhone(updatedProfile.getPhone());
-        existingProfile.setEmail(updatedProfile.getEmail());
-        existingProfile.setAddress(updatedProfile.getAddress());
-        existingProfile.setEmergencyContact(updatedProfile.getEmergencyContact());
-        existingProfile.setEmergencyPhone(updatedProfile.getEmergencyPhone());
-        existingProfile.setUpdateTime(LocalDateTime.now());
+        existingArchive.setStaffName(updatedArchive.getStaffName());
+        existingArchive.setGender(updatedArchive.getGender());
+        existingArchive.setAge(updatedArchive.getAge());
+        existingArchive.setBio(updatedArchive.getBio());
+        existingArchive.setMobile(updatedArchive.getMobile());
+        existingArchive.setPhone(updatedArchive.getPhone());
+        existingArchive.setEmail(updatedArchive.getEmail());
+        existingArchive.setUpdateTime(LocalDateTime.now());
         
-        EmployeeProfile savedProfile = employeeProfileRepository.save(existingProfile);
-        return ResponseEntity.ok(ApiResponse.success(savedProfile));
+        StaffArchive savedArchive = staffArchiveRepository.save(existingArchive);
+        return ResponseEntity.ok(ApiResponse.success(savedArchive));
     }
     
     /**
@@ -133,6 +123,8 @@ public class EmployeeController {
         if (currentUserId == null) {
             return ResponseEntity.status(401).body(ApiResponse.error("未认证"));
         }
+        
+        System.out.println("Submitting resignation for user: " + currentUserId);
         
         // 根据用户ID查找对应的员工档案
         List<StaffArchive> archives = staffArchiveRepository.findByAccountId(currentUserId);
@@ -177,6 +169,8 @@ public class EmployeeController {
             return ResponseEntity.status(401).body(ApiResponse.error("未认证"));
         }
         
+        System.out.println("Fetching attendance records for user: " + currentUserId);
+        
         // 根据用户ID查询考勤记录
         List<AttendanceRecord> records = attendanceRecordRepository.findByUserId(currentUserId);
         return ResponseEntity.ok(ApiResponse.success(records));
@@ -192,11 +186,14 @@ public class EmployeeController {
             return ResponseEntity.status(401).body(ApiResponse.error("未认证"));
         }
         
+        System.out.println("Clock in for user: " + currentUserId);
+        
         // 查找与当前用户关联的员工档案
         List<StaffArchive> archives = staffArchiveRepository.findByAccountId(currentUserId);
         StaffArchive archive = archives.isEmpty() ? null : archives.get(0);
         
         if (archive == null) {
+            System.err.println("Staff archive not found for user: " + currentUserId);
             return ResponseEntity.ok(ApiResponse.error("未找到员工档案"));
         }
         
@@ -206,7 +203,16 @@ public class EmployeeController {
         }
         
         // 检查今天是否已经打过卡
-        // 注意：这里需要更复杂的逻辑来检查是否已经打过卡，为了简化示例省略了这部分
+        LocalDate today = LocalDate.now();
+        List<AttendanceRecord> todayRecords = attendanceRecordRepository
+                .findByUserIdAndClockInTimeBetween(currentUserId, today, today.plusDays(1));
+        
+        // 检查是否已经有今天的打卡记录
+        for (AttendanceRecord record : todayRecords) {
+            if (record.getClockInTime() != null && record.getClockOutTime() == null) {
+                return ResponseEntity.ok(ApiResponse.error("今天已经打过卡了"));
+            }
+        }
         
         AttendanceRecord record = new AttendanceRecord();
         record.setUserId(currentUserId);
@@ -229,11 +235,14 @@ public class EmployeeController {
             return ResponseEntity.status(401).body(ApiResponse.error("未认证"));
         }
         
+        System.out.println("Clock out for user: " + currentUserId);
+        
         // 查找与当前用户关联的员工档案
         List<StaffArchive> archives = staffArchiveRepository.findByAccountId(currentUserId);
         StaffArchive archive = archives.isEmpty() ? null : archives.get(0);
         
         if (archive == null) {
+            System.err.println("Staff archive not found for user: " + currentUserId);
             return ResponseEntity.ok(ApiResponse.error("未找到员工档案"));
         }
         
@@ -251,17 +260,23 @@ public class EmployeeController {
             return ResponseEntity.ok(ApiResponse.error("未找到今天的考勤记录"));
         }
         
-        // 获取最后一条记录
-        AttendanceRecord record = todayRecords.get(todayRecords.size() - 1);
-        
-        // 检查是否已经签退
-        if (record.getClockOutTime() != null) {
-            return ResponseEntity.ok(ApiResponse.error("今天已经签退过了"));
+        // 获取最后一条未签退的记录
+        AttendanceRecord recordToClockOut = null;
+        for (int i = todayRecords.size() - 1; i >= 0; i--) {
+            AttendanceRecord record = todayRecords.get(i);
+            if (record.getClockInTime() != null && record.getClockOutTime() == null) {
+                recordToClockOut = record;
+                break;
+            }
         }
         
-        record.setClockOutTime(LocalDateTime.now());
-        record.setUpdateTime(LocalDateTime.now());
-        AttendanceRecord savedRecord = attendanceRecordRepository.save(record);
+        if (recordToClockOut == null) {
+            return ResponseEntity.ok(ApiResponse.error("未找到需要签退的记录"));
+        }
+        
+        recordToClockOut.setClockOutTime(LocalDateTime.now());
+        recordToClockOut.setUpdateTime(LocalDateTime.now());
+        AttendanceRecord savedRecord = attendanceRecordRepository.save(recordToClockOut);
         return ResponseEntity.ok(ApiResponse.success(savedRecord));
     }
     
@@ -276,11 +291,14 @@ public class EmployeeController {
             return ResponseEntity.status(401).body(ApiResponse.error("未认证"));
         }
         
+        System.out.println("Submitting leave application for user: " + currentUserId);
+        
         // 查找与当前用户关联的员工档案
         List<StaffArchive> archives = staffArchiveRepository.findByAccountId(currentUserId);
         StaffArchive archive = archives.isEmpty() ? null : archives.get(0);
         
         if (archive == null) {
+            System.err.println("Staff archive not found for user: " + currentUserId);
             return ResponseEntity.ok(ApiResponse.error("未找到员工档案"));
         }
         
@@ -310,11 +328,14 @@ public class EmployeeController {
             return ResponseEntity.status(401).body(ApiResponse.error("未认证"));
         }
         
+        System.out.println("Submitting overtime application for user: " + currentUserId);
+        
         // 查找与当前用户关联的员工档案
         List<StaffArchive> archives = staffArchiveRepository.findByAccountId(currentUserId);
         StaffArchive archive = archives.isEmpty() ? null : archives.get(0);
         
         if (archive == null) {
+            System.err.println("Staff archive not found for user: " + currentUserId);
             return ResponseEntity.ok(ApiResponse.error("未找到员工档案"));
         }
         
@@ -344,11 +365,14 @@ public class EmployeeController {
             return ResponseEntity.status(401).body(ApiResponse.error("未认证"));
         }
         
+        System.out.println("Submitting transfer request for user: " + currentUserId);
+        
         // 查找与当前用户关联的员工档案
         List<StaffArchive> archives = staffArchiveRepository.findByAccountId(currentUserId);
         StaffArchive archive = archives.isEmpty() ? null : archives.get(0);
         
         if (archive == null) {
+            System.err.println("Staff archive not found for user: " + currentUserId);
             return ResponseEntity.ok(ApiResponse.error("未找到员工档案"));
         }
         

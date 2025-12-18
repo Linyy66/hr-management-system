@@ -12,4 +12,6 @@ public interface AttendanceRecordRepository extends JpaRepository<AttendanceReco
     List<AttendanceRecord> findByUserId(String userId);
     
     List<AttendanceRecord> findByUserIdAndClockInTimeBetween(String userId, LocalDate startDate, LocalDate endDate);
+    
+    Long countByAbnormal(Boolean abnormal);
 }
